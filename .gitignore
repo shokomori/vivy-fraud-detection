@@ -5,9 +5,6 @@
 # IDE settings
 .idea/
 
-# Large/generated artifacts
-artifacts/stage3/arrays/train.npz
-
 # Logs and local outputs
 smoke_test.log
 output.txt
