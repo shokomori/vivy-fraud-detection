@@ -1,12 +1,20 @@
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
+
+import 'domain/analysis_models.dart';
+import 'ui/screens/analyze_screen.dart';
+import 'ui/screens/guidelines_screen.dart';
+import 'ui/screens/history_screen.dart';
+import 'ui/screens/home_screen.dart';
+import 'ui/screens/splash_screen.dart';
+import 'ui/theme/vivy_colors.dart';
 
 const double kFraudThreshold = 0.16;
 const double kUnclearBand = 0.05;
@@ -28,11 +36,72 @@ class VivyApp extends StatelessWidget {
       title: 'Vivy Receipt Detector',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0E6D6A)),
+        scaffoldBackgroundColor: VivyColors.appBackground,
+        colorScheme: ColorScheme.fromSeed(seedColor: VivyColors.primaryBlue),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          foregroundColor: VivyColors.textPrimary,
+          elevation: 0,
+        ),
         useMaterial3: true,
       ),
-      home: const ReceiptCheckPage(),
+      home: const AppLaunchFlow(),
     );
+  }
+}
+
+enum _LaunchStage { splash, guidelines, home }
+
+class AppLaunchFlow extends StatefulWidget {
+  const AppLaunchFlow({super.key});
+
+  @override
+  State<AppLaunchFlow> createState() => _AppLaunchFlowState();
+}
+
+class _AppLaunchFlowState extends State<AppLaunchFlow> {
+  static const String _onboardingCompleteKey = 'onboarding_complete_v1';
+  _LaunchStage _stage = _LaunchStage.splash;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveLaunchStage();
+  }
+
+  Future<void> _resolveLaunchStage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final done = prefs.getBool(_onboardingCompleteKey) ?? false;
+
+    await Future<void>.delayed(const Duration(milliseconds: 2800));
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _stage = done ? _LaunchStage.home : _LaunchStage.guidelines;
+    });
+  }
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_onboardingCompleteKey, true);
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _stage = _LaunchStage.home;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (_stage) {
+      _LaunchStage.splash => const SplashScreen(),
+      _LaunchStage.guidelines => GuidelinesScreen(
+        onComplete: _completeOnboarding,
+      ),
+      _LaunchStage.home => const ReceiptCheckPage(),
+    };
   }
 }
 
@@ -44,21 +113,22 @@ class ReceiptCheckPage extends StatefulWidget {
 }
 
 class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
-  static const MethodChannel _preprocessChannel = MethodChannel('vivy/preprocess');
+  static const String _historyStorageKey = 'analysis_history_v1';
 
   final ImagePicker _picker = ImagePicker();
 
   Interpreter? _interpreter;
   XFile? _selectedFile;
   AnalysisResult? _result;
+  List<HistoryEntry> _historyEntries = const [];
   bool _isBusy = false;
   String? _loadError;
-  String _lastPreprocessPath = 'Not run yet';
 
   @override
   void initState() {
     super.initState();
     _loadModel();
+    _loadHistory();
   }
 
   @override
@@ -93,6 +163,56 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     });
   }
 
+  Future<void> _loadHistory() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getStringList(_historyStorageKey) ?? <String>[];
+      final parsed = raw
+          .map((row) {
+            try {
+              return HistoryEntry.fromStorageString(row);
+            } catch (_) {
+              return null;
+            }
+          })
+          .whereType<HistoryEntry>()
+          .toList();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _historyEntries = parsed;
+      });
+    } catch (_) {
+      // Keep app usable even if local history cannot be loaded.
+    }
+  }
+
+  Future<void> _recordHistory(AnalysisResult result) async {
+    final entry = HistoryEntry(
+      label: result.type.displayLabel,
+      confidence: result.confidence,
+      timestamp: DateTime.now(),
+    );
+
+    final updated = <HistoryEntry>[entry, ..._historyEntries];
+    if (mounted) {
+      setState(() {
+        _historyEntries = updated;
+      });
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = updated
+          .map((item) => item.toStorageString())
+          .toList(growable: false);
+      await prefs.setStringList(_historyStorageKey, encoded);
+    } catch (_) {
+      // Ignore persistence failures to avoid blocking inference flow.
+    }
+  }
+
   Future<void> _analyzePhoto() async {
     if (_selectedFile == null || _interpreter == null) {
       return;
@@ -101,83 +221,61 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     setState(() {
       _isBusy = true;
       _result = null;
-      _lastPreprocessPath = 'Running...';
     });
 
     try {
-      final nativeResult = await _preprocessWithNativeOpenCv(_selectedFile!.path);
+      final bytes = await _selectedFile!.readAsBytes();
+      final decoded = img.decodeImage(bytes);
+      if (decoded == null) {
+        throw Exception('Could not decode image.');
+      }
 
-      if (nativeResult != null && nativeResult.usedNative && !nativeResult.geometryPass) {
+      final roiResult = _extractReceiptRoi(decoded);
+      if (!roiResult.geometryPass) {
+        final result = AnalysisResult.notReceipt(
+          message: 'This does not look like a GCash receipt.',
+          areaRatio: roiResult.areaRatio,
+          aspectRatio: roiResult.aspectRatio,
+        );
         setState(() {
-          _lastPreprocessPath = 'Native OpenCV (ROI rejected)';
-          _result = AnalysisResult.notReceipt(
-            message: 'This does not look like a GCash receipt.',
-            areaRatio: nativeResult.areaRatio,
-            aspectRatio: nativeResult.aspectRatio,
-          );
+          _result = result;
         });
+        await _recordHistory(result);
         return;
       }
 
-      Float32List normalized;
-      if (nativeResult != null && nativeResult.usedNative && nativeResult.tensor != null) {
-        debugPrint('Preprocess backend: Native OpenCV');
-        setState(() {
-          _lastPreprocessPath = 'Native OpenCV';
-        });
-        normalized = nativeResult.tensor!;
-      } else {
-        final reason = nativeResult?.reason ?? 'native result unavailable';
-        debugPrint('Preprocess backend: Dart fallback (reason: $reason)');
-        setState(() {
-          _lastPreprocessPath = 'Dart fallback (reason: $reason)';
-        });
-
-        final bytes = await _selectedFile!.readAsBytes();
-        final decoded = img.decodeImage(bytes);
-        if (decoded == null) {
-          throw Exception('Could not decode image.');
-        }
-
-        final roiResult = _extractReceiptRoi(decoded);
-        if (!roiResult.geometryPass) {
-          setState(() {
-            _result = AnalysisResult.notReceipt(
-              message: 'This does not look like a GCash receipt.',
-              areaRatio: roiResult.areaRatio,
-              aspectRatio: roiResult.aspectRatio,
-            );
-          });
-          return;
-        }
-        normalized = _preprocessForModel(roiResult.roi!);
-      }
-
+      final normalized = _preprocessForModel(roiResult.roi!);
       final score = _runModel(normalized);
 
       if ((score - kFraudThreshold).abs() < kUnclearBand) {
+        final result = AnalysisResult.unclear(
+          score: score,
+          message: 'Result unclear - try a clearer or better-lit photo.',
+        );
         setState(() {
-          _result = AnalysisResult.unclear(
-            score: score,
-            message: 'Result unclear - try a clearer or better-lit photo.',
-          );
+          _result = result;
         });
+        await _recordHistory(result);
         return;
       }
 
       final isFraudulent = score >= kFraudThreshold;
       final confidence = isFraudulent ? score : (1.0 - score);
+      final result = AnalysisResult.classified(
+        score: score,
+        confidence: confidence,
+        isFraudulent: isFraudulent,
+      );
       setState(() {
-        _result = AnalysisResult.classified(
-          score: score,
-          confidence: confidence,
-          isFraudulent: isFraudulent,
-        );
+        _result = result;
       });
+      await _recordHistory(result);
     } catch (e) {
+      final result = AnalysisResult.error('Analysis failed: $e');
       setState(() {
-        _result = AnalysisResult.error('Analysis failed: $e');
+        _result = result;
       });
+      await _recordHistory(result);
     } finally {
       setState(() {
         _isBusy = false;
@@ -185,79 +283,18 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     }
   }
 
-  Future<_NativePreprocessResult?> _preprocessWithNativeOpenCv(String imagePath) async {
-    if (!Platform.isAndroid) {
-      return const _NativePreprocessResult(
-        usedNative: false,
-        geometryPass: false,
-        areaRatio: 0,
-        aspectRatio: 0,
-        tensor: null,
-        reason: 'non-android platform',
-      );
-    }
-
-    try {
-      final res = await _preprocessChannel.invokeMethod<Map<dynamic, dynamic>>(
-        'preprocessReceipt',
-        <String, dynamic>{'path': imagePath},
-      );
-      if (res == null) {
-        return null;
-      }
-
-      final geometryPass = (res['geometryPass'] as bool?) ?? false;
-      final areaRatio = ((res['areaRatio'] as num?) ?? 0).toDouble();
-      final aspectRatio = ((res['aspectRatio'] as num?) ?? 0).toDouble();
-      final bytes = res['tensorBytes'];
-      final backend = (res['backend'] as String?) ?? 'native-opencv';
-      final reason = (res['reason'] as String?) ?? 'ok';
-
-      Float32List? tensor;
-      if (geometryPass && bytes is Uint8List) {
-        tensor = _uint8ToFloat32(bytes);
-      }
-
-      final usedNative = geometryPass ? (tensor != null) : true;
-
-      return _NativePreprocessResult(
-        usedNative: usedNative,
-        geometryPass: geometryPass,
-        areaRatio: areaRatio,
-        aspectRatio: aspectRatio,
-        tensor: tensor,
-        reason: '$backend: $reason',
-      );
-    } on PlatformException catch (e) {
-      return _NativePreprocessResult(
-        usedNative: false,
-        geometryPass: false,
-        areaRatio: 0,
-        aspectRatio: 0,
-        tensor: null,
-        reason: 'platform exception ${e.code}: ${e.message}',
-      );
-    } catch (e) {
-      // Keep app resilient: fallback to legacy Dart pipeline if native bridge fails.
-      return _NativePreprocessResult(
-        usedNative: false,
-        geometryPass: false,
-        areaRatio: 0,
-        aspectRatio: 0,
-        tensor: null,
-        reason: 'unexpected exception: $e',
-      );
-    }
-  }
-
-  Float32List _uint8ToFloat32(Uint8List bytes) {
-    final byteData = ByteData.sublistView(bytes);
-    final count = bytes.lengthInBytes ~/ 4;
-    final out = Float32List(count);
-    for (var i = 0; i < count; i++) {
-      out[i] = byteData.getFloat32(i * 4, Endian.little);
-    }
-    return out;
+  Future<void> _simulateClassifiedResult({required bool isFraudulent}) async {
+    final score = isFraudulent ? 0.9992 : 0.0092;
+    final confidence = isFraudulent ? score : (1.0 - score);
+    final result = AnalysisResult.classified(
+      isFraudulent: isFraudulent,
+      score: score,
+      confidence: confidence,
+    );
+    setState(() {
+      _result = result;
+    });
+    await _recordHistory(result);
   }
 
   double _runModel(Float32List inputBuffer) {
@@ -265,17 +302,14 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       1,
       (_) => List.generate(
         kInputSize,
-        (y) => List.generate(
-          kInputSize,
-          (x) {
-            final base = (y * kInputSize + x) * 3;
-            return <double>[
-              inputBuffer[base],
-              inputBuffer[base + 1],
-              inputBuffer[base + 2],
-            ];
-          },
-        ),
+        (y) => List.generate(kInputSize, (x) {
+          final base = (y * kInputSize + x) * 3;
+          return <double>[
+            inputBuffer[base],
+            inputBuffer[base + 1],
+            inputBuffer[base + 2],
+          ];
+        }),
       ),
     );
 
@@ -337,7 +371,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     final areaRatio = component.area / (width * height);
     final aspectRatio = component.w / component.h;
 
-    final pass = areaRatio >= kMinAreaRatio && aspectRatio >= kMinAspectRatio && aspectRatio <= kMaxAspectRatio;
+    final pass =
+        areaRatio >= kMinAreaRatio &&
+        aspectRatio >= kMinAspectRatio &&
+        aspectRatio <= kMaxAspectRatio;
     if (!pass) {
       return RoiExtractionResult(
         roi: null,
@@ -427,7 +464,12 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     return mask;
   }
 
-  List<bool> _dilate(List<bool> mask, int width, int height, {required int kernelSize}) {
+  List<bool> _dilate(
+    List<bool> mask,
+    int width,
+    int height, {
+    required int kernelSize,
+  }) {
     final out = List<bool>.filled(mask.length, false);
     final r = kernelSize ~/ 2;
 
@@ -456,7 +498,12 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     return out;
   }
 
-  List<bool> _erode(List<bool> mask, int width, int height, {required int kernelSize}) {
+  List<bool> _erode(
+    List<bool> mask,
+    int width,
+    int height, {
+    required int kernelSize,
+  }) {
     final out = List<bool>.filled(mask.length, false);
     final r = kernelSize ~/ 2;
 
@@ -483,7 +530,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     return out;
   }
 
-  _ComponentBox? _largestValidComponent(List<bool> mask, int width, int height) {
+  _ComponentBox? _largestValidComponent(
+    List<bool> mask,
+    int width,
+    int height,
+  ) {
     final visited = List<bool>.filled(mask.length, false);
     _ComponentBox? best;
 
@@ -536,7 +587,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
 
         final aspect = w / h;
         final areaRatio = area / (width * height);
-        if (areaRatio < kMinAreaRatio || aspect < kMinAspectRatio || aspect > kMaxAspectRatio) {
+        if (areaRatio < kMinAreaRatio ||
+            aspect < kMinAspectRatio ||
+            aspect > kMaxAspectRatio) {
           continue;
         }
 
@@ -551,246 +604,56 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('GCash Receipt Checker'),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Offline fraud check using on-device TFLite model',
-                style: TextStyle(fontSize: 15),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(12),
+    return HomeScreen(
+      entries: _historyEntries,
+      onUploadVerify: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => AnalyzeScreen(
+              selectedFile: _selectedFile,
+              result: _result,
+              isBusy: _isBusy,
+              loadError: _loadError,
+              modelReady: _interpreter != null,
+              threshold: kFraudThreshold,
+              onPickPhoto: _pickPhoto,
+              onRunOfflineCheck: _analyzePhoto,
+              onOpenHistory: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => HistoryScreen(entries: _historyEntries),
                   ),
-                  child: _selectedFile == null
-                      ? const Center(child: Text('No image selected'))
-                      : ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            File(_selectedFile!.path),
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (_loadError != null)
-                Text(
-                  _loadError!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: _isBusy ? null : _pickPhoto,
-                      icon: const Icon(Icons.photo_library_outlined),
-                      label: const Text('Pick Photo'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: FilledButton.icon(
-                      onPressed: _isBusy || _selectedFile == null || _interpreter == null ? null : _analyzePhoto,
-                      icon: const Icon(Icons.play_arrow_rounded),
-                      label: const Text('Run Offline Check'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              if (_isBusy)
-                const Row(
-                  children: [
-                    SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2.5)),
-                    SizedBox(width: 10),
-                    Text('Running on-device analysis...'),
-                  ],
-                ),
-              const SizedBox(height: 8),
-              Text(
-                'Preprocess path: $_lastPreprocessPath',
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 8),
-              if (_result != null) _ResultCard(result: _result!),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ResultCard extends StatelessWidget {
-  const _ResultCard({required this.result});
-
-  final AnalysisResult result;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (result.type) {
-      ResultType.fraudulent => Colors.red.shade700,
-      ResultType.genuine => Colors.green.shade700,
-      ResultType.notReceipt => Colors.orange.shade800,
-      ResultType.unclear => Colors.deepOrange.shade700,
-      ResultType.error => Colors.red.shade900,
-    };
-
-    final title = switch (result.type) {
-      ResultType.fraudulent => 'Fraudulent',
-      ResultType.genuine => 'Genuine',
-      ResultType.notReceipt => 'Not a GCash Receipt',
-      ResultType.unclear => 'Unclear Result',
-      ResultType.error => 'Error',
-    };
-
-    return Card(
-      color: color.withAlpha(28),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.verified_outlined, color: color),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: color),
-                ),
-              ],
+                );
+              },
+              onDebugGenuine: kReleaseMode
+                  ? null
+                  : () => _simulateClassifiedResult(isFraudulent: false),
+              onDebugFraudulent: kReleaseMode
+                  ? null
+                  : () => _simulateClassifiedResult(isFraudulent: true),
             ),
-            const SizedBox(height: 8),
-            Text(result.message),
-            if (result.confidence != null) ...[
-              const SizedBox(height: 8),
-              Text('Confidence: ${(result.confidence! * 100).toStringAsFixed(1)}%'),
-            ],
-            if (result.score != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                'Raw fraud score: ${result.score!.toStringAsFixed(4)} (threshold ${kFraudThreshold.toStringAsFixed(2)})',
-                style: TextStyle(color: Colors.grey.shade800),
-              ),
-            ],
-            if (result.areaRatio != null && result.aspectRatio != null) ...[
-              const SizedBox(height: 4),
-              Text(
-                'Geometry: area ratio ${result.areaRatio!.toStringAsFixed(3)}, aspect ratio ${result.aspectRatio!.toStringAsFixed(3)}',
-                style: TextStyle(color: Colors.grey.shade800),
-              ),
-            ],
-          ],
-        ),
-      ),
+          ),
+        );
+      },
+      onOpenHistory: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => HistoryScreen(entries: _historyEntries),
+          ),
+        );
+      },
     );
   }
-}
-
-class _NativePreprocessResult {
-  const _NativePreprocessResult({
-    required this.usedNative,
-    required this.geometryPass,
-    required this.areaRatio,
-    required this.aspectRatio,
-    required this.tensor,
-    required this.reason,
-  });
-
-  final bool usedNative;
-  final bool geometryPass;
-  final double areaRatio;
-  final double aspectRatio;
-  final Float32List? tensor;
-  final String reason;
-}
-
-enum ResultType { genuine, fraudulent, notReceipt, unclear, error }
-
-class AnalysisResult {
-  const AnalysisResult({
-    required this.type,
-    required this.message,
-    this.score,
-    this.confidence,
-    this.areaRatio,
-    this.aspectRatio,
-  });
-
-  final ResultType type;
-  final String message;
-  final double? score;
-  final double? confidence;
-  final double? areaRatio;
-  final double? aspectRatio;
-
-  factory AnalysisResult.classified({
-    required bool isFraudulent,
-    required double score,
-    required double confidence,
-  }) {
-    return AnalysisResult(
-      type: isFraudulent ? ResultType.fraudulent : ResultType.genuine,
-      message: isFraudulent ? 'Receipt appears fraudulent.' : 'Receipt appears genuine.',
-      score: score,
-      confidence: confidence,
-    );
-  }
-
-  factory AnalysisResult.notReceipt({
-    required String message,
-    required double areaRatio,
-    required double aspectRatio,
-  }) {
-    return AnalysisResult(
-      type: ResultType.notReceipt,
-      message: message,
-      areaRatio: areaRatio,
-      aspectRatio: aspectRatio,
-    );
-  }
-
-  factory AnalysisResult.unclear({required String message, required double score}) {
-    return AnalysisResult(
-      type: ResultType.unclear,
-      message: message,
-      score: score,
-    );
-  }
-
-  factory AnalysisResult.error(String message) {
-    return AnalysisResult(type: ResultType.error, message: message);
-  }
-}
-
-class RoiExtractionResult {
-  const RoiExtractionResult({
-    required this.roi,
-    required this.geometryPass,
-    required this.areaRatio,
-    required this.aspectRatio,
-  });
-
-  final img.Image? roi;
-  final bool geometryPass;
-  final double areaRatio;
-  final double aspectRatio;
 }
 
 class _ComponentBox {
-  const _ComponentBox({required this.x, required this.y, required this.w, required this.h, required this.area});
+  const _ComponentBox({
+    required this.x,
+    required this.y,
+    required this.w,
+    required this.h,
+    required this.area,
+  });
 
   final int x;
   final int y;

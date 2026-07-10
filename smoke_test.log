@@ -43,7 +43,28 @@ Epoch 2: finished saving model to C:\Users\YUKI\Documents\Vivy\artifacts\stage4_
 Restoring model weights from the end of the best epoch: 2.
 Restoring model weights from the end of the best epoch: 2.
 
-Training complete.
+Training complete.Commit and push the entire repository to the remote Git repository.
+
+Requirements:
+
+* Check the current Git status.
+* Stage all modified, deleted, and newly created files.
+* Write a clear, professional commit message that summarizes all changes made in this repository.
+* If there are multiple unrelated changes, create an appropriate commit message that covers them all instead of listing every file.
+* Commit the changes.
+* Push the commit to the current branch's configured remote (using the existing upstream if configured).
+* If the current branch has no upstream, set the upstream automatically and push.
+* Verify that the push completed successfully.
+* If any Git errors occur (merge conflicts, authentication issues, detached HEAD, etc.), explain the problem and provide the safest resolution instead of making destructive changes.
+* Do **not** rewrite history, force push, reset, or discard any local changes.
+* Do **not** modify any project files unless required to resolve a Git-specific issue.
+* At the end, provide:
+
+  * The branch name
+  * The commit hash
+  * The commit message
+  * Confirmation that the remote repository is up to date
+
 Final train accuracy: 0.8438
 Final val accuracy:   0.6562
 Epochs actually run:  2
