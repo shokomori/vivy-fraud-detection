@@ -1,0 +1,161 @@
+{
+  "threshold": 0.16,
+  "sample_size": 16,
+  "class_balance": {
+    "genuine": 8,
+    "fraudulent": 8
+  },
+  "metrics_native_like": {
+    "accuracy": 1.0,
+    "false_positive_count": 0,
+    "false_positive_rate_on_genuine": 0.0,
+    "false_negative_count": 0,
+    "false_negative_rate_on_fraudulent": 0.0
+  },
+  "rows": [
+    {
+      "index": 1,
+      "source_path": "dataset/AndroidGenuine/gA_145.jfif",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.0002566274197306484,
+      "stage5_keras_score": 0.00025508035,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 4,
+      "source_path": "dataset/AndroidGenuine/gA_147.jfif",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 7.980380905792117e-05,
+      "stage5_keras_score": 7.857948e-05,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 5,
+      "source_path": "dataset/iOSGenuine/gI_054.jpg",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.026714470237493515,
+      "stage5_keras_score": 0.027210137,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 9,
+      "source_path": "dataset/AndroidGenuine/gA_053.jpg",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.005291022825986147,
+      "stage5_keras_score": 0.0054447204,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 12,
+      "source_path": "dataset/AndroidGenuine/gA_120.jfif",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.0005530882626771927,
+      "stage5_keras_score": 0.00056977075,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 14,
+      "source_path": "dataset/iOSGenuine/gI_114.JPG",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.01010898407548666,
+      "stage5_keras_score": 0.010305904,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 15,
+      "source_path": "dataset/AndroidGenuine/gA_264.jpg",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.09717176854610443,
+      "stage5_keras_score": 0.097637355,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 17,
+      "source_path": "dataset/AndroidGenuine/gA_239.jfif",
+      "y_true": 0,
+      "y_pred_native_like": 0,
+      "fraud_score_native_like": 0.00015008120681159198,
+      "stage5_keras_score": 0.00014985641,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 0,
+      "source_path": "dataset/AndroidFraudulent/fA_215.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.999998927116394,
+      "stage5_keras_score": 0.999999,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 2,
+      "source_path": "dataset/iOSFraudulent/fI_385.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999996423721313,
+      "stage5_keras_score": 0.99999964,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 3,
+      "source_path": "dataset/iOSFraudulent/fI_326.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999935030937195,
+      "stage5_keras_score": 0.99999356,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 6,
+      "source_path": "dataset/AndroidFraudulent/fA_349.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999998807907104,
+      "stage5_keras_score": 0.9999999,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 7,
+      "source_path": "dataset/iOSFraudulent/fI_277.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999996423721313,
+      "stage5_keras_score": 0.99999964,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 8,
+      "source_path": "dataset/AndroidFraudulent/fA_122.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999999403953552,
+      "stage5_keras_score": 0.99999994,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 10,
+      "source_path": "dataset/iOSFraudulent/fI_122.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999558329582214,
+      "stage5_keras_score": 0.99995786,
+      "matches_stage5_label": true
+    },
+    {
+      "index": 11,
+      "source_path": "dataset/iOSFraudulent/fI_151.png",
+      "y_true": 1,
+      "y_pred_native_like": 1,
+      "fraud_score_native_like": 0.9999470114707947,
+      "stage5_keras_score": 0.99995285,
+      "matches_stage5_label": true
+    }
+  ]
+}

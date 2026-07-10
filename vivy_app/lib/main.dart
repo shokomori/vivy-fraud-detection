@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
@@ -43,6 +44,8 @@ class ReceiptCheckPage extends StatefulWidget {
 }
 
 class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
+  static const MethodChannel _preprocessChannel = MethodChannel('vivy/preprocess');
+
   final ImagePicker _picker = ImagePicker();
 
   Interpreter? _interpreter;
@@ -50,6 +53,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
   AnalysisResult? _result;
   bool _isBusy = false;
   String? _loadError;
+  String _lastPreprocessPath = 'Not run yet';
 
   @override
   void initState() {
@@ -97,28 +101,58 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     setState(() {
       _isBusy = true;
       _result = null;
+      _lastPreprocessPath = 'Running...';
     });
 
     try {
-      final bytes = await _selectedFile!.readAsBytes();
-      final decoded = img.decodeImage(bytes);
-      if (decoded == null) {
-        throw Exception('Could not decode image.');
-      }
+      final nativeResult = await _preprocessWithNativeOpenCv(_selectedFile!.path);
 
-      final roiResult = _extractReceiptRoi(decoded);
-      if (!roiResult.geometryPass) {
+      if (nativeResult != null && nativeResult.usedNative && !nativeResult.geometryPass) {
         setState(() {
+          _lastPreprocessPath = 'Native OpenCV (ROI rejected)';
           _result = AnalysisResult.notReceipt(
             message: 'This does not look like a GCash receipt.',
-            areaRatio: roiResult.areaRatio,
-            aspectRatio: roiResult.aspectRatio,
+            areaRatio: nativeResult.areaRatio,
+            aspectRatio: nativeResult.aspectRatio,
           );
         });
         return;
       }
 
-      final normalized = _preprocessForModel(roiResult.roi!);
+      Float32List normalized;
+      if (nativeResult != null && nativeResult.usedNative && nativeResult.tensor != null) {
+        debugPrint('Preprocess backend: Native OpenCV');
+        setState(() {
+          _lastPreprocessPath = 'Native OpenCV';
+        });
+        normalized = nativeResult.tensor!;
+      } else {
+        final reason = nativeResult?.reason ?? 'native result unavailable';
+        debugPrint('Preprocess backend: Dart fallback (reason: $reason)');
+        setState(() {
+          _lastPreprocessPath = 'Dart fallback (reason: $reason)';
+        });
+
+        final bytes = await _selectedFile!.readAsBytes();
+        final decoded = img.decodeImage(bytes);
+        if (decoded == null) {
+          throw Exception('Could not decode image.');
+        }
+
+        final roiResult = _extractReceiptRoi(decoded);
+        if (!roiResult.geometryPass) {
+          setState(() {
+            _result = AnalysisResult.notReceipt(
+              message: 'This does not look like a GCash receipt.',
+              areaRatio: roiResult.areaRatio,
+              aspectRatio: roiResult.aspectRatio,
+            );
+          });
+          return;
+        }
+        normalized = _preprocessForModel(roiResult.roi!);
+      }
+
       final score = _runModel(normalized);
 
       if ((score - kFraudThreshold).abs() < kUnclearBand) {
@@ -149,6 +183,81 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
         _isBusy = false;
       });
     }
+  }
+
+  Future<_NativePreprocessResult?> _preprocessWithNativeOpenCv(String imagePath) async {
+    if (!Platform.isAndroid) {
+      return const _NativePreprocessResult(
+        usedNative: false,
+        geometryPass: false,
+        areaRatio: 0,
+        aspectRatio: 0,
+        tensor: null,
+        reason: 'non-android platform',
+      );
+    }
+
+    try {
+      final res = await _preprocessChannel.invokeMethod<Map<dynamic, dynamic>>(
+        'preprocessReceipt',
+        <String, dynamic>{'path': imagePath},
+      );
+      if (res == null) {
+        return null;
+      }
+
+      final geometryPass = (res['geometryPass'] as bool?) ?? false;
+      final areaRatio = ((res['areaRatio'] as num?) ?? 0).toDouble();
+      final aspectRatio = ((res['aspectRatio'] as num?) ?? 0).toDouble();
+      final bytes = res['tensorBytes'];
+      final backend = (res['backend'] as String?) ?? 'native-opencv';
+      final reason = (res['reason'] as String?) ?? 'ok';
+
+      Float32List? tensor;
+      if (geometryPass && bytes is Uint8List) {
+        tensor = _uint8ToFloat32(bytes);
+      }
+
+      final usedNative = geometryPass ? (tensor != null) : true;
+
+      return _NativePreprocessResult(
+        usedNative: usedNative,
+        geometryPass: geometryPass,
+        areaRatio: areaRatio,
+        aspectRatio: aspectRatio,
+        tensor: tensor,
+        reason: '$backend: $reason',
+      );
+    } on PlatformException catch (e) {
+      return _NativePreprocessResult(
+        usedNative: false,
+        geometryPass: false,
+        areaRatio: 0,
+        aspectRatio: 0,
+        tensor: null,
+        reason: 'platform exception ${e.code}: ${e.message}',
+      );
+    } catch (e) {
+      // Keep app resilient: fallback to legacy Dart pipeline if native bridge fails.
+      return _NativePreprocessResult(
+        usedNative: false,
+        geometryPass: false,
+        areaRatio: 0,
+        aspectRatio: 0,
+        tensor: null,
+        reason: 'unexpected exception: $e',
+      );
+    }
+  }
+
+  Float32List _uint8ToFloat32(Uint8List bytes) {
+    final byteData = ByteData.sublistView(bytes);
+    final count = bytes.lengthInBytes ~/ 4;
+    final out = Float32List(count);
+    for (var i = 0; i < count; i++) {
+      out[i] = byteData.getFloat32(i * 4, Endian.little);
+    }
+    return out;
   }
 
   double _runModel(Float32List inputBuffer) {
@@ -509,6 +618,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
                   ],
                 ),
               const SizedBox(height: 8),
+              Text(
+                'Preprocess path: $_lastPreprocessPath',
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+              ),
+              const SizedBox(height: 8),
               if (_result != null) _ResultCard(result: _result!),
             ],
           ),
@@ -583,6 +697,24 @@ class _ResultCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NativePreprocessResult {
+  const _NativePreprocessResult({
+    required this.usedNative,
+    required this.geometryPass,
+    required this.areaRatio,
+    required this.aspectRatio,
+    required this.tensor,
+    required this.reason,
+  });
+
+  final bool usedNative;
+  final bool geometryPass;
+  final double areaRatio;
+  final double aspectRatio;
+  final Float32List? tensor;
+  final String reason;
 }
 
 enum ResultType { genuine, fraudulent, notReceipt, unclear, error }

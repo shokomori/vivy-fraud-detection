@@ -1,0 +1,45 @@
+{
+  "input_path": "c:\\Users\\YUKI\\Documents\\Vivy\\dataset\\AndroidGenuine\\gA_120.jfif",
+  "geometry_pass": true,
+  "area_ratio": 0.6380688310815352,
+  "aspect_ratio": 0.5140562248995983,
+  "roi_box": {
+    "x": 40,
+    "y": 70,
+    "w": 640,
+    "h": 1245,
+    "area": 759404
+  },
+  "crop_box_with_padding": {
+    "x0": 21,
+    "y0": 33,
+    "x1": 698,
+    "y1": 1351,
+    "width": 678,
+    "height": 1319
+  },
+  "output_tensor_shape": [
+    224,
+    224,
+    3
+  ],
+  "output_tensor_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gA_120_flutter\\flutter_tensor_f32.bin",
+  "roi_png_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gA_120_flutter\\flutter_roi.png",
+  "resized_png_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gA_120_flutter\\flutter_resized_224.png",
+  "stats": {
+    "mean": 0.8117544709329734,
+    "std": 0.3052487837209224,
+    "min": 0.10196078568696976,
+    "max": 0.9921568632125854
+  },
+  "sample_values": {
+    "0": 0.10196078568696976,
+    "1": 0.10196078568696976,
+    "2": 0.10196078568696976,
+    "3": 0.10196078568696976,
+    "4": 0.10196078568696976,
+    "5": 0.10196078568696976,
+    "75600": 0.9921568632125854,
+    "150525": 0.10196078568696976
+  }
+}

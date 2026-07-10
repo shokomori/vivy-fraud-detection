@@ -1,0 +1,45 @@
+{
+  "input_path": "c:\\Users\\YUKI\\Documents\\Vivy\\dataset\\iOSGenuine\\gI_054.jpg",
+  "geometry_pass": true,
+  "area_ratio": 0.6686768096470276,
+  "aspect_ratio": 0.5067155067155067,
+  "roi_box": {
+    "x": 56,
+    "y": 305,
+    "w": 830,
+    "h": 1638,
+    "area": 1290022
+  },
+  "crop_box_with_padding": {
+    "x0": 31,
+    "y0": 256,
+    "x1": 910,
+    "y1": 1991,
+    "width": 880,
+    "height": 1736
+  },
+  "output_tensor_shape": [
+    224,
+    224,
+    3
+  ],
+  "output_tensor_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gI_054_flutter\\flutter_tensor_f32.bin",
+  "roi_png_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gI_054_flutter\\flutter_roi.png",
+  "resized_png_path": "c:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gI_054_flutter\\flutter_resized_224.png",
+  "stats": {
+    "mean": 0.8344278387774058,
+    "std": 0.24741560243972566,
+    "min": 0.1725490242242813,
+    "max": 0.9921568632125854
+  },
+  "sample_values": {
+    "0": 0.29019609093666077,
+    "1": 0.29019609093666077,
+    "2": 0.29019609093666077,
+    "3": 0.29019609093666077,
+    "4": 0.29019609093666077,
+    "5": 0.29019609093666077,
+    "75600": 0.9607843160629272,
+    "150525": 0.29019609093666077
+  }
+}

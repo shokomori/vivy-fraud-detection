@@ -1,0 +1,69 @@
+{
+  "description": "Before/after preprocessing alignment report on 5 genuine samples",
+  "notes": {
+    "before": "Old Flutter package:image preprocessing export",
+    "after": "New OpenCV-aligned semantics matching Android native bridge and Stage 3"
+  },
+  "rows": [
+    {
+      "sample": "dataset/AndroidGenuine/gA_145.jfif",
+      "before_allclose_atol_1e-6": false,
+      "before_mean_abs_diff_vs_stage3": 0.07912907004356384,
+      "before_max_abs_diff_vs_stage3": 0.8980392217636108,
+      "after_allclose_atol_1e-6": true,
+      "after_mean_abs_diff_vs_stage3": 0.0,
+      "after_max_abs_diff_vs_stage3": 0.0,
+      "before_tflite_fraud_score": 0.10605016350746155,
+      "after_tflite_fraud_score": 0.0002566274197306484,
+      "stage3_tflite_fraud_score": 0.0002566274197306484
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_147.jfif",
+      "before_allclose_atol_1e-6": false,
+      "before_mean_abs_diff_vs_stage3": 0.07923703640699387,
+      "before_max_abs_diff_vs_stage3": 0.8980392217636108,
+      "after_allclose_atol_1e-6": true,
+      "after_mean_abs_diff_vs_stage3": 0.0,
+      "after_max_abs_diff_vs_stage3": 0.0,
+      "before_tflite_fraud_score": 0.0568646565079689,
+      "after_tflite_fraud_score": 7.980380905792117e-05,
+      "stage3_tflite_fraud_score": 7.980380905792117e-05
+    },
+    {
+      "sample": "dataset/iOSGenuine/gI_054.jpg",
+      "before_allclose_atol_1e-6": false,
+      "before_mean_abs_diff_vs_stage3": 0.07214049249887466,
+      "before_max_abs_diff_vs_stage3": 0.6274509429931641,
+      "after_allclose_atol_1e-6": true,
+      "after_mean_abs_diff_vs_stage3": 0.0,
+      "after_max_abs_diff_vs_stage3": 0.0,
+      "before_tflite_fraud_score": 0.3130369484424591,
+      "after_tflite_fraud_score": 0.026714470237493515,
+      "stage3_tflite_fraud_score": 0.026714470237493515
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_053.jpg",
+      "before_allclose_atol_1e-6": false,
+      "before_mean_abs_diff_vs_stage3": 0.08208674192428589,
+      "before_max_abs_diff_vs_stage3": 0.8941176533699036,
+      "after_allclose_atol_1e-6": true,
+      "after_mean_abs_diff_vs_stage3": 0.0,
+      "after_max_abs_diff_vs_stage3": 0.0,
+      "before_tflite_fraud_score": 0.834514319896698,
+      "after_tflite_fraud_score": 0.005291022825986147,
+      "stage3_tflite_fraud_score": 0.005291022825986147
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_120.jfif",
+      "before_allclose_atol_1e-6": false,
+      "before_mean_abs_diff_vs_stage3": 0.07878109812736511,
+      "before_max_abs_diff_vs_stage3": 0.8980392217636108,
+      "after_allclose_atol_1e-6": true,
+      "after_mean_abs_diff_vs_stage3": 0.0,
+      "after_max_abs_diff_vs_stage3": 0.0,
+      "before_tflite_fraud_score": 0.12437344342470169,
+      "after_tflite_fraud_score": 0.0005530882626771927,
+      "stage3_tflite_fraud_score": 0.0005530882626771927
+    }
+  ]
+}

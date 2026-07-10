@@ -1,0 +1,88 @@
+{
+  "primary_image": "dataset\\AndroidGenuine\\gA_145.jfif",
+  "flutter_export_dir": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\gA_145_flutter",
+  "shape_match": true,
+  "dtype": {
+    "flutter": "float32",
+    "stage3": "float32"
+  },
+  "byte_for_byte_equal": false,
+  "allclose_atol_1e-6": false,
+  "diff": {
+    "mean_abs_diff": 0.07912907004356384,
+    "max_abs_diff": 0.8980392217636108,
+    "max_abs_diff_location_hwc": [
+      9,
+      91,
+      2
+    ],
+    "flutter_value_at_max": 0.10196078568696976,
+    "stage3_value_at_max": 1.0,
+    "mae_if_stage3_channels_reversed": 0.07912907004356384,
+    "mae_if_stage3_scaled_0_255": 215.588623046875
+  },
+  "stats": {
+    "flutter": {
+      "mean": 0.8108408451080322,
+      "std": 0.30575165152549744,
+      "min": 0.10196078568696976,
+      "max": 0.9921568632125854
+    },
+    "stage3": {
+      "mean": 0.8485737442970276,
+      "std": 0.30207353830337524,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "roi_boxes": {
+    "flutter_crop_xyxy": {
+      "x0": 21,
+      "y0": 33,
+      "x1": 698,
+      "y1": 1347
+    },
+    "python_stage3_crop_xyxy": {
+      "x0": 21,
+      "y0": 33,
+      "x1": 698,
+      "y1": 1347
+    }
+  },
+  "primary_scores_tflite": {
+    "flutter_tensor_tflite_score": 0.10605016350746155,
+    "stage3_tensor_tflite_score": 0.0002566274197306484
+  },
+  "genuine_sample_scores": [
+    {
+      "sample": "dataset/AndroidGenuine/gA_145.jfif",
+      "flutter_geometry_pass": true,
+      "flutter_tflite_fraud_score": 0.10605016350746155,
+      "stage5_keras_fraud_score": 0.00025508035
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_147.jfif",
+      "flutter_geometry_pass": true,
+      "flutter_tflite_fraud_score": 0.0568646565079689,
+      "stage5_keras_fraud_score": 7.857948e-05
+    },
+    {
+      "sample": "dataset/iOSGenuine/gI_054.jpg",
+      "flutter_geometry_pass": true,
+      "flutter_tflite_fraud_score": 0.3130369484424591,
+      "stage5_keras_fraud_score": 0.027210137
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_053.jpg",
+      "flutter_geometry_pass": true,
+      "flutter_tflite_fraud_score": 0.834514319896698,
+      "stage5_keras_fraud_score": 0.0054447204
+    },
+    {
+      "sample": "dataset/AndroidGenuine/gA_120.jfif",
+      "flutter_geometry_pass": true,
+      "flutter_tflite_fraud_score": 0.12437344342470169,
+      "stage5_keras_fraud_score": 0.00056977075
+    }
+  ]
+}
