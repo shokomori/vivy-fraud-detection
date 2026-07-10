@@ -1,0 +1,12 @@
+{
+  "threshold": 0.16,
+  "sample_size": 40,
+  "matches": 40,
+  "mismatches": 0,
+  "match_rate": 1.0,
+  "max_abs_prob_diff": 0.003939008340239525,
+  "mean_abs_prob_diff": 0.00045851850882172585,
+  "keras_model": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4\\checkpoints\\best_finetune.keras",
+  "tflite_model": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage6\\mobilenetv2_fraud_detector_float16.tflite",
+  "details_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage6\\tflite_verification_samples.csv"
+}

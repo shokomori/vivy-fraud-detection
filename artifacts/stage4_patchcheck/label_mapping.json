@@ -1,0 +1,5 @@
+{
+  "0":"Genuine",
+  "1":"Fraudulent",
+  "positive_class_for_metrics_and_threshold":1
+}

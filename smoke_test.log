@@ -1,0 +1,53 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783603663.761800   34520 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783603667.094281   34520 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1783603675.675454   34520 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+C:\Users\YUKI\Documents\Vivy\.venv311\Lib\site-packages\keras\src\trainers\epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
+  self.data_adapter = data_adapters.get_data_adapter(
+Found split metadata: C:\Users\YUKI\Documents\Vivy\artifacts\stage3\splits\train.csv (1280 rows)
+Found split metadata: C:\Users\YUKI\Documents\Vivy\artifacts\stage3\splits\val.csv (160 rows)
+Found split metadata: C:\Users\YUKI\Documents\Vivy\artifacts\stage3\splits\test.csv (160 rows)
+Train set: X=(64, 224, 224, 3), y=(64,)
+Val set:   X=(64, 224, 224, 3), y=(64,)
+Test set:  X=(64, 224, 224, 3), y=(64,)
+
+Stage 1/2: Train classification head with MobileNetV2 base frozen
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m17s[0m 6s/step - binary_accuracy: 0.5000 - loss: 0.7219
+[1m2/4[0m [32m==========[0m[37m==========[0m [1m0s[0m 266ms/step - binary_accuracy: 0.6250 - loss: 0.6547
+[1m3/4[0m [32m===============[0m[37m=====[0m [1m0s[0m 269ms/step - binary_accuracy: 0.6042 - loss: 0.7614
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 268ms/step - binary_accuracy: 0.6406 - loss: 0.6840
+Epoch 1: val_loss improved from None to 0.73658, saving model to C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\checkpoints\best_head.keras
+
+Epoch 1: finished saving model to C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\checkpoints\best_head.keras
+
+[1m4/4[0m [32m====================[0m[37m[0m [1m13s[0m 2s/step - binary_accuracy: 0.6406 - loss: 0.6840 - val_binary_accuracy: 0.4688 - val_loss: 0.7366
+Restoring model weights from the end of the best epoch: 1.
+Restoring model weights from the end of the best epoch: 1.
+
+Stage 2/2: Fine-tune top MobileNetV2 layers with lower learning rate
+Epoch 2/2
+
+[1m1/4[0m [32m=====[0m[37m===============[0m [1m25s[0m 9s/step - binary_accuracy: 0.8125 - loss: 0.4291
+[1m2/4[0m [32m==========[0m[37m==========[0m [1m0s[0m 304ms/step - binary_accuracy: 0.7500 - loss: 0.4879
+[1m3/4[0m [32m===============[0m[37m=====[0m [1m0s[0m 322ms/step - binary_accuracy: 0.8333 - loss: 0.4169
+[1m4/4[0m [32m====================[0m[37m[0m [1m0s[0m 313ms/step - binary_accuracy: 0.8438 - loss: 0.4119
+Epoch 2: val_loss improved from None to 0.56686, saving model to C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\checkpoints\best_finetune.keras
+
+Epoch 2: finished saving model to C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\checkpoints\best_finetune.keras
+
+[1m4/4[0m [32m====================[0m[37m[0m [1m14s[0m 2s/step - binary_accuracy: 0.8438 - loss: 0.4119 - val_binary_accuracy: 0.6562 - val_loss: 0.5669
+Restoring model weights from the end of the best epoch: 2.
+Restoring model weights from the end of the best epoch: 2.
+
+Training complete.
+Final train accuracy: 0.8438
+Final val accuracy:   0.6562
+Epochs actually run:  2
+Final model saved:    C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\mobilenetv2_fraud_detector.keras
+History CSV saved:    C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\training_history.csv
+Curves plot saved:    C:\Users\YUKI\Documents\Vivy\artifacts\stage4_smoke_log\training_curves.png
+Test metrics:         {'loss': 0.5458545684814453, 'compile_metrics': 0.71875}
