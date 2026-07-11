@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
@@ -113,9 +116,15 @@ class ReceiptCheckPage extends StatefulWidget {
   State<ReceiptCheckPage> createState() => _ReceiptCheckPageState();
 }
 
-class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
+class _ReceiptCheckPageState extends State<ReceiptCheckPage>
+    with WidgetsBindingObserver {
   static const String _historyStorageKey = 'analysis_history_v1';
   static const String _rawScoreStorageKey = 'analysis_raw_score_log_v2';
+  static const String _debugBatchRootName = 'vivy_debug_batch';
+  static const String _debugBatchInboxName = 'batch_inbox';
+  static const String _debugBatchExportName = 'batch_exports';
+  static const String _debugBatchTriggerName = 'trigger.run';
+  static const String _debugBatchStatusName = 'last_batch_status.json';
 
   final ImagePicker _picker = ImagePicker();
   final ValueNotifier<AnalyzeUiState> _analyzeUiState =
@@ -127,19 +136,30 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
   List<HistoryEntry> _historyEntries = const [];
   bool _isBusy = false;
   String? _loadError;
+  bool _isDebugBatchRunning = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadModel();
     _loadHistory();
+    _maybeRunDebugBatchIngestion(reason: 'startup');
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _analyzeUiState.dispose();
     _interpreter?.close();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _maybeRunDebugBatchIngestion(reason: 'resume');
+    }
   }
 
   void _syncAnalyzeUiState() {
@@ -158,6 +178,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       setState(() {
         _interpreter = interpreter;
       });
+      _maybeRunDebugBatchIngestion(reason: 'model_ready');
     } catch (e) {
       setState(() {
         _loadError = 'Failed to load model: $e';
@@ -242,76 +263,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     });
     _syncAnalyzeUiState();
 
-    String fileSha256 = '';
-    int fileSizeBytes = 0;
-    int? decodedWidth;
-    int? decodedHeight;
-
     try {
       final bytes = await _selectedFile!.readAsBytes();
-      fileSha256 = _sha256Hex(bytes);
-      fileSizeBytes = bytes.length;
-      final decoded = img.decodeImage(bytes);
-      if (decoded == null) {
-        throw Exception('Could not decode image.');
-      }
-      decodedWidth = decoded.width;
-      decodedHeight = decoded.height;
+      final outcome = _analyzeBytesThroughLivePipeline(bytes: bytes);
+      final result = outcome.result;
 
-      final roiResult = _extractReceiptRoi(decoded);
-      if (!roiResult.geometryPass) {
-        final result = AnalysisResult.notReceipt(
-          message: 'This does not look like a GCash receipt.',
-          areaRatio: roiResult.areaRatio,
-          aspectRatio: roiResult.aspectRatio,
-        );
-        setState(() {
-          _result = result;
-        });
-        _syncAnalyzeUiState();
-        await _recordRawScoreObservation(
-          result: result,
-          imagePath: _selectedFile!.path,
-          fileSha256: fileSha256,
-          fileSizeBytes: fileSizeBytes,
-          decodedWidth: decodedWidth,
-          decodedHeight: decodedHeight,
-        );
-        await _recordHistory(result);
-        return;
-      }
-
-      final normalized = _preprocessForModel(roiResult.roi!);
-      final score = _runModel(normalized);
-
-      if ((score - kFraudThreshold).abs() < kUnclearBand) {
-        final result = AnalysisResult.unclear(
-          score: score,
-          message: 'Result unclear - try a clearer or better-lit photo.',
-        );
-        setState(() {
-          _result = result;
-        });
-        _syncAnalyzeUiState();
-        await _recordRawScoreObservation(
-          result: result,
-          imagePath: _selectedFile!.path,
-          fileSha256: fileSha256,
-          fileSizeBytes: fileSizeBytes,
-          decodedWidth: decodedWidth,
-          decodedHeight: decodedHeight,
-        );
-        await _recordHistory(result);
-        return;
-      }
-
-      final isFraudulent = score >= kFraudThreshold;
-      final confidence = isFraudulent ? score : (1.0 - score);
-      final result = AnalysisResult.classified(
-        score: score,
-        confidence: confidence,
-        isFraudulent: isFraudulent,
-      );
       setState(() {
         _result = result;
       });
@@ -319,10 +275,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       await _recordRawScoreObservation(
         result: result,
         imagePath: _selectedFile!.path,
-        fileSha256: fileSha256,
-        fileSizeBytes: fileSizeBytes,
-        decodedWidth: decodedWidth,
-        decodedHeight: decodedHeight,
+        fileSha256: outcome.fileSha256,
+        fileSizeBytes: outcome.fileSizeBytes,
+        decodedWidth: outcome.decodedWidth,
+        decodedHeight: outcome.decodedHeight,
       );
       await _recordHistory(result);
     } catch (e) {
@@ -334,10 +290,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       await _recordRawScoreObservation(
         result: result,
         imagePath: _selectedFile!.path,
-        fileSha256: fileSha256,
-        fileSizeBytes: fileSizeBytes,
-        decodedWidth: decodedWidth,
-        decodedHeight: decodedHeight,
+        fileSha256: '',
+        fileSizeBytes: 0,
+        decodedWidth: null,
+        decodedHeight: null,
       );
       await _recordHistory(result);
     } finally {
@@ -346,6 +302,65 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       });
       _syncAnalyzeUiState();
     }
+  }
+
+  _PipelineOutcome _analyzeBytesThroughLivePipeline({required Uint8List bytes}) {
+    final fileSha256 = _sha256Hex(bytes);
+    final fileSizeBytes = bytes.length;
+    final decoded = img.decodeImage(bytes);
+    if (decoded == null) {
+      throw Exception('Could not decode image.');
+    }
+    final decodedWidth = decoded.width;
+    final decodedHeight = decoded.height;
+
+    final roiResult = _extractReceiptRoi(decoded);
+    if (!roiResult.geometryPass) {
+      final result = AnalysisResult.notReceipt(
+        message: 'This does not look like a GCash receipt.',
+        areaRatio: roiResult.areaRatio,
+        aspectRatio: roiResult.aspectRatio,
+      );
+      return _PipelineOutcome(
+        result: result,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+      );
+    }
+
+    final normalized = _preprocessForModel(roiResult.roi!);
+    final score = _runModel(normalized);
+
+    if ((score - kFraudThreshold).abs() < kUnclearBand) {
+      final result = AnalysisResult.unclear(
+        score: score,
+        message: 'Result unclear - try a clearer or better-lit photo.',
+      );
+      return _PipelineOutcome(
+        result: result,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+      );
+    }
+
+    final isFraudulent = score >= kFraudThreshold;
+    final confidence = isFraudulent ? score : (1.0 - score);
+    final result = AnalysisResult.classified(
+      score: score,
+      confidence: confidence,
+      isFraudulent: isFraudulent,
+    );
+    return _PipelineOutcome(
+      result: result,
+      fileSha256: fileSha256,
+      fileSizeBytes: fileSizeBytes,
+      decodedWidth: decodedWidth,
+      decodedHeight: decodedHeight,
+    );
   }
 
   Future<void> _simulateClassifiedResult({required bool isFraudulent}) async {
@@ -394,6 +409,137 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     } catch (_) {
       // Keep analysis flow responsive even if score logging fails.
     }
+  }
+
+  Future<void> _maybeRunDebugBatchIngestion({required String reason}) async {
+    if (kReleaseMode || _isDebugBatchRunning || _interpreter == null) {
+      return;
+    }
+
+    final rootDir = await _debugBatchRootDir();
+    if (rootDir == null) {
+      return;
+    }
+
+    final trigger = File(
+      '${rootDir.path}${Platform.pathSeparator}$_debugBatchTriggerName',
+    );
+    if (!trigger.existsSync()) {
+      return;
+    }
+
+    _isDebugBatchRunning = true;
+    try {
+      final inbox = Directory(
+        '${rootDir.path}${Platform.pathSeparator}$_debugBatchInboxName',
+      );
+      final exportDir = Directory(
+        '${rootDir.path}${Platform.pathSeparator}$_debugBatchExportName',
+      )..createSync(recursive: true);
+
+      final images = inbox
+          .listSync()
+          .whereType<File>()
+          .where(_isBatchImageFile)
+          .toList()
+        ..sort((a, b) => a.path.compareTo(b.path));
+
+      final timestamp = DateTime.now()
+          .toUtc()
+          .toIso8601String()
+          .replaceAll(':', '-');
+      final csvPath =
+          '${exportDir.path}${Platform.pathSeparator}batch_results_$timestamp.csv';
+      final csvFile = File(csvPath);
+      final rows = <String>[];
+
+      for (final file in images) {
+        try {
+          final bytes = await file.readAsBytes();
+          final outcome = _analyzeBytesThroughLivePipeline(bytes: bytes);
+          rows.add(
+            _buildRawScoreCsvRow(
+              result: outcome.result,
+              imagePath: file.path,
+              fileSha256: outcome.fileSha256,
+              fileSizeBytes: outcome.fileSizeBytes,
+              decodedWidth: outcome.decodedWidth,
+              decodedHeight: outcome.decodedHeight,
+            ),
+          );
+        } catch (_) {
+          final errorResult = AnalysisResult.error('Batch analysis failed.');
+          rows.add(
+            _buildRawScoreCsvRow(
+              result: errorResult,
+              imagePath: file.path,
+              fileSha256: '',
+              fileSizeBytes: 0,
+              decodedWidth: null,
+              decodedHeight: null,
+            ),
+          );
+        }
+      }
+
+      const header =
+          'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height';
+      final csv = rows.isEmpty ? header : '$header\n${rows.join('\n')}';
+      await csvFile.writeAsString(csv, flush: true);
+
+      final status = {
+        'trigger_reason': reason,
+        'ran_at_utc': DateTime.now().toUtc().toIso8601String(),
+        'inbox_dir': inbox.path,
+        'export_csv_path': csvFile.path,
+        'processed_count': rows.length,
+      };
+      final statusFile = File(
+        '${rootDir.path}${Platform.pathSeparator}$_debugBatchStatusName',
+      );
+      await statusFile.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(status),
+        flush: true,
+      );
+
+      trigger.deleteSync();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Debug batch processed ${rows.length} image(s).',
+            ),
+          ),
+        );
+      }
+    } finally {
+      _isDebugBatchRunning = false;
+    }
+  }
+
+  Future<Directory?> _debugBatchRootDir() async {
+    final external = await getExternalStorageDirectory();
+    if (external == null) {
+      return null;
+    }
+    final root = Directory(
+      '${external.path}${Platform.pathSeparator}$_debugBatchRootName',
+    );
+    root.createSync(recursive: true);
+    Directory(
+      '${root.path}${Platform.pathSeparator}$_debugBatchInboxName',
+    ).createSync(recursive: true);
+    return root;
+  }
+
+  bool _isBatchImageFile(File file) {
+    final lower = file.path.toLowerCase();
+    return lower.endsWith('.jpg') ||
+        lower.endsWith('.jpeg') ||
+        lower.endsWith('.png') ||
+        lower.endsWith('.jfif') ||
+        lower.endsWith('.webp');
   }
 
   Future<void> _copyRawScoreLogToClipboard() async {
@@ -819,4 +965,20 @@ class _ComponentBox {
   final int w;
   final int h;
   final int area;
+}
+
+class _PipelineOutcome {
+  const _PipelineOutcome({
+    required this.result,
+    required this.fileSha256,
+    required this.fileSizeBytes,
+    required this.decodedWidth,
+    required this.decodedHeight,
+  });
+
+  final AnalysisResult result;
+  final String fileSha256;
+  final int fileSizeBytes;
+  final int? decodedWidth;
+  final int? decodedHeight;
 }

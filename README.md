@@ -116,3 +116,57 @@ Interpretation:
 - If per-image `abs_delta` is small (within tolerance), app and Python agree; this points to model gap or data shift.
 - If `abs_delta` is consistently high, this signals app-side preprocessing mismatch.
 - If `file_sha256` is present, comparator performs hash-aware image matching so each CSV row is tied to the exact source bytes.
+
+## Debug Batch Ingestion (ADB Triggered)
+
+This path is for collecting real-world batches without picker tapping.
+
+### Debug-only enforcement
+
+- The batch runner is gated by `kReleaseMode` in app code.
+- In release builds, trigger files are ignored and batch ingestion will not run.
+- The trigger check executes only in debug/profile app sessions.
+
+### Where to drop images
+
+Push real-world screenshots to this app-specific folder on device/emulator:
+
+- `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/`
+
+### Single adb command to trigger a full batch run
+
+Use one host command (from repo root) after images are in `batch_inbox`:
+
+```bash
+adb shell "touch /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/trigger.run" && adb shell monkey -p com.example.vivy_app -c android.intent.category.LAUNCHER 1
+```
+
+### Cleanup command (recommended after every run)
+
+Clear `batch_inbox` so old images cannot mix into the next batch:
+
+```bash
+adb shell "rm -f /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/*"
+```
+
+Optional strict pre-run sequence (empty inbox first, then push fresh files):
+
+```bash
+adb shell "rm -f /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/*"
+adb push <your_real_image_folder>/* /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+adb shell "touch /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/trigger.run" && adb shell monkey -p com.example.vivy_app -c android.intent.category.LAUNCHER 1
+```
+
+### Output files
+
+After processing, app writes:
+
+- CSV: `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports/batch_results_<UTC>.csv`
+- Status JSON: `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/last_batch_status.json`
+
+Pull outputs to local workspace:
+
+```bash
+adb pull /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports artifacts/debug_compare/
+adb pull /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/last_batch_status.json artifacts/debug_compare/
+```
