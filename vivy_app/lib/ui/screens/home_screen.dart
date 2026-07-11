@@ -70,10 +70,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: IconButton(
                       onPressed: () {},
-                      icon: const Icon(
-                        Icons.help_outline_rounded,
-                        color: Colors.white,
-                        size: 20,
+                      icon: SvgPicture.asset(
+                        'assets/vivy_assets/help.svg',
+                        width: 20,
+                        height: 20,
                       ),
                     ),
                   ),
@@ -133,8 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: _MiniActionCard(
                               title: 'History',
                               subtitle: '${stats.total} results saved',
-                              icon: Icons.history_rounded,
-                              iconColor: const Color(0xFF0D9F8A),
+                              iconAsset: 'assets/vivy_assets/history.svg',
                               iconBackground: const Color(0xFFD1FAF5),
                               onTap: widget.onOpenHistory,
                             ),
@@ -144,8 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: _MiniActionCard(
                               title: 'Learn More',
                               subtitle: 'About fraud',
-                              icon: Icons.menu_book_rounded,
-                              iconColor: Color(0xFFD97706),
+                              iconAsset: 'assets/vivy_assets/learn.svg',
                               iconBackground: Color(0xFFFFEDD5),
                             ),
                           ),
@@ -200,10 +198,9 @@ class _UploadCard extends StatelessWidget {
                 color: Colors.white.withAlpha(18),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: const Icon(
-                Icons.upload_rounded,
-                color: Colors.white,
-                size: 34,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: SvgPicture.asset('assets/vivy_assets/upload.svg'),
               ),
             ),
             const SizedBox(width: 14),
@@ -239,10 +236,9 @@ class _UploadCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: Color(0xFF4F7FCA),
               ),
-              child: const Icon(
-                Icons.arrow_forward_ios_rounded,
-                color: Colors.white,
-                size: 18,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: SvgPicture.asset('assets/vivy_assets/blue_back.svg'),
               ),
             ),
           ],
@@ -276,7 +272,7 @@ class _SummaryCard extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
             ),
             child: const Text(
-              '↗  YOUR SCAN SUMMARY',
+              'YOUR SCAN SUMMARY',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,
@@ -301,7 +297,7 @@ class _SummaryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _SummaryPill(
-                    value: '🛡 ${stats.genuine}',
+                    value: '${stats.genuine}',
                     label: 'Genuine',
                     valueColor: const Color(0xFF059669),
                     background: const Color(0xFFDDF3EA),
@@ -310,7 +306,7 @@ class _SummaryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _SummaryPill(
-                    value: '⚠ ${stats.flagged}',
+                    value: '${stats.flagged}',
                     label: 'Flagged',
                     valueColor: const Color(0xFFDC2626),
                     background: const Color(0xFFFBE4E4),
@@ -429,16 +425,14 @@ class _MiniActionCard extends StatelessWidget {
   const _MiniActionCard({
     required this.title,
     required this.subtitle,
-    required this.icon,
-    required this.iconColor,
+    required this.iconAsset,
     required this.iconBackground,
     this.onTap,
   });
 
   final String title;
   final String subtitle;
-  final IconData icon;
-  final Color iconColor;
+  final String iconAsset;
   final Color iconBackground;
   final VoidCallback? onTap;
 
@@ -461,7 +455,10 @@ class _MiniActionCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: iconBackground,
                 ),
-                child: Icon(icon, color: iconColor, size: 20),
+                child: Padding(
+                  padding: const EdgeInsets.all(7),
+                  child: SvgPicture.asset(iconAsset),
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -517,7 +514,10 @@ class _QrCard extends StatelessWidget {
               color: const Color(0xFFE3EDFF),
               border: Border.all(color: const Color(0xFF2E6BD2), width: 1.3),
             ),
-            child: const Icon(Icons.qr_code_2_rounded, color: Color(0xFF174AA5)),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: SvgPicture.asset('assets/vivy_assets/qr.svg'),
+            ),
           ),
           const SizedBox(width: 10),
           const Expanded(
@@ -550,10 +550,9 @@ class _QrCard extends StatelessWidget {
               shape: BoxShape.circle,
               color: Color(0xFFE4EAF4),
             ),
-            child: const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: Color(0xFF5C6D8A),
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: SvgPicture.asset('assets/vivy_assets/view.svg'),
             ),
           ),
         ],
@@ -586,10 +585,10 @@ class _TipsCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.lightbulb_outline_rounded,
-                    size: 18,
-                    color: Color(0xFFA16A04),
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: SvgPicture.asset('assets/vivy_assets/warning.svg'),
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
@@ -669,7 +668,7 @@ class _SummaryStats {
     final safeRate = total == 0 ? 0.0 : (genuine / total) * 100;
 
     final last = entries.isEmpty
-        ? '◷  Last scan: No scans yet'
+      ? 'Last scan: No scans yet'
         : _formatLastScan(entries.first);
 
     return _SummaryStats(
@@ -684,7 +683,7 @@ class _SummaryStats {
   static String _formatLastScan(HistoryEntry entry) {
     final confidenceText = entry.confidence == null
         ? ''
-        : ' • ${(entry.confidence! * 100).toStringAsFixed(1)}%';
-    return '◷  Last scan: ${entry.label}$confidenceText';
+        : ' - ${(entry.confidence! * 100).toStringAsFixed(1)}%';
+    return 'Last scan: ${entry.label}$confidenceText';
   }
 }

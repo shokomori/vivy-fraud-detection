@@ -82,3 +82,37 @@ Build the final installable app and install it on demo devices ahead of time.
 - Tune the fraud threshold based on validation results instead of using 0.5.
 - Add a rejection path for images that are not receipts.
 - Keep the explanation feature simple first; per-zone anomaly detection is a stretch goal.
+
+## Real-World Misclassification Diagnosis (No Retraining Yet)
+
+Use this workflow before proposing any retraining changes.
+
+1. Export app raw scores on-device
+
+- In the result screen, tap `Copy Raw Score CSV`.
+- The app copies CSV text with columns:
+	- `timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height`
+- Paste this into a local file, for example:
+	- `artifacts/debug_compare/app_raw_scores.csv`
+
+2. Compare app raw score vs Python Stage 3 + TFLite score
+
+Run from repo root:
+
+```bash
+python tools/compare_realworld_app_vs_stage3.py \
+	--app-csv artifacts/debug_compare/app_raw_scores.csv \
+	--images-dir <folder_with_realworld_images> \
+	--model artifacts/stage6/mobilenetv2_fraud_detector_float16.tflite
+```
+
+Outputs:
+
+- `artifacts/debug_compare/realworld_score_comparison.json`
+- `artifacts/debug_compare/realworld_score_comparison.csv`
+
+Interpretation:
+
+- If per-image `abs_delta` is small (within tolerance), app and Python agree; this points to model gap or data shift.
+- If `abs_delta` is consistently high, this signals app-side preprocessing mismatch.
+- If `file_sha256` is present, comparator performs hash-aware image matching so each CSV row is tied to the exact source bytes.

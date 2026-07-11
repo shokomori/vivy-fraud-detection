@@ -1,0 +1,73 @@
+{
+  "input": {
+    "app_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\app_raw_scores_sample.csv",
+    "images_dir": "C:\\Users\\YUKI\\Documents\\Vivy\\dataset",
+    "model": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage6\\mobilenetv2_fraud_detector_float16.tflite",
+    "delta_tolerance": 0.01
+  },
+  "counts": {
+    "rows_in_app_csv_with_raw_score": 1,
+    "rows_scored": 1,
+    "missing_images_by_filename": 0
+  },
+  "missing_images": [],
+  "diagnosis": "strong_app_preprocess_mismatch_signal",
+  "comparison_summary": {
+    "mean_abs_delta": 0.049743372580269354,
+    "max_abs_delta": 0.049743372580269354,
+    "rows_flagged_possible_app_preprocess_mismatch": 1,
+    "rows_flagged_model_gap_or_data_shift": 0,
+    "label_disagreements": 0
+  },
+  "rows": [
+    {
+      "filename": "gA_145.jfif",
+      "app_result_type": "genuine",
+      "app_raw_score": 0.05,
+      "threshold": 0.16,
+      "image_path": "C:\\Users\\YUKI\\Documents\\Vivy\\dataset\\AndroidGenuine\\gA_145.jfif",
+      "image_ext": ".jfif",
+      "width": 720,
+      "height": 1649,
+      "aspect_ratio": 0.4366282595512432,
+      "long_edge": 1649,
+      "file_size_kb": 35.6435546875,
+      "python_stage3_score": 0.0002566274197306484,
+      "abs_delta": 0.049743372580269354,
+      "app_label_from_score": "genuine",
+      "python_label_from_score": "genuine",
+      "verdict": "possible_app_preprocess_mismatch"
+    }
+  ],
+  "profiles": {
+    "realworld": {
+      "count": 1,
+      "extensions": {
+        ".jfif": 1
+      },
+      "aspect_ratio_mean": 0.4366282595512432,
+      "aspect_ratio_p10": 0.4366282595512432,
+      "aspect_ratio_p90": 0.4366282595512432,
+      "long_edge_mean": 1649.0,
+      "long_edge_p10": 1649.0,
+      "long_edge_p90": 1649.0,
+      "size_kb_mean": 35.6435546875,
+      "size_kb_p10": 35.6435546875,
+      "size_kb_p90": 35.6435546875,
+      "heuristic_direct_screenshot_name_hits": 0,
+      "heuristic_forwarded_or_reshared_name_hits": 0
+    },
+    "dataset": {
+      "count": 1600,
+      "aspect_ratio_mean": 0.4959156547115357,
+      "aspect_ratio_p10": 0.42946708463949845,
+      "aspect_ratio_p90": 0.6019785959178442,
+      "long_edge_mean": 1484.290625,
+      "long_edge_p10": 631.0,
+      "long_edge_p90": 2048.0,
+      "size_kb_mean": 247.72403564453126,
+      "size_kb_p10": 45.7263671875,
+      "size_kb_p90": 373.70546875000025
+    }
+  }
+}

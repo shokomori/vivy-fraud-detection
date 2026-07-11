@@ -1,8 +1,9 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:crypto/crypto.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -114,8 +115,11 @@ class ReceiptCheckPage extends StatefulWidget {
 
 class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
   static const String _historyStorageKey = 'analysis_history_v1';
+  static const String _rawScoreStorageKey = 'analysis_raw_score_log_v2';
 
   final ImagePicker _picker = ImagePicker();
+  final ValueNotifier<AnalyzeUiState> _analyzeUiState =
+      ValueNotifier(const AnalyzeUiState());
 
   Interpreter? _interpreter;
   XFile? _selectedFile;
@@ -133,8 +137,17 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
 
   @override
   void dispose() {
+    _analyzeUiState.dispose();
     _interpreter?.close();
     super.dispose();
+  }
+
+  void _syncAnalyzeUiState() {
+    _analyzeUiState.value = AnalyzeUiState(
+      result: _result,
+      isBusy: _isBusy,
+      loadError: _loadError,
+    );
   }
 
   Future<void> _loadModel() async {
@@ -149,6 +162,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       setState(() {
         _loadError = 'Failed to load model: $e';
       });
+      _syncAnalyzeUiState();
     }
   }
 
@@ -161,6 +175,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       _selectedFile = file;
       _result = null;
     });
+    _syncAnalyzeUiState();
+
+    // UI flow: skip manual crop/confirm and go straight to scanning.
+    await _analyzePhoto();
   }
 
   Future<void> _loadHistory() async {
@@ -222,13 +240,23 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       _isBusy = true;
       _result = null;
     });
+    _syncAnalyzeUiState();
+
+    String fileSha256 = '';
+    int fileSizeBytes = 0;
+    int? decodedWidth;
+    int? decodedHeight;
 
     try {
       final bytes = await _selectedFile!.readAsBytes();
+      fileSha256 = _sha256Hex(bytes);
+      fileSizeBytes = bytes.length;
       final decoded = img.decodeImage(bytes);
       if (decoded == null) {
         throw Exception('Could not decode image.');
       }
+      decodedWidth = decoded.width;
+      decodedHeight = decoded.height;
 
       final roiResult = _extractReceiptRoi(decoded);
       if (!roiResult.geometryPass) {
@@ -240,6 +268,15 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
         setState(() {
           _result = result;
         });
+        _syncAnalyzeUiState();
+        await _recordRawScoreObservation(
+          result: result,
+          imagePath: _selectedFile!.path,
+          fileSha256: fileSha256,
+          fileSizeBytes: fileSizeBytes,
+          decodedWidth: decodedWidth,
+          decodedHeight: decodedHeight,
+        );
         await _recordHistory(result);
         return;
       }
@@ -255,6 +292,15 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
         setState(() {
           _result = result;
         });
+        _syncAnalyzeUiState();
+        await _recordRawScoreObservation(
+          result: result,
+          imagePath: _selectedFile!.path,
+          fileSha256: fileSha256,
+          fileSizeBytes: fileSizeBytes,
+          decodedWidth: decodedWidth,
+          decodedHeight: decodedHeight,
+        );
         await _recordHistory(result);
         return;
       }
@@ -269,17 +315,36 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
       setState(() {
         _result = result;
       });
+      _syncAnalyzeUiState();
+      await _recordRawScoreObservation(
+        result: result,
+        imagePath: _selectedFile!.path,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+      );
       await _recordHistory(result);
     } catch (e) {
       final result = AnalysisResult.error('Analysis failed: $e');
       setState(() {
         _result = result;
       });
+      _syncAnalyzeUiState();
+      await _recordRawScoreObservation(
+        result: result,
+        imagePath: _selectedFile!.path,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+      );
       await _recordHistory(result);
     } finally {
       setState(() {
         _isBusy = false;
       });
+      _syncAnalyzeUiState();
     }
   }
 
@@ -294,7 +359,105 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
     setState(() {
       _result = result;
     });
+    _syncAnalyzeUiState();
+    await _recordRawScoreObservation(
+      result: result,
+      imagePath: isFraudulent ? 'debug_fraudulent.png' : 'debug_genuine.png',
+      fileSha256: 'debug_simulated',
+      fileSizeBytes: 0,
+      decodedWidth: null,
+      decodedHeight: null,
+    );
     await _recordHistory(result);
+  }
+
+  Future<void> _recordRawScoreObservation({
+    required AnalysisResult result,
+    required String imagePath,
+    required String fileSha256,
+    required int fileSizeBytes,
+    required int? decodedWidth,
+    required int? decodedHeight,
+  }) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final existing = prefs.getStringList(_rawScoreStorageKey) ?? <String>[];
+      final row = _buildRawScoreCsvRow(
+        result: result,
+        imagePath: imagePath,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+      );
+      await prefs.setStringList(_rawScoreStorageKey, <String>[...existing, row]);
+    } catch (_) {
+      // Keep analysis flow responsive even if score logging fails.
+    }
+  }
+
+  Future<void> _copyRawScoreLogToClipboard() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rows = prefs.getStringList(_rawScoreStorageKey) ?? <String>[];
+    const header =
+      'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height';
+    final csv = rows.isEmpty ? header : '$header\n${rows.join('\n')}';
+
+    await Clipboard.setData(ClipboardData(text: csv));
+    if (!mounted) {
+      return;
+    }
+    final count = rows.length;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          count == 0
+              ? 'No score rows yet. Header copied to clipboard.'
+              : 'Copied $count raw-score rows to clipboard.',
+        ),
+      ),
+    );
+  }
+
+  String _buildRawScoreCsvRow({
+    required AnalysisResult result,
+    required String imagePath,
+    required String fileSha256,
+    required int fileSizeBytes,
+    required int? decodedWidth,
+    required int? decodedHeight,
+  }) {
+    final timestamp = DateTime.now().toUtc().toIso8601String();
+    final filename = _basename(imagePath);
+    final score = result.score == null ? '' : result.score!.toStringAsFixed(6);
+    final encodedPath = imagePath.replaceAll(',', '_');
+
+    return [
+      timestamp,
+      filename,
+      result.type.name,
+      score,
+      kFraudThreshold.toStringAsFixed(2),
+      encodedPath,
+      fileSha256,
+      fileSizeBytes.toString(),
+      decodedWidth?.toString() ?? '',
+      decodedHeight?.toString() ?? '',
+    ].join(',');
+  }
+
+  String _sha256Hex(List<int> bytes) {
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
+
+  String _basename(String value) {
+    if (value.isEmpty) {
+      return 'unknown';
+    }
+    final normalized = value.replaceAll('\\\\', '/');
+    final parts = normalized.split('/');
+    return parts.isEmpty ? value : parts.last;
   }
 
   double _runModel(Float32List inputBuffer) {
@@ -610,14 +773,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => AnalyzeScreen(
-              selectedFile: _selectedFile,
-              result: _result,
-              isBusy: _isBusy,
-              loadError: _loadError,
-              modelReady: _interpreter != null,
+              uiStateListenable: _analyzeUiState,
               threshold: kFraudThreshold,
               onPickPhoto: _pickPhoto,
-              onRunOfflineCheck: _analyzePhoto,
               onOpenHistory: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -625,6 +783,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage> {
                   ),
                 );
               },
+              onExportRawScores: _copyRawScoreLogToClipboard,
               onDebugGenuine: kReleaseMode
                   ? null
                   : () => _simulateClassifiedResult(isFraudulent: false),

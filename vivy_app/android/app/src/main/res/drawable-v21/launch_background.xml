@@ -5,9 +5,4 @@
             <solid android:color="#0A3D8F" />
         </shape>
     </item>
-    <item>
-        <bitmap
-            android:gravity="fill"
-            android:src="@drawable/launch_branding" />
-    </item>
 </layer-list>

@@ -1,0 +1,3 @@
+filename,app_result_type,app_raw_score,threshold,image_path,image_ext,width,height,aspect_ratio,long_edge,file_size_kb,python_stage3_score,abs_delta,app_label_from_score,python_label_from_score,verdict
+gA_022.jpg,fraudulent,0.930295,0.16,C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_022.jpg,.jpg,1440,3079,0.46768431308866515,3079,134.1904296875,0.03191954270005226,0.8983754572999477,fraudulent,genuine,possible_app_preprocess_mismatch
+gA_018.jpg,genuine,0.038674,0.16,C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_018.jpg,.jpg,1440,4311,0.33402922755741127,4311,143.7529296875,0.021380996331572533,0.017293003668427467,genuine,genuine,possible_app_preprocess_mismatch

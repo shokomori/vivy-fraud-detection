@@ -1,0 +1,93 @@
+{
+  "input": {
+    "app_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\app_raw_scores_user_batch1.csv",
+    "images_dir": "C:\\Users\\YUKI\\Documents\\Vivy\\dataset",
+    "model": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage6\\mobilenetv2_fraud_detector_float16.tflite",
+    "delta_tolerance": 0.01
+  },
+  "counts": {
+    "rows_in_app_csv_with_raw_score": 3,
+    "rows_scored": 2,
+    "missing_images_by_filename": 1
+  },
+  "missing_images": [
+    "1000000203.jpg"
+  ],
+  "diagnosis": "strong_app_preprocess_mismatch_signal",
+  "comparison_summary": {
+    "mean_abs_delta": 0.4578342304841876,
+    "max_abs_delta": 0.8983754572999477,
+    "rows_flagged_possible_app_preprocess_mismatch": 2,
+    "rows_flagged_model_gap_or_data_shift": 0,
+    "label_disagreements": 1
+  },
+  "rows": [
+    {
+      "filename": "gA_022.jpg",
+      "app_result_type": "fraudulent",
+      "app_raw_score": 0.930295,
+      "threshold": 0.16,
+      "image_path": "C:\\Users\\YUKI\\Documents\\Vivy\\dataset\\AndroidGenuine\\gA_022.jpg",
+      "image_ext": ".jpg",
+      "width": 1440,
+      "height": 3079,
+      "aspect_ratio": 0.46768431308866515,
+      "long_edge": 3079,
+      "file_size_kb": 134.1904296875,
+      "python_stage3_score": 0.03191954270005226,
+      "abs_delta": 0.8983754572999477,
+      "app_label_from_score": "fraudulent",
+      "python_label_from_score": "genuine",
+      "verdict": "possible_app_preprocess_mismatch"
+    },
+    {
+      "filename": "gA_018.jpg",
+      "app_result_type": "genuine",
+      "app_raw_score": 0.038674,
+      "threshold": 0.16,
+      "image_path": "C:\\Users\\YUKI\\Documents\\Vivy\\dataset\\AndroidGenuine\\gA_018.jpg",
+      "image_ext": ".jpg",
+      "width": 1440,
+      "height": 4311,
+      "aspect_ratio": 0.33402922755741127,
+      "long_edge": 4311,
+      "file_size_kb": 143.7529296875,
+      "python_stage3_score": 0.021380996331572533,
+      "abs_delta": 0.017293003668427467,
+      "app_label_from_score": "genuine",
+      "python_label_from_score": "genuine",
+      "verdict": "possible_app_preprocess_mismatch"
+    }
+  ],
+  "profiles": {
+    "realworld": {
+      "count": 2,
+      "extensions": {
+        ".jpg": 2
+      },
+      "aspect_ratio_mean": 0.40085677032303824,
+      "aspect_ratio_p10": 0.3473947361105367,
+      "aspect_ratio_p90": 0.45431880453553974,
+      "long_edge_mean": 3695.0,
+      "long_edge_p10": 3202.2,
+      "long_edge_p90": 4187.8,
+      "size_kb_mean": 138.9716796875,
+      "size_kb_p10": 135.1466796875,
+      "size_kb_p90": 142.7966796875,
+      "heuristic_direct_screenshot_name_hits": 0,
+      "heuristic_forwarded_or_reshared_name_hits": 0
+    },
+    "dataset": {
+      "count": 1600,
+      "aspect_ratio_mean": 0.4959156547115357,
+      "aspect_ratio_p10": 0.42946708463949845,
+      "aspect_ratio_p90": 0.6019785959178442,
+      "long_edge_mean": 1484.290625,
+      "long_edge_p10": 631.0,
+      "long_edge_p90": 2048.0,
+      "size_kb_mean": 247.72403564453126,
+      "size_kb_p10": 45.7263671875,
+      "size_kb_p90": 373.70546875000025
+    }
+  }
+}

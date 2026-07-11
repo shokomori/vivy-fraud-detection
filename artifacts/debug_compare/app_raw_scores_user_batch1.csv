@@ -1,0 +1,4 @@
+timestamp_iso,filename,result_type,raw_score,threshold,file_path
+2026-07-11T12:20:40.848588Z,1000000203.jpg,fraudulent,0.985303,0.16,/data/user/0/com.example.vivy_app/cache/d6cc260f-2f59-4372-8524-6df0abbb8083/1000000203.jpg
+2026-07-11T12:21:34.068072Z,gA_022.jpg,fraudulent,0.930295,0.16,/data/user/0/com.example.vivy_app/cache/cc0017e6-8475-4dc9-97f1-83704278197d/gA_022.jpg
+2026-07-11T12:22:05.552533Z,gA_018.jpg,genuine,0.038674,0.16,/data/user/0/com.example.vivy_app/cache/9a63f153-3621-4604-8805-233c9c88e934/gA_018.jpg

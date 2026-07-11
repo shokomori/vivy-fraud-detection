@@ -1,0 +1,31 @@
+{
+  "image": "c:\\Users\\YUKI\\Documents\\Vivy\\dataset\\AndroidGenuine\\gA_022.jpg",
+  "shape_match": true,
+  "byte_for_byte_equal": true,
+  "allclose_atol_1e-6": true,
+  "diff": {
+    "mean_abs_diff": 0.0,
+    "max_abs_diff": 0.0,
+    "max_abs_diff_location_hwc": [
+      0,
+      0,
+      0
+    ],
+    "stage3_value_at_max": 0.0,
+    "native_like_value_at_max": 0.0,
+    "mae_if_channels_reversed": 0.12983907759189606,
+    "mae_if_native_scaled_0_255": 213.13333129882812
+  },
+  "stage3_stats": {
+    "mean": 0.8391075134277344,
+    "std": 0.30872276425361633,
+    "min": 0.0,
+    "max": 1.0
+  },
+  "native_like_stats": {
+    "mean": 0.8391075134277344,
+    "std": 0.30872276425361633,
+    "min": 0.0,
+    "max": 1.0
+  }
+}

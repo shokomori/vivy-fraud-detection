@@ -1,79 +1,78 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/analysis_models.dart';
 import '../widgets/result_card.dart';
 
+class AnalyzeUiState {
+  const AnalyzeUiState({
+    this.result,
+    this.isBusy = false,
+    this.loadError,
+  });
+
+  final AnalysisResult? result;
+  final bool isBusy;
+  final String? loadError;
+}
+
 class AnalyzeScreen extends StatelessWidget {
   const AnalyzeScreen({
     super.key,
-    required this.selectedFile,
-    required this.result,
-    required this.isBusy,
-    required this.loadError,
-    required this.modelReady,
+    required this.uiStateListenable,
     required this.threshold,
     required this.onPickPhoto,
-    required this.onRunOfflineCheck,
     required this.onOpenHistory,
+    required this.onExportRawScores,
     this.onDebugGenuine,
     this.onDebugFraudulent,
   });
 
-  final XFile? selectedFile;
-  final AnalysisResult? result;
-  final bool isBusy;
-  final String? loadError;
-  final bool modelReady;
+  final ValueListenable<AnalyzeUiState> uiStateListenable;
   final double threshold;
   final VoidCallback onPickPhoto;
-  final VoidCallback onRunOfflineCheck;
   final VoidCallback onOpenHistory;
+  final VoidCallback onExportRawScores;
   final VoidCallback? onDebugGenuine;
   final VoidCallback? onDebugFraudulent;
 
   @override
   Widget build(BuildContext context) {
-    final hasImage = selectedFile != null;
-    final mode = isBusy
-        ? _AnalyzeViewMode.scanning
-        : (result != null
-              ? _AnalyzeViewMode.result
-              : (hasImage ? _AnalyzeViewMode.crop : _AnalyzeViewMode.upload));
+    return ValueListenableBuilder<AnalyzeUiState>(
+      valueListenable: uiStateListenable,
+      builder: (context, state, _) {
+        final mode = state.isBusy
+            ? _AnalyzeViewMode.scanning
+            : (state.result != null
+                  ? _AnalyzeViewMode.result
+                  : _AnalyzeViewMode.upload);
 
-    final darkMode = mode == _AnalyzeViewMode.crop;
-
-    return Scaffold(
-      backgroundColor: darkMode ? const Color(0xFF061A3A) : const Color(0xFFEFF3FB),
-      appBar: _TopBar(mode: mode, onOpenHistory: onOpenHistory),
-      body: SafeArea(
-        child: switch (mode) {
-          _AnalyzeViewMode.upload => _UploadStateView(
-            loadError: loadError,
-            onPickPhoto: onPickPhoto,
+        return Scaffold(
+          backgroundColor: const Color(0xFFEFF3FB),
+          appBar: _TopBar(mode: mode, onOpenHistory: onOpenHistory),
+          body: SafeArea(
+            child: switch (mode) {
+              _AnalyzeViewMode.upload => _UploadStateView(
+                loadError: state.loadError,
+                onPickPhoto: onPickPhoto,
+              ),
+              _AnalyzeViewMode.scanning => const _ScanningStateView(),
+              _AnalyzeViewMode.result => _ResultStateView(
+                result: state.result!,
+                threshold: threshold,
+                onPickPhoto: onPickPhoto,
+                onExportRawScores: onExportRawScores,
+              ),
+            },
           ),
-          _AnalyzeViewMode.crop => _CropStateView(
-            selectedFile: selectedFile!,
-            modelReady: modelReady,
-            onPickPhoto: onPickPhoto,
-            onRunOfflineCheck: onRunOfflineCheck,
-          ),
-          _AnalyzeViewMode.scanning => const _ScanningStateView(),
-          _AnalyzeViewMode.result => _ResultStateView(
-            result: result!,
-            threshold: threshold,
-            onPickPhoto: onPickPhoto,
-          ),
-        },
-      ),
+        );
+      },
     );
   }
 }
 
-enum _AnalyzeViewMode { upload, crop, scanning, result }
+enum _AnalyzeViewMode { upload, scanning, result }
 
 class _TopBar extends StatelessWidget implements PreferredSizeWidget {
   const _TopBar({required this.mode, required this.onOpenHistory});
@@ -86,10 +85,8 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final darkMode = mode == _AnalyzeViewMode.crop;
     final title = switch (mode) {
       _AnalyzeViewMode.upload => 'Upload Receipt',
-      _AnalyzeViewMode.crop => 'Crop & Confirm',
       _AnalyzeViewMode.scanning => '',
       _AnalyzeViewMode.result => 'Verification Result',
     };
@@ -109,20 +106,18 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: darkMode ? Colors.white.withAlpha(18) : Colors.white,
+            color: Colors.white,
             shape: BoxShape.circle,
             border: Border.all(
-              color: darkMode
-                  ? Colors.white.withAlpha(28)
-                  : const Color(0xFFDCE3F0),
+              color: const Color(0xFFDCE3F0),
             ),
           ),
           child: IconButton(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: Icon(
-              Icons.arrow_back,
-              color: darkMode ? Colors.white : const Color(0xFF222B3B),
-              size: 19,
+            icon: SvgPicture.asset(
+              'assets/vivy_assets/back.svg',
+              width: 19,
+              height: 19,
             ),
           ),
         ),
@@ -132,7 +127,7 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         style: TextStyle(
           fontSize: 31,
           fontWeight: FontWeight.w700,
-          color: darkMode ? Colors.white : const Color(0xFF1D2638),
+          color: const Color(0xFF1D2638),
         ),
       ),
       actions: [
@@ -142,7 +137,11 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
             child: IconButton(
               tooltip: 'History',
               onPressed: onOpenHistory,
-              icon: const Icon(Icons.history_rounded, color: Color(0xFF1D2638)),
+              icon: SvgPicture.asset(
+                'assets/vivy_assets/history.svg',
+                width: 20,
+                height: 20,
+              ),
             ),
           ),
       ],
@@ -183,10 +182,9 @@ class _UploadStateView extends StatelessWidget {
                     color: const Color(0xFFBDEEE6),
                     borderRadius: BorderRadius.circular(18),
                   ),
-                  child: const Icon(
-                    Icons.image_outlined,
-                    size: 42,
-                    color: Color(0xFF0D8D7F),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: SvgPicture.asset('assets/vivy_assets/upload.svg'),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -294,121 +292,6 @@ class _UploadStateView extends StatelessWidget {
   }
 }
 
-class _CropStateView extends StatelessWidget {
-  const _CropStateView({
-    required this.selectedFile,
-    required this.modelReady,
-    required this.onPickPhoto,
-    required this.onRunOfflineCheck,
-  });
-
-  final XFile selectedFile;
-  final bool modelReady;
-  final VoidCallback onPickPhoto;
-  final VoidCallback onRunOfflineCheck;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const SizedBox(height: 18),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18),
-            child: Center(
-              child: Container(
-                height: 390,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18),
-                  color: Colors.black,
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: Stack(
-                  children: [
-                    Positioned.fill(
-                      child: Image.file(File(selectedFile.path), fit: BoxFit.cover),
-                    ),
-                    Positioned.fill(
-                      child: Container(color: Colors.black.withAlpha(90)),
-                    ),
-                    Center(
-                      child: Container(
-                        width: 300,
-                        height: 190,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFF18D2BE),
-                            width: 2,
-                          ),
-                        ),
-                        child: const _GridOverlay(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Text(
-          'Drag corners to adjust · Pinch to zoom',
-          style: TextStyle(
-            color: Color(0xFF7F8FA7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 10),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: FilledButton(
-                  onPressed: onPickPhoto,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF22324C),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Retake / Reselect',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: FilledButton(
-                  onPressed: modelReady ? onRunOfflineCheck : null,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF00A87D),
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size.fromHeight(54),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
-                  child: const Text(
-                    'Confirm ✓',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _ScanningStateView extends StatelessWidget {
   const _ScanningStateView();
 
@@ -434,7 +317,10 @@ class _ScanningStateView extends StatelessWidget {
                   color: const Color(0xFF17489D),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Icon(Icons.check_rounded, color: Colors.white, size: 38),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: SvgPicture.asset('assets/vivy_assets/analysis.svg'),
+                ),
               ),
             ),
           ),
@@ -482,11 +368,13 @@ class _ResultStateView extends StatelessWidget {
     required this.result,
     required this.threshold,
     required this.onPickPhoto,
+    required this.onExportRawScores,
   });
 
   final AnalysisResult result;
   final double threshold;
   final VoidCallback onPickPhoto;
+  final VoidCallback onExportRawScores;
 
   @override
   Widget build(BuildContext context) {
@@ -510,6 +398,27 @@ class _ResultStateView extends StatelessWidget {
                 ResultCard(result: result, threshold: threshold),
                 const SizedBox(height: 12),
                 _RecommendationCard(result: result),
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton(
+                    onPressed: onExportRawScores,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF15489D),
+                      side: const BorderSide(
+                        color: Color(0xFF15489D),
+                        width: 1.5,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Copy Raw Score CSV',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -632,34 +541,6 @@ class _RecommendationCard extends StatelessWidget {
   }
 }
 
-class _GridOverlay extends StatelessWidget {
-  const _GridOverlay();
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(painter: _GridPainter());
-  }
-}
-
-class _GridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withAlpha(120)
-      ..strokeWidth = 1;
-
-    final thirdW = size.width / 3;
-    final thirdH = size.height / 3;
-    for (var i = 1; i < 3; i++) {
-      canvas.drawLine(Offset(thirdW * i, 0), Offset(thirdW * i, size.height), paint);
-      canvas.drawLine(Offset(0, thirdH * i), Offset(size.width, thirdH * i), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
 class _PulseBars extends StatelessWidget {
   const _PulseBars();
 
@@ -743,10 +624,9 @@ class _TipBullet extends StatelessWidget {
             color: Color(0xFFBCECE5),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.check,
-            size: 14,
-            color: Color(0xFF0A8E7F),
+          child: Padding(
+            padding: const EdgeInsets.all(3),
+            child: SvgPicture.asset('assets/vivy_assets/checkmark.svg'),
           ),
         ),
         const SizedBox(width: 8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/analysis_models.dart';
 
@@ -47,15 +48,15 @@ class ResultCard extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.receipt_long_rounded, color: theme.accent, size: 36),
+                      SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: SvgPicture.asset(theme.headerAsset),
+                      ),
                       const SizedBox(height: 8),
-                      Text(
-                        'GCash Payment Receipt',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: theme.accent,
-                        ),
+                      SizedBox(
+                        height: 24,
+                        child: SvgPicture.asset(theme.titleAsset),
                       ),
                     ],
                   ),
@@ -70,7 +71,11 @@ class ResultCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(theme.badgeIcon, size: 19, color: theme.accent),
+                      SizedBox(
+                        width: 19,
+                        height: 19,
+                        child: SvgPicture.asset(theme.badgeAsset),
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         theme.badgeLabel,
@@ -176,14 +181,18 @@ class _ResultTheme {
     required this.accent,
     required this.headerBackground,
     required this.badgeBackground,
-    required this.badgeIcon,
+    required this.headerAsset,
+    required this.titleAsset,
+    required this.badgeAsset,
     required this.badgeLabel,
   });
 
   final Color accent;
   final Color headerBackground;
   final Color badgeBackground;
-  final IconData badgeIcon;
+  final String headerAsset;
+  final String titleAsset;
+  final String badgeAsset;
   final String badgeLabel;
 
   static _ResultTheme fromType(ResultType type) {
@@ -192,35 +201,45 @@ class _ResultTheme {
         accent: Color(0xFF059669),
         headerBackground: Color(0xFFDFF1E7),
         badgeBackground: Color(0xFFCFF2DE),
-        badgeIcon: Icons.check_circle_outline_rounded,
+        headerAsset: 'assets/vivy_assets/genuine.svg',
+        titleAsset: 'assets/vivy_assets/genuine_text.svg',
+        badgeAsset: 'assets/vivy_assets/genuine_check.svg',
         badgeLabel: 'Genuine',
       ),
       ResultType.fraudulent => const _ResultTheme(
         accent: Color(0xFFDC2626),
         headerBackground: Color(0xFFF5E7E7),
         badgeBackground: Color(0xFFF8D9D9),
-        badgeIcon: Icons.error_outline_rounded,
+        headerAsset: 'assets/vivy_assets/fraudulent.svg',
+        titleAsset: 'assets/vivy_assets/fraudulent_text.svg',
+        badgeAsset: 'assets/vivy_assets/fraudulent_check.svg',
         badgeLabel: 'Fraudulent',
       ),
       ResultType.notReceipt => const _ResultTheme(
         accent: Color(0xFFD97706),
         headerBackground: Color(0xFFFFF2D9),
         badgeBackground: Color(0xFFFFE6C2),
-        badgeIcon: Icons.help_outline_rounded,
+        headerAsset: 'assets/vivy_assets/warning.svg',
+        titleAsset: 'assets/vivy_assets/warning.svg',
+        badgeAsset: 'assets/vivy_assets/warning.svg',
         badgeLabel: 'Not Receipt',
       ),
       ResultType.unclear => const _ResultTheme(
         accent: Color(0xFFD97706),
         headerBackground: Color(0xFFFFF2D9),
         badgeBackground: Color(0xFFFFE6C2),
-        badgeIcon: Icons.report_gmailerrorred_rounded,
+        headerAsset: 'assets/vivy_assets/warning.svg',
+        titleAsset: 'assets/vivy_assets/warning.svg',
+        badgeAsset: 'assets/vivy_assets/warning.svg',
         badgeLabel: 'Unclear',
       ),
       ResultType.error => const _ResultTheme(
         accent: Color(0xFFDC2626),
         headerBackground: Color(0xFFF5E7E7),
         badgeBackground: Color(0xFFF8D9D9),
-        badgeIcon: Icons.error_outline_rounded,
+        headerAsset: 'assets/vivy_assets/warning.svg',
+        titleAsset: 'assets/vivy_assets/warning.svg',
+        badgeAsset: 'assets/vivy_assets/warning.svg',
         badgeLabel: 'Error',
       ),
     };

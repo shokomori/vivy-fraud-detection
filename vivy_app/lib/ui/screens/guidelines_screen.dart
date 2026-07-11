@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../theme/vivy_colors.dart';
 import '../theme/vivy_spacing.dart';
@@ -15,19 +16,19 @@ class GuidelinesScreen extends StatefulWidget {
 class _GuidelinesScreenState extends State<GuidelinesScreen> {
   static const _items = [
     (
-      image: 'assets/vivy_assets/Guidelines 1.png',
+      type: _GuidelineArtType.scanConfidence,
       title: 'Scan with Confidence',
       subtitle:
           'Use ViVy to quickly check if a GCash receipt looks genuine before accepting it.',
     ),
     (
-      image: 'assets/vivy_assets/Guidelines 2.png',
+      type: _GuidelineArtType.reviewDetails,
       title: 'Review Critical Details',
       subtitle:
           'Follow the in-app checks and warnings to avoid suspicious or manipulated receipts.',
     ),
     (
-      image: 'assets/vivy_assets/Guidelines 3.png',
+      type: _GuidelineArtType.stayProtected,
       title: 'Stay Protected',
       subtitle:
           'Keep your transactions safer with a fast local analysis workflow.',
@@ -86,11 +87,10 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
                             width: double.infinity,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(26),
-                              image: DecorationImage(
-                                image: AssetImage(item.image),
-                                fit: BoxFit.cover,
-                              ),
+                              color: const Color(0xFFE8EEF8),
+                              border: Border.all(color: const Color(0xFFD5DFEF)),
                             ),
+                            child: _GuidelineArt(type: item.type),
                           ),
                         ),
                         const SizedBox(height: 22),
@@ -159,6 +159,119 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+enum _GuidelineArtType { scanConfidence, reviewDetails, stayProtected }
+
+class _GuidelineArt extends StatelessWidget {
+  const _GuidelineArt({required this.type});
+
+  final _GuidelineArtType type;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (type) {
+      _GuidelineArtType.scanConfidence => const _ScanConfidenceArt(),
+      _GuidelineArtType.reviewDetails => const _ReviewDetailsArt(),
+      _GuidelineArtType.stayProtected => const _StayProtectedArt(),
+    };
+  }
+}
+
+class _ScanConfidenceArt extends StatelessWidget {
+  const _ScanConfidenceArt();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 110,
+            height: 110,
+            child: SvgPicture.asset('assets/vivy_assets/security.svg'),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 64,
+            height: 64,
+            child: SvgPicture.asset('assets/vivy_assets/security_check.svg'),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: SvgPicture.asset('assets/vivy_assets/analysis.svg'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ReviewDetailsArt extends StatelessWidget {
+  const _ReviewDetailsArt();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: SvgPicture.asset('assets/vivy_assets/redflags.svg'),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: 52,
+            height: 52,
+            child: SvgPicture.asset('assets/vivy_assets/warning.svg'),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: 80,
+            height: 38,
+            child: SvgPicture.asset('assets/vivy_assets/list.svg'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StayProtectedArt extends StatelessWidget {
+  const _StayProtectedArt();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: SvgPicture.asset('assets/vivy_assets/secure.svg'),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: 56,
+            height: 56,
+            child: SvgPicture.asset('assets/vivy_assets/checkmark.svg'),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: 90,
+            height: 40,
+            child: SvgPicture.asset('assets/vivy_assets/scan.svg'),
+          ),
+        ],
       ),
     );
   }

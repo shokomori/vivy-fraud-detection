@@ -1,0 +1,60 @@
+powershell -Command "New-Item -ItemType Directory -Force artifacts/debug_compare"
+powershell -Command "Move-Item -Force 1000000203.jpg artifacts/debug_compare/1000000203.jpg; Get-Item artifacts/debug_compare/1000000203.jpg"
+adb devices
+adb devices && adb shell "ls /sdcard/Download | grep -i 1000000203 || true"
+adb devices -l
+adb shell echo hello
+echo hello
+cmd.exe /c "echo hello"
+powershell -Command "Get-Process"
+whoami
+dir
+cd /d c:\Users\YUKI\Documents\Vivy && adb devices && adb shell "ls /sdcard/Download | grep -i 1000000203 || true" && adb shell "ls /sdcard/Pictures | grep -i 1000000203 || true" && adb shell "ls /sdcard/DCIM/Camera | grep -i 1000000203 || true" && adb shell "run-as com.example.vivy_app ls cache 2>/dev/null | head -n 40 || true" && adb shell "run-as com.example.vivy_app sh -c 'find cache -type f 2>/dev/null | grep -i 1000000203' || true"
+echo ready && where adb
+cd vivy_app && dart run tool/export_flutter_preprocess.dart --input ..\dataset\AndroidGenuine\gA_022.jpg --out ..\artifacts\debug_compare\gA_022_flutter
+dir ..\artifacts\debug_compare\gA_022_flutter
+dir
+echo hello
+Get-Location
+cmd /c "echo hello"
+pwd
+echo "test" > test.txt
+type test.txt
+echo START && where dart && cd vivy_app && dart --version && dart run tool/export_flutter_preprocess.dart --input ..\dataset\AndroidGenuine\gA_022.jpg --out ..\artifacts\debug_compare\gA_022_flutter && echo DONE
+echo START
+dir
+cmd.exe /c echo START
+Get-Location
+powershell -Command "echo START; where.exe dart; cd vivy_app; dart --version; dart run tool/export_flutter_preprocess.dart --input ..\dataset\AndroidGenuine\gA_022.jpg --out ..\artifacts\debug_compare\gA_022_flutter; echo DONE"
+echo %cd%
+echo START; Get-Command dart; cd vivy_app; dart --version; dart run tool/export_flutter_preprocess.dart --input ..\dataset\AndroidGenuine\gA_022.jpg --out ..\artifacts\debug_compare\gA_022_flutter; echo DONE
+echo 123
+.venv311\Scripts\python.exe tools\bytelevel_diff_stage3_vs_app_semantics.py --image dataset\AndroidGenuine\gA_022.jpg --out-json artifacts\debug_compare\gA_022_stage3_vs_app_semantics_bytelevel.json
+.venv311\Scripts\python.exe -c "import json; f=open('artifacts/debug_compare/gA_022_stage3_vs_app_semantics_bytelevel.json'); data=json.load(f); print(json.dumps({k: data.get(k) for k in ['byte_for_byte_equal', 'mean_abs_diff', 'max_abs_diff', 'app_semantics_meta']}, indent=2))"
+dir artifacts\debug_compare\gA_022_stage3_vs_app_semantics_bytelevel.json
+cd
+echo Hello
+.venv311\Scripts\python.exe -V
+powershell -Command "Write-Output 'Hello from PowerShell'"
+cmd.exe /c "echo hi"
+powershell -Command "Get-Process | Out-File proc.txt"
+pwd
+.venv311\Scripts\python.exe --version
+echo %CD%
+.venv311\Scripts\python.exe -c "import cv2, json, numpy as np; from pathlib import Path; from tools.image_pipeline import preprocess_image; p=Path('dataset/AndroidGenuine/gA_022.jpg'); bgr=cv2.imread(str(p)); gray=cv2.cvtColor(bgr, cv2.COLOR_BGR2GRAY); blur=cv2.GaussianBlur(gray,(5,5),0); _,th=cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU); k=np.ones((5,5),np.uint8); closed=cv2.morphologyEx(th,cv2.MORPH_CLOSE,k,iterations=2); cnts,_=cv2.findContours(closed,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE); h,w=gray.shape; min_area=0.12*h*w; best=None; best_area=0.0
+for c in cnts:
+ a=cv2.contourArea(c)
+ if a<min_area: continue
+ x,y,bw,bh=cv2.boundingRect(c); asp=bw/max(float(bh),1.0)
+ if 0.25<=asp<=3.5 and a>best_area: best=(x,y,bw,bh,a); best_area=a
+if best is None:
+ roi=bgr; meta={'geometry_pass':False,'crop_box_xyxy':[0,0,w-1,h-1],'area_ratio':0.0,'aspect_ratio':0.0}
+else:
+ x,y,bw,bh,a=best; px=int(0.03*bw); py=int(0.03*bh); x0=max(x-px,0); y0=max(y-py,0); x1=min(x+bw+px,w); y1=min(y+bh+py,h); roi=bgr[y0:y1,x0:x1]; meta={'geometry_pass':True,'crop_box_xyxy':[int(x0),int(y0),int(x1-1),int(y1-1)],'component_xywh':[int(x),int(y),int(bw),int(bh)],'area_ratio':float(a/(h*w)),'aspect_ratio':float(bw/max(float(bh),1.0))}
+res=cv2.resize(roi,(224,224),interpolation=cv2.INTER_AREA); app=cv2.cvtColor(res,cv2.COLOR_BGR2RGB).astype(np.float32)/255.0; st=preprocess_image(p).astype(np.float32); d=np.abs(st-app); idx=np.unravel_index(np.argmax(d),d.shape); out={'image':str(p),'byte_for_byte_equal':bool(np.array_equal(st,app)),'allclose_atol_1e-6':bool(np.allclose(st,app,atol=1e-6)),'diff':{'mean_abs_diff':float(d.mean()),'max_abs_diff':float(d.max()),'max_abs_diff_location_hwc':[int(idx[0]),int(idx[1]),int(idx[2])],'stage3_value_at_max':float(st[idx]),'app_semantics_value_at_max':float(app[idx]),'mae_if_app_channels_reversed':float(np.abs(st-app[...,::-1]).mean()),'mae_if_app_scaled_0_255':float(np.abs(st-(app*255.0)).mean())},'stage3_stats':{'mean':float(st.mean()),'std':float(st.std()),'min':float(st.min()),'max':float(st.max())},'app_semantics_stats':{'mean':float(app.mean()),'std':float(app.std()),'min':float(app.min()),'max':float(app.max())},'app_semantics_meta':meta}; Path('artifacts/debug_compare').mkdir(parents=True,exist_ok=True); open('artifacts/debug_compare/gA_022_stage3_vs_app_semantics_bytelevel.json','w',encoding='utf-8').write(json.dumps(out,indent=2)); print(json.dumps(out,indent=2))
+type artifacts\debug_compare\gA_022_stage3_vs_app_semantics_bytelevel.json
+.venv311\Scripts\python.exe -c "import sys; print(sys.executable)"
+dir .venv311\Scripts\python.exe
+dir
+cmd.exe /c "echo hello"
+cd /d c:\Users\YUKI\Documents\Vivy && .venv311\Scripts\python.exe -c "print('ok')"

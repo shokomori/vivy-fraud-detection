@@ -1,0 +1,2 @@
+filename,app_result_type,app_raw_score,threshold,image_path,image_ext,width,height,aspect_ratio,long_edge,file_size_kb,python_stage3_score,abs_delta,app_label_from_score,python_label_from_score,verdict
+gA_145.jfif,genuine,0.05,0.16,C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_145.jfif,.jfif,720,1649,0.4366282595512432,1649,35.6435546875,0.0002566274197306484,0.049743372580269354,genuine,genuine,possible_app_preprocess_mismatch
