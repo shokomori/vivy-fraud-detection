@@ -170,3 +170,24 @@ Pull outputs to local workspace:
 adb pull /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports artifacts/debug_compare/
 adb pull /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/last_batch_status.json artifacts/debug_compare/
 ```
+
+### Reusable Batch Validation CLI
+
+For repeatable app-side regression checks, use:
+
+```bash
+python tools/run_app_batch_validation.py \
+	--manifest artifacts/debug_compare/full204/selected_files.txt \
+	--output-dir artifacts/debug_compare/full204_postfix \
+	--chunk-size 51 \
+	--compare-images-dir real_world_samples \
+	--compare-out-name full204_compare_postfix.json
+```
+
+What it does:
+
+- Pushes images to the app debug-batch inbox in fixed-size chunks.
+- Triggers the app through adb and waits for each exported CSV.
+- Fails fast if any row uses a backend other than the expected `backend_used` value.
+- Merges batch CSVs into one combined export.
+- Optionally runs `tools/compare_realworld_app_vs_stage3.py` on the merged CSV.

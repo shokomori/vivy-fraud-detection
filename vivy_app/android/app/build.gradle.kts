@@ -30,6 +30,10 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
@@ -46,4 +50,5 @@ flutter {
 
 dependencies {
     implementation("org.opencv:opencv:4.9.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu-api:2.11.0")
 }

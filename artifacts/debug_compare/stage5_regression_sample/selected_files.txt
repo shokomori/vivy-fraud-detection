@@ -1,0 +1,12 @@
+dataset/AndroidFraudulent/fA_215.png
+dataset/AndroidGenuine/gA_145.jfif
+dataset/iOSFraudulent/fI_385.png
+dataset/iOSFraudulent/fI_326.png
+dataset/AndroidGenuine/gA_147.jfif
+dataset/iOSGenuine/gI_054.jpg
+dataset/AndroidFraudulent/fA_349.png
+dataset/iOSFraudulent/fI_277.png
+dataset/AndroidFraudulent/fA_122.png
+dataset/AndroidGenuine/gA_053.jpg
+dataset/iOSFraudulent/fI_122.png
+dataset/iOSFraudulent/fI_151.png

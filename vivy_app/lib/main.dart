@@ -118,6 +118,9 @@ class ReceiptCheckPage extends StatefulWidget {
 
 class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     with WidgetsBindingObserver {
+  static const MethodChannel _preprocessChannel = MethodChannel(
+    'vivy/preprocess',
+  );
   static const String _historyStorageKey = 'analysis_history_v1';
   static const String _rawScoreStorageKey = 'analysis_raw_score_log_v2';
   static const String _debugBatchRootName = 'vivy_debug_batch';
@@ -265,7 +268,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
     try {
       final bytes = await _selectedFile!.readAsBytes();
-      final outcome = _analyzeBytesThroughLivePipeline(bytes: bytes);
+      final outcome = await _analyzeBytesThroughLivePipeline(
+        bytes: bytes,
+        sourcePathForNative: _selectedFile!.path,
+      );
       final result = outcome.result;
 
       setState(() {
@@ -279,6 +285,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         fileSizeBytes: outcome.fileSizeBytes,
         decodedWidth: outcome.decodedWidth,
         decodedHeight: outcome.decodedHeight,
+        backendUsed: outcome.backendUsed,
+        backendNote: outcome.backendNote,
       );
       await _recordHistory(result);
     } catch (e) {
@@ -294,6 +302,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         fileSizeBytes: 0,
         decodedWidth: null,
         decodedHeight: null,
+        backendUsed: 'error',
+        backendNote: e.toString(),
       );
       await _recordHistory(result);
     } finally {
@@ -304,16 +314,102 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     }
   }
 
-  _PipelineOutcome _analyzeBytesThroughLivePipeline({required Uint8List bytes}) {
+  Future<_PipelineOutcome> _analyzeBytesThroughLivePipeline({
+    required Uint8List bytes,
+    required String sourcePathForNative,
+  }) async {
     final fileSha256 = _sha256Hex(bytes);
     final fileSizeBytes = bytes.length;
+    final decodedForMeta = img.decodeImage(bytes);
+    final decodedWidth = decodedForMeta?.width;
+    final decodedHeight = decodedForMeta?.height;
+
+    try {
+      final native = await _preprocessNative(sourcePathForNative);
+      if (!native.geometryPass) {
+        _reportBackendUsage(
+          imagePath: sourcePathForNative,
+          backendUsed: 'native-opencv',
+          backendNote: native.reason,
+        );
+        final result = AnalysisResult.notReceipt(
+          message: 'This does not look like a GCash receipt.',
+          areaRatio: native.areaRatio,
+          aspectRatio: native.aspectRatio,
+        );
+        return _PipelineOutcome(
+          result: result,
+          fileSha256: fileSha256,
+          fileSizeBytes: fileSizeBytes,
+          decodedWidth: decodedWidth,
+          decodedHeight: decodedHeight,
+          backendUsed: 'native-opencv',
+          backendNote: native.reason,
+        );
+      }
+
+      final score = _runModel(native.tensor!);
+      _reportBackendUsage(
+        imagePath: sourcePathForNative,
+        backendUsed: 'native-opencv',
+        backendNote: native.reason,
+      );
+
+      if ((score - kFraudThreshold).abs() < kUnclearBand) {
+        final result = AnalysisResult.unclear(
+          score: score,
+          message: 'Result unclear - try a clearer or better-lit photo.',
+        );
+        return _PipelineOutcome(
+          result: result,
+          fileSha256: fileSha256,
+          fileSizeBytes: fileSizeBytes,
+          decodedWidth: decodedWidth,
+          decodedHeight: decodedHeight,
+          backendUsed: 'native-opencv',
+          backendNote: native.reason,
+        );
+      }
+
+      final isFraudulent = score >= kFraudThreshold;
+      final confidence = isFraudulent ? score : (1.0 - score);
+      final result = AnalysisResult.classified(
+        score: score,
+        confidence: confidence,
+        isFraudulent: isFraudulent,
+      );
+      return _PipelineOutcome(
+        result: result,
+        fileSha256: fileSha256,
+        fileSizeBytes: fileSizeBytes,
+        decodedWidth: decodedWidth,
+        decodedHeight: decodedHeight,
+        backendUsed: 'native-opencv',
+        backendNote: native.reason,
+      );
+    } catch (e, st) {
+      final fallbackNote = 'native_failed_fallback_to_dart: $e';
+      _reportBackendUsage(
+        imagePath: sourcePathForNative,
+        backendUsed: 'dart-image-fallback',
+        backendNote: fallbackNote,
+      );
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: e,
+          stack: st,
+          library: 'vivy.preprocess',
+          context: ErrorDescription(
+            'Native preprocess failed; Dart fallback path executed.',
+          ),
+        ),
+      );
+    }
+
     final decoded = img.decodeImage(bytes);
     if (decoded == null) {
       throw Exception('Could not decode image.');
     }
-    final decodedWidth = decoded.width;
-    final decodedHeight = decoded.height;
-
     final roiResult = _extractReceiptRoi(decoded);
     if (!roiResult.geometryPass) {
       final result = AnalysisResult.notReceipt(
@@ -327,6 +423,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         fileSizeBytes: fileSizeBytes,
         decodedWidth: decodedWidth,
         decodedHeight: decodedHeight,
+        backendUsed: 'dart-image-fallback',
+        backendNote: 'geometry_gate_failed',
       );
     }
 
@@ -344,6 +442,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         fileSizeBytes: fileSizeBytes,
         decodedWidth: decodedWidth,
         decodedHeight: decodedHeight,
+        backendUsed: 'dart-image-fallback',
+        backendNote: 'ok',
       );
     }
 
@@ -360,7 +460,83 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       fileSizeBytes: fileSizeBytes,
       decodedWidth: decodedWidth,
       decodedHeight: decodedHeight,
+      backendUsed: 'dart-image-fallback',
+      backendNote: 'ok',
     );
+  }
+
+  Future<_NativePreprocessResult> _preprocessNative(String imagePath) async {
+    final raw = await _preprocessChannel.invokeMethod<Object?>(
+      'preprocessReceipt',
+      <String, Object?>{'path': imagePath},
+    );
+    if (raw is! Map) {
+      throw Exception('Native preprocess returned invalid payload type.');
+    }
+
+    final map = Map<dynamic, dynamic>.from(raw);
+    final geometryPass = map['geometryPass'] == true;
+    final reason = (map['reason'] ?? '').toString();
+    final areaRatio = (map['areaRatio'] as num?)?.toDouble() ?? 0.0;
+    final aspectRatio = (map['aspectRatio'] as num?)?.toDouble() ?? 0.0;
+
+    if (!geometryPass) {
+      return _NativePreprocessResult(
+        geometryPass: false,
+        reason: reason,
+        areaRatio: areaRatio,
+        aspectRatio: aspectRatio,
+      );
+    }
+
+    final tensorBytesAny = map['tensorBytes'];
+    Uint8List? tensorBytes;
+    if (tensorBytesAny is Uint8List) {
+      tensorBytes = tensorBytesAny;
+    } else if (tensorBytesAny is List) {
+      tensorBytes = Uint8List.fromList(
+        tensorBytesAny.cast<int>(),
+      );
+    }
+
+    if (tensorBytes == null) {
+      throw Exception('Native preprocess did not return tensorBytes.');
+    }
+
+    final expectedBytes = kInputSize * kInputSize * 3 * 4;
+    if (tensorBytes.lengthInBytes != expectedBytes) {
+      throw Exception(
+        'Native tensorBytes length mismatch: ${tensorBytes.lengthInBytes} != $expectedBytes',
+      );
+    }
+
+    final data = ByteData.sublistView(tensorBytes);
+    final tensor = Float32List(kInputSize * kInputSize * 3);
+    for (var i = 0; i < tensor.length; i++) {
+      tensor[i] = data.getFloat32(i * 4, Endian.little);
+    }
+
+    return _NativePreprocessResult(
+      geometryPass: true,
+      reason: reason,
+      areaRatio: areaRatio,
+      aspectRatio: aspectRatio,
+      tensor: tensor,
+    );
+  }
+
+  void _reportBackendUsage({
+    required String imagePath,
+    required String backendUsed,
+    required String backendNote,
+  }) {
+    final msg =
+        '[VIVY][BACKEND] backend=$backendUsed note=$backendNote image=${_basename(imagePath)}';
+    debugPrint(msg);
+    assert(() {
+      debugPrint(msg);
+      return true;
+    }());
   }
 
   Future<void> _simulateClassifiedResult({required bool isFraudulent}) async {
@@ -382,6 +558,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       fileSizeBytes: 0,
       decodedWidth: null,
       decodedHeight: null,
+      backendUsed: 'debug-simulated',
+      backendNote: 'manual_debug_button',
     );
     await _recordHistory(result);
   }
@@ -393,6 +571,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     required int fileSizeBytes,
     required int? decodedWidth,
     required int? decodedHeight,
+    required String backendUsed,
+    required String backendNote,
   }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -404,6 +584,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         fileSizeBytes: fileSizeBytes,
         decodedWidth: decodedWidth,
         decodedHeight: decodedHeight,
+        backendUsed: backendUsed,
+        backendNote: backendNote,
       );
       await prefs.setStringList(_rawScoreStorageKey, <String>[...existing, row]);
     } catch (_) {
@@ -456,7 +638,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       for (final file in images) {
         try {
           final bytes = await file.readAsBytes();
-          final outcome = _analyzeBytesThroughLivePipeline(bytes: bytes);
+          final outcome = await _analyzeBytesThroughLivePipeline(
+            bytes: bytes,
+            sourcePathForNative: file.path,
+          );
           rows.add(
             _buildRawScoreCsvRow(
               result: outcome.result,
@@ -465,6 +650,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
               fileSizeBytes: outcome.fileSizeBytes,
               decodedWidth: outcome.decodedWidth,
               decodedHeight: outcome.decodedHeight,
+              backendUsed: outcome.backendUsed,
+              backendNote: outcome.backendNote,
             ),
           );
         } catch (_) {
@@ -477,13 +664,15 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
               fileSizeBytes: 0,
               decodedWidth: null,
               decodedHeight: null,
+              backendUsed: 'error',
+              backendNote: 'batch_analysis_failed',
             ),
           );
         }
       }
 
       const header =
-          'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height';
+          'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height,backend_used,backend_note';
       final csv = rows.isEmpty ? header : '$header\n${rows.join('\n')}';
       await csvFile.writeAsString(csv, flush: true);
 
@@ -519,12 +708,28 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   }
 
   Future<Directory?> _debugBatchRootDir() async {
-    final external = await getExternalStorageDirectory();
-    if (external == null) {
-      return null;
+    Directory? base;
+
+    // Some Android images deny app writes under external app-specific paths.
+    try {
+      base = await getExternalStorageDirectory();
+      if (base != null) {
+        final probe = Directory(
+          '${base.path}${Platform.pathSeparator}$_debugBatchRootName',
+        );
+        probe.createSync(recursive: true);
+        Directory(
+          '${probe.path}${Platform.pathSeparator}$_debugBatchInboxName',
+        ).createSync(recursive: true);
+        return probe;
+      }
+    } catch (_) {
+      // Fall back to internal app documents storage.
     }
+
+    final docs = await getApplicationSupportDirectory();
     final root = Directory(
-      '${external.path}${Platform.pathSeparator}$_debugBatchRootName',
+      '${docs.path}${Platform.pathSeparator}$_debugBatchRootName',
     );
     root.createSync(recursive: true);
     Directory(
@@ -546,7 +751,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final prefs = await SharedPreferences.getInstance();
     final rows = prefs.getStringList(_rawScoreStorageKey) ?? <String>[];
     const header =
-      'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height';
+      'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height,backend_used,backend_note';
     final csv = rows.isEmpty ? header : '$header\n${rows.join('\n')}';
 
     await Clipboard.setData(ClipboardData(text: csv));
@@ -572,6 +777,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     required int fileSizeBytes,
     required int? decodedWidth,
     required int? decodedHeight,
+    required String backendUsed,
+    required String backendNote,
   }) {
     final timestamp = DateTime.now().toUtc().toIso8601String();
     final filename = _basename(imagePath);
@@ -589,6 +796,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       fileSizeBytes.toString(),
       decodedWidth?.toString() ?? '',
       decodedHeight?.toString() ?? '',
+      backendUsed,
+      backendNote.replaceAll(',', ';'),
     ].join(',');
   }
 
@@ -967,6 +1176,22 @@ class _ComponentBox {
   final int area;
 }
 
+class _NativePreprocessResult {
+  const _NativePreprocessResult({
+    required this.geometryPass,
+    required this.reason,
+    required this.areaRatio,
+    required this.aspectRatio,
+    this.tensor,
+  });
+
+  final bool geometryPass;
+  final String reason;
+  final double areaRatio;
+  final double aspectRatio;
+  final Float32List? tensor;
+}
+
 class _PipelineOutcome {
   const _PipelineOutcome({
     required this.result,
@@ -974,6 +1199,8 @@ class _PipelineOutcome {
     required this.fileSizeBytes,
     required this.decodedWidth,
     required this.decodedHeight,
+    required this.backendUsed,
+    required this.backendNote,
   });
 
   final AnalysisResult result;
@@ -981,4 +1208,6 @@ class _PipelineOutcome {
   final int fileSizeBytes;
   final int? decodedWidth;
   final int? decodedHeight;
+  final String backendUsed;
+  final String backendNote;
 }
