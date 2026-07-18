@@ -1,0 +1,21 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783864801.116298    6764 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1783864804.060649    6764 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+C:\Users\YUKI\Documents\Vivy\.venv311\Lib\site-packages\tensorflow\lite\python\interpreter.py:457: UserWarning:     Warning: tf.lite.Interpreter is deprecated and is scheduled for deletion in
+    TF 2.20. Please use the LiteRT interpreter from the ai_edge_litert package.
+    See the [migration guide](https://ai.google.dev/edge/litert/migration)
+    for details.
+    
+  warnings.warn(_INTERPRETER_DELETION_WARNING)
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+{
+  "mean_abs_delta": 1.1265890628338265e-06,
+  "max_abs_delta": 8.569722175610917e-06,
+  "rows_flagged_possible_app_preprocess_mismatch": 0,
+  "rows_flagged_model_gap_or_data_shift": 204,
+  "label_disagreements": 0
+}
+Diagnosis: python_matches_app_scores_model_gap_or_data_shift
+Saved JSON report: C:\Users\YUKI\Documents\Vivy\artifacts\debug_compare\full204_postfix\full204_compare_postfix.json
+Saved row CSV: C:\Users\YUKI\Documents\Vivy\artifacts\debug_compare\full204_postfix\full204_compare_postfix.csv

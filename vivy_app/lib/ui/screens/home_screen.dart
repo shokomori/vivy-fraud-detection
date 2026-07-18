@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/analysis_models.dart';
-import '../theme/vivy_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -10,11 +9,15 @@ class HomeScreen extends StatefulWidget {
     required this.entries,
     required this.onUploadVerify,
     required this.onOpenHistory,
+    required this.onOpenLearnMore,
+    required this.onOpenMessengerQr,
   });
 
   final List<HistoryEntry> entries;
   final VoidCallback onUploadVerify;
   final VoidCallback onOpenHistory;
+  final VoidCallback onOpenLearnMore;
+  final VoidCallback onOpenMessengerQr;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -22,6 +25,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _tipsExpanded = false;
+
+  void _showHowToModal() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withAlpha(110),
+      builder: (_) => const _HowToUseSheet(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: Colors.white.withAlpha(28),
                     ),
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: _showHowToModal,
                       icon: SvgPicture.asset(
                         'assets/vivy_assets/help.svg',
                         width: 20,
@@ -139,18 +152,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Expanded(
+                          Expanded(
                             child: _MiniActionCard(
                               title: 'Learn More',
                               subtitle: 'About fraud',
                               iconAsset: 'assets/vivy_assets/learn.svg',
                               iconBackground: Color(0xFFFFEDD5),
+                              onTap: widget.onOpenLearnMore,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 10),
-                      const _QrCard(),
+                      _QrCard(onTap: widget.onOpenMessengerQr),
                       const SizedBox(height: 10),
                       _TipsCard(
                         expanded: _tipsExpanded,
@@ -169,6 +183,278 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+}
+
+class _HowToUseSheet extends StatefulWidget {
+  const _HowToUseSheet();
+
+  @override
+  State<_HowToUseSheet> createState() => _HowToUseSheetState();
+}
+
+class _HowToUseSheetState extends State<_HowToUseSheet> {
+  final PageController _controller = PageController();
+  int _index = 0;
+
+  static const _steps = [
+    (
+      title: 'Step 1: Upload a Receipt',
+      description:
+          "Tap 'Upload & Verify Receipt' on the Home screen. Pick a photo from your gallery to begin.",
+      art: _HowToArtType.upload,
+      cta: 'Next',
+    ),
+    (
+      title: 'Step 2: AI Analysis',
+      description:
+          'ViVy scans the receipt image for signs of tampering, font inconsistencies, and metadata anomalies.',
+      art: _HowToArtType.analysis,
+      cta: 'Next',
+    ),
+    (
+      title: 'Step 3: Review Results',
+      description:
+          'Get an instant Genuine or Fraudulent verdict with a clear explanation. Results are saved automatically to History.',
+      art: _HowToArtType.result,
+      cta: "Let's Go!",
+    ),
+  ];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _next() {
+    if (_index == _steps.length - 1) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _controller.nextPage(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Color(0xFFF8FAFF),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 10, 8),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'How to Use ViVy',
+                        style: TextStyle(
+                          fontSize: 37,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1E293B),
+                          height: 1,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      width: 34,
+                      height: 34,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFFE9EEF7),
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close, size: 18),
+                        color: const Color(0xFF334155),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 500,
+                child: PageView.builder(
+                  controller: _controller,
+                  itemCount: _steps.length,
+                  onPageChanged: (value) => setState(() => _index = value),
+                  itemBuilder: (context, i) {
+                    final step = _steps[i];
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 184,
+                            child: Center(
+                              child: _HowToArt(type: step.art),
+                            ),
+                          ),
+                          const SizedBox(height: 18),
+                          Text(
+                            step.title,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 33,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E293B),
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            step.description,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF64748B),
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(_steps.length, (dotIndex) {
+                        final active = dotIndex == _index;
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: active ? 30 : 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: active
+                                ? const Color(0xFF174AA5)
+                                : const Color(0xFFC8D4E5),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        );
+                      }),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: _next,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF174AA5),
+                          minimumSize: const Size.fromHeight(54),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Text(
+                          _steps[_index].cta,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum _HowToArtType { upload, analysis, result }
+
+class _HowToArt extends StatelessWidget {
+  const _HowToArt({required this.type});
+
+  final _HowToArtType type;
+
+  @override
+  Widget build(BuildContext context) {
+    return switch (type) {
+      _HowToArtType.upload => Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 138,
+            height: 138,
+            child: SvgPicture.asset('assets/vivy_assets/scan.svg'),
+          ),
+          SizedBox(
+            width: 86,
+            height: 86,
+            child: SvgPicture.asset('assets/vivy_assets/upload.svg'),
+          ),
+        ],
+      ),
+      _HowToArtType.analysis => Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 130,
+            height: 130,
+            child: SvgPicture.asset('assets/vivy_assets/security.svg'),
+          ),
+          SizedBox(
+            width: 58,
+            height: 58,
+            child: SvgPicture.asset('assets/vivy_assets/analysis.svg'),
+          ),
+        ],
+      ),
+      _HowToArtType.result => Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 118,
+            height: 118,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFDBF5EA),
+              border: Border.all(color: const Color(0xFF0BA47A), width: 2),
+            ),
+          ),
+          Container(
+            width: 88,
+            height: 88,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: Color(0xFF08A374),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: SvgPicture.asset(
+                'assets/vivy_assets/checkmark.svg',
+                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
+              ),
+            ),
+          ),
+        ],
+      ),
+    };
   }
 }
 
@@ -438,54 +724,54 @@ class _MiniActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: iconBackground,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(7),
-                  child: SvgPicture.asset(iconAsset),
-                ),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        child: Row(
+          children: [
+            Container(
+              width: 34,
+              height: 34,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: iconBackground,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF1E293B),
-                      ),
-                    ),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
+              child: Padding(
+                padding: const EdgeInsets.all(7),
+                child: SvgPicture.asset(iconAsset),
               ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -493,69 +779,75 @@ class _MiniActionCard extends StatelessWidget {
 }
 
 class _QrCard extends StatelessWidget {
-  const _QrCard();
+  const _QrCard({required this.onTap});
+
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFE3EDFF),
-              border: Border.all(color: const Color(0xFF2E6BD2), width: 1.3),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFFE3EDFF),
+                border: Border.all(color: const Color(0xFF2E6BD2), width: 1.3),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SvgPicture.asset('assets/vivy_assets/qr.svg'),
+              ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: SvgPicture.asset('assets/vivy_assets/qr.svg'),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'My Facebook Receipt QR',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1E293B),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'My Facebook Receipt QR',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E293B),
+                    ),
                   ),
-                ),
-                Text(
-                  'Let customers send you receipts to scan',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF64748B),
-                    fontWeight: FontWeight.w600,
+                  Text(
+                    'Let customers send you receipts to scan',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF64748B),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          Container(
-            width: 34,
-            height: 34,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFFE4EAF4),
+            Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Color(0xFFE4EAF4),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: SvgPicture.asset('assets/vivy_assets/view.svg'),
+              ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: SvgPicture.asset('assets/vivy_assets/view.svg'),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -601,11 +893,14 @@ class _TipsCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    expanded
-                        ? Icons.keyboard_arrow_down_rounded
-                        : Icons.chevron_right_rounded,
-                    color: const Color(0xFFA16A04),
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: SvgPicture.asset(
+                      expanded
+                          ? 'assets/vivy_assets/list.svg'
+                          : 'assets/vivy_assets/view.svg',
+                    ),
                   ),
                 ],
               ),

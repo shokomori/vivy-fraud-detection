@@ -1,0 +1,97 @@
+{
+  "image": "C:\\Users\\YUKI\\Documents\\Vivy\\real_world_samples\\Android\\gA_249.jpg",
+  "filename": "gA_249.jpg",
+  "file_sha256": "a8fd225348148ab9dea9c2a5f44ca87ec71d690fe3cf07b9e2e5abf517cd6ebc",
+  "metadata": {
+    "pil": {
+      "format": "JPEG",
+      "mode": "RGB",
+      "size_wh": [
+        1046,
+        2048
+      ],
+      "bands": [
+        "R",
+        "G",
+        "B"
+      ],
+      "has_alpha": false,
+      "exif_orientation": 1,
+      "icc_profile_present": false,
+      "icc_profile_bytes": 0
+    },
+    "opencv": {
+      "imread_color_shape": [
+        2048,
+        1046,
+        3
+      ],
+      "imread_color_channels": 3,
+      "imread_unchanged_shape": [
+        2048,
+        1046,
+        3
+      ],
+      "imread_unchanged_channels": 3,
+      "imdecode_color_shape": [
+        2048,
+        1046,
+        3
+      ],
+      "imdecode_unchanged_shape": [
+        2048,
+        1046,
+        3
+      ]
+    }
+  },
+  "tensor_compare_stage3_vs_app_semantics": {
+    "shape_match": true,
+    "byte_for_byte_equal": true,
+    "allclose_atol_1e-6": true,
+    "mean_abs_diff": 0.0,
+    "max_abs_diff": 0.0
+  },
+  "app_semantics_meta": {
+    "source_shape_hw": [
+      2048,
+      1046
+    ],
+    "roi_shape_hw": [
+      1580,
+      1004
+    ],
+    "geometry_pass": true,
+    "reason": "largest_valid_component",
+    "crop_box_xyxy": [
+      21,
+      51,
+      1024,
+      1630
+    ],
+    "component_xywh": [
+      49,
+      95,
+      948,
+      1492
+    ],
+    "component_area": 1344856.5,
+    "area_ratio": 0.627789878480521,
+    "aspect_ratio": 0.6353887399463807
+  },
+  "app_csv_context": {
+    "app_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\proof5\\batch_exports\\batch_results_2026-07-12T11-07-07.769871Z.csv",
+    "matched_row": {
+      "timestamp_iso": "2026-07-12T11:07:17.510390Z",
+      "filename": "gA_249.jpg",
+      "result_type": "fraudulent",
+      "raw_score": "0.965773",
+      "threshold": "0.16",
+      "file_path": "/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gA_249.jpg",
+      "file_sha256": "a8fd225348148ab9dea9c2a5f44ca87ec71d690fe3cf07b9e2e5abf517cd6ebc",
+      "file_size_bytes": "87656",
+      "decoded_width": "1046",
+      "decoded_height": "2048"
+    }
+  }
+}

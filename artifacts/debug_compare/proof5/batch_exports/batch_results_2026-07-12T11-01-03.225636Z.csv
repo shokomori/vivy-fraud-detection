@@ -1,0 +1,6 @@
+timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height
+2026-07-12T11:01:08.334718Z,gA_223.jpg,fraudulent,0.223858,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gA_223.jpg,5ff244a772dacb5dcc55efbc8a2247513daa7f7670ce3f264abb6ba90f6ce5e2,99790,945,2048
+2026-07-12T11:01:12.928152Z,gA_249.jpg,fraudulent,0.965773,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gA_249.jpg,a8fd225348148ab9dea9c2a5f44ca87ec71d690fe3cf07b9e2e5abf517cd6ebc,87656,1046,2048
+2026-07-12T11:01:16.814924Z,gA_250.jpg,fraudulent,0.953946,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gA_250.jpg,f16f3557f31d95d73dd0ac6f0db3b181a169eada1741a050ac5e97c306b3f564,84436,1046,2048
+2026-07-12T11:01:19.945769Z,gI_249.jpg,fraudulent,0.222603,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gI_249.jpg,4bad4c0f7389a77a39e5f37b1aef5b42b0ccb312f5ec442b1f1558272db4cd5d,78429,828,1792
+2026-07-12T11:01:23.616980Z,gI_285.JPEG,fraudulent,0.433849,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gI_285.JPEG,084a1b2a391c7c5ff555811874c8b95568e17e71ad8a0039bf3fe5d850ed22f7,68872,945,2048

@@ -17,6 +17,8 @@ import 'ui/screens/analyze_screen.dart';
 import 'ui/screens/guidelines_screen.dart';
 import 'ui/screens/history_screen.dart';
 import 'ui/screens/home_screen.dart';
+import 'ui/screens/learn_more_screen.dart';
+import 'ui/screens/messenger_qr_screen.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/theme/vivy_colors.dart';
 
@@ -26,6 +28,28 @@ const double kMinAreaRatio = 0.12;
 const double kMinAspectRatio = 0.25;
 const double kMaxAspectRatio = 3.5;
 const int kInputSize = 224;
+const String kZoneBaselineAsset = 'assets/config/zone_baselines.json';
+const Map<String, Map<String, List<double>>> kZoneLayouts = {
+  'android-like': {
+    'transaction_amount': [0.52, 0.16, 0.95, 0.32],
+    'reference_number': [0.52, 0.34, 0.95, 0.48],
+    'timestamp': [0.52, 0.50, 0.95, 0.63],
+    'name_block': [0.08, 0.66, 0.95, 0.84],
+  },
+  'ios-like': {
+    'transaction_amount': [0.50, 0.18, 0.94, 0.34],
+    'reference_number': [0.50, 0.35, 0.94, 0.50],
+    'timestamp': [0.50, 0.52, 0.94, 0.66],
+    'name_block': [0.08, 0.67, 0.94, 0.86],
+  },
+};
+
+const Map<String, String> kZoneDisplayNames = {
+  'transaction_amount': 'transaction amount',
+  'reference_number': 'reference number',
+  'timestamp': 'timestamp',
+  'name_block': 'name block',
+};
 
 void main() {
   runApp(const VivyApp());
@@ -140,11 +164,14 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   bool _isBusy = false;
   String? _loadError;
   bool _isDebugBatchRunning = false;
+  _ZoneBaselineProfile? _zoneBaselineProfile;
+  bool _zoneBaselineLoadAttempted = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _loadZoneBaselines();
     _loadModel();
     _loadHistory();
     _maybeRunDebugBatchIngestion(reason: 'startup');
@@ -187,6 +214,22 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         _loadError = 'Failed to load model: $e';
       });
       _syncAnalyzeUiState();
+    }
+  }
+
+  Future<void> _loadZoneBaselines() async {
+    if (_zoneBaselineLoadAttempted) {
+      return;
+    }
+    _zoneBaselineLoadAttempted = true;
+    try {
+      final raw = await rootBundle.loadString(kZoneBaselineAsset);
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        _zoneBaselineProfile = _ZoneBaselineProfile.fromJson(decoded);
+      }
+    } catch (e) {
+      debugPrint('[VIVY][ZONE] Baseline unavailable: $e');
     }
   }
 
@@ -373,10 +416,18 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
       final isFraudulent = score >= kFraudThreshold;
       final confidence = isFraudulent ? score : (1.0 - score);
+      final zoneExplanation = _buildZoneExplanation(
+        isFraudulent: isFraudulent,
+        confidence: confidence,
+        family: native.templateFamily,
+        templateConfidence: native.templateConfidence,
+        zoneMetrics: native.zoneMetrics,
+      );
       final result = AnalysisResult.classified(
         score: score,
         confidence: confidence,
         isFraudulent: isFraudulent,
+        explanation: zoneExplanation,
       );
       return _PipelineOutcome(
         result: result,
@@ -449,10 +500,23 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
     final isFraudulent = score >= kFraudThreshold;
     final confidence = isFraudulent ? score : (1.0 - score);
+    final fallbackZoneFeatures = _extractZoneFeaturesFromRoi(roiResult.roi!);
+    final fallbackTemplate = _inferTemplateFamily(
+      roiWidth: roiResult.roi!.width,
+      roiHeight: roiResult.roi!.height,
+    );
+    final zoneExplanation = _buildZoneExplanation(
+      isFraudulent: isFraudulent,
+      confidence: confidence,
+      family: fallbackTemplate.family,
+      templateConfidence: fallbackTemplate.confidence,
+      zoneMetrics: fallbackZoneFeatures,
+    );
     final result = AnalysisResult.classified(
       score: score,
       confidence: confidence,
       isFraudulent: isFraudulent,
+      explanation: zoneExplanation,
     );
     return _PipelineOutcome(
       result: result,
@@ -479,6 +543,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final reason = (map['reason'] ?? '').toString();
     final areaRatio = (map['areaRatio'] as num?)?.toDouble() ?? 0.0;
     final aspectRatio = (map['aspectRatio'] as num?)?.toDouble() ?? 0.0;
+    final templateFamily = (map['templateFamily'] as String?) ?? 'generic';
+    final templateConfidence =
+      (map['templateConfidence'] as num?)?.toDouble() ?? 0.0;
+    final zoneMetrics = _parseNativeZoneMetrics(map['zoneMetrics']);
 
     if (!geometryPass) {
       return _NativePreprocessResult(
@@ -486,6 +554,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         reason: reason,
         areaRatio: areaRatio,
         aspectRatio: aspectRatio,
+        templateFamily: templateFamily,
+        templateConfidence: templateConfidence,
+        zoneMetrics: zoneMetrics,
       );
     }
 
@@ -521,6 +592,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       reason: reason,
       areaRatio: areaRatio,
       aspectRatio: aspectRatio,
+      templateFamily: templateFamily,
+      templateConfidence: templateConfidence,
+      zoneMetrics: zoneMetrics,
       tensor: tensor,
     );
   }
@@ -813,6 +887,352 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final normalized = value.replaceAll('\\\\', '/');
     final parts = normalized.split('/');
     return parts.isEmpty ? value : parts.last;
+  }
+
+  Map<String, _ZoneFeatureVector> _extractZoneFeaturesFromRoi(img.Image roi) {
+    final family = _inferTemplateFamily(roiWidth: roi.width, roiHeight: roi.height);
+    final layout = kZoneLayouts[family.family] ?? kZoneLayouts['android-like']!;
+    final gray = img.grayscale(roi);
+    final out = <String, _ZoneFeatureVector>{};
+    for (final entry in layout.entries) {
+      final bounds = entry.value;
+      final zone = _cropNormalized(gray, bounds);
+      out[entry.key] = _computeZoneFeatureVector(zone);
+    }
+    return out;
+  }
+
+  _TemplateFamilyGuess _inferTemplateFamily({
+    required int roiWidth,
+    required int roiHeight,
+  }) {
+    final aspect = roiWidth / math.max(roiHeight.toDouble(), 1.0);
+    if (aspect >= 0.80) {
+      return const _TemplateFamilyGuess(family: 'android-like', confidence: 0.86);
+    }
+    if (aspect <= 0.68) {
+      return const _TemplateFamilyGuess(family: 'ios-like', confidence: 0.86);
+    }
+    return const _TemplateFamilyGuess(family: 'generic', confidence: 0.55);
+  }
+
+  img.Image _cropNormalized(img.Image gray, List<double> bounds) {
+    final x0 = _denormX(bounds[0], gray.width);
+    final y0 = _denormY(bounds[1], gray.height);
+    final x1 = _denormX(bounds[2], gray.width);
+    final y1 = _denormY(bounds[3], gray.height);
+    final w = math.max(1, x1 - x0);
+    final h = math.max(1, y1 - y0);
+    return img.copyCrop(gray, x: x0, y: y0, width: w, height: h);
+  }
+
+  int _denormX(double x, int width) {
+    final raw = (x * width).round();
+    return raw.clamp(0, math.max(0, width - 1));
+  }
+
+  int _denormY(double y, int height) {
+    final raw = (y * height).round();
+    return raw.clamp(0, math.max(0, height - 1));
+  }
+
+  _ZoneFeatureVector _computeZoneFeatureVector(img.Image grayZone) {
+    final lapVar = _laplacianVariance(grayZone);
+    final edgeDensity = _edgeDensity(grayZone);
+    final bin = _binaryMask(grayZone, _otsuThreshold(grayZone));
+    final stats = _connectedComponentStats(bin, grayZone.width, grayZone.height);
+    final strokeFill = bin.where((v) => v).length / math.max(1, bin.length);
+
+    if (stats.isEmpty) {
+      return _ZoneFeatureVector(
+        laplacianVar: lapVar,
+        edgeDensity: edgeDensity,
+        spacingCv: 0.0,
+        alignmentStd: 0.0,
+        fontHeightCv: 0.0,
+        strokeFillRatio: strokeFill,
+      );
+    }
+
+    final centerXs = stats.map((s) => s.centerX).toList()..sort();
+    final gaps = <double>[];
+    for (var i = 1; i < centerXs.length; i++) {
+      final d = centerXs[i] - centerXs[i - 1];
+      if (d > 1.0) {
+        gaps.add(d);
+      }
+    }
+    final spacingCv = gaps.length < 2
+        ? 0.0
+        : _stddev(gaps) / math.max(_mean(gaps), 1e-6);
+
+    final centerYs = stats.map((s) => s.centerY).toList();
+    final heights = stats.map((s) => s.height).toList();
+    final alignmentStd = _stddev(centerYs) / math.max(grayZone.height.toDouble(), 1.0);
+    final fontHeightCv = _stddev(heights) / math.max(_mean(heights), 1e-6);
+
+    return _ZoneFeatureVector(
+      laplacianVar: lapVar,
+      edgeDensity: edgeDensity,
+      spacingCv: spacingCv,
+      alignmentStd: alignmentStd,
+      fontHeightCv: fontHeightCv,
+      strokeFillRatio: strokeFill,
+    );
+  }
+
+  double _laplacianVariance(img.Image gray) {
+    final values = <double>[];
+    final kernel = const <List<int>>[
+      [0, 1, 0],
+      [1, -4, 1],
+      [0, 1, 0],
+    ];
+    for (var y = 1; y < gray.height - 1; y++) {
+      for (var x = 1; x < gray.width - 1; x++) {
+        var v = 0.0;
+        for (var ky = -1; ky <= 1; ky++) {
+          for (var kx = -1; kx <= 1; kx++) {
+            final p = gray.getPixel(x + kx, y + ky).r.toDouble();
+            v += kernel[ky + 1][kx + 1] * p;
+          }
+        }
+        values.add(v);
+      }
+    }
+    if (values.isEmpty) {
+      return 0.0;
+    }
+    final m = _mean(values);
+    var acc = 0.0;
+    for (final v in values) {
+      final d = v - m;
+      acc += d * d;
+    }
+    return acc / values.length;
+  }
+
+  double _edgeDensity(img.Image gray) {
+    var count = 0;
+    var total = 0;
+    for (var y = 1; y < gray.height - 1; y++) {
+      for (var x = 1; x < gray.width - 1; x++) {
+        final gx = (gray.getPixel(x + 1, y).r - gray.getPixel(x - 1, y).r).toDouble();
+        final gy = (gray.getPixel(x, y + 1).r - gray.getPixel(x, y - 1).r).toDouble();
+        final mag = math.sqrt(gx * gx + gy * gy);
+        if (mag >= 48.0) {
+          count++;
+        }
+        total++;
+      }
+    }
+    if (total == 0) {
+      return 0.0;
+    }
+    return count / total;
+  }
+
+  List<_ConnectedComponentStat> _connectedComponentStats(
+    List<bool> mask,
+    int width,
+    int height,
+  ) {
+    final visited = Uint8List(mask.length);
+    final stats = <_ConnectedComponentStat>[];
+    final qx = <int>[];
+    final qy = <int>[];
+    for (var y = 0; y < height; y++) {
+      for (var x = 0; x < width; x++) {
+        final idx = y * width + x;
+        if (!mask[idx] || visited[idx] == 1) {
+          continue;
+        }
+
+        qx.clear();
+        qy.clear();
+        qx.add(x);
+        qy.add(y);
+        visited[idx] = 1;
+
+        var minX = x;
+        var minY = y;
+        var maxX = x;
+        var maxY = y;
+        var area = 0;
+        var sumX = 0.0;
+        var sumY = 0.0;
+
+        for (var p = 0; p < qx.length; p++) {
+          final cx = qx[p];
+          final cy = qy[p];
+          area++;
+          sumX += cx;
+          sumY += cy;
+          if (cx < minX) minX = cx;
+          if (cy < minY) minY = cy;
+          if (cx > maxX) maxX = cx;
+          if (cy > maxY) maxY = cy;
+
+          for (var ny = cy - 1; ny <= cy + 1; ny++) {
+            if (ny < 0 || ny >= height) {
+              continue;
+            }
+            for (var nx = cx - 1; nx <= cx + 1; nx++) {
+              if (nx < 0 || nx >= width) {
+                continue;
+              }
+              final nidx = ny * width + nx;
+              if (!mask[nidx] || visited[nidx] == 1) {
+                continue;
+              }
+              visited[nidx] = 1;
+              qx.add(nx);
+              qy.add(ny);
+            }
+          }
+        }
+
+        final bw = maxX - minX + 1;
+        final bh = maxY - minY + 1;
+        if (area < 10 || bw < 2 || bh < 4) {
+          continue;
+        }
+        stats.add(
+          _ConnectedComponentStat(
+            centerX: sumX / area,
+            centerY: sumY / area,
+            height: bh.toDouble(),
+          ),
+        );
+      }
+    }
+    return stats;
+  }
+
+  double _mean(List<double> values) {
+    if (values.isEmpty) {
+      return 0.0;
+    }
+    var sum = 0.0;
+    for (final v in values) {
+      sum += v;
+    }
+    return sum / values.length;
+  }
+
+  double _stddev(List<double> values) {
+    if (values.length < 2) {
+      return 0.0;
+    }
+    final m = _mean(values);
+    var acc = 0.0;
+    for (final v in values) {
+      final d = v - m;
+      acc += d * d;
+    }
+    return math.sqrt(acc / values.length);
+  }
+
+  Map<String, _ZoneFeatureVector> _parseNativeZoneMetrics(Object? raw) {
+    if (raw is! Map) {
+      return const <String, _ZoneFeatureVector>{};
+    }
+    final out = <String, _ZoneFeatureVector>{};
+    for (final entry in raw.entries) {
+      final zoneName = entry.key.toString();
+      final value = entry.value;
+      if (value is! Map) {
+        continue;
+      }
+      out[zoneName] = _ZoneFeatureVector(
+        laplacianVar: (value['laplacian_var'] as num?)?.toDouble() ?? 0.0,
+        edgeDensity: (value['edge_density'] as num?)?.toDouble() ?? 0.0,
+        spacingCv: (value['spacing_cv'] as num?)?.toDouble() ?? 0.0,
+        alignmentStd: (value['alignment_std'] as num?)?.toDouble() ?? 0.0,
+        fontHeightCv: (value['font_height_cv'] as num?)?.toDouble() ?? 0.0,
+        strokeFillRatio: (value['stroke_fill_ratio'] as num?)?.toDouble() ?? 0.0,
+      );
+    }
+    return out;
+  }
+
+  String _buildZoneExplanation({
+    required bool isFraudulent,
+    required double confidence,
+    required String family,
+    required double templateConfidence,
+    required Map<String, _ZoneFeatureVector> zoneMetrics,
+  }) {
+    final confidenceText = (confidence * 100).toStringAsFixed(1);
+    final profile = _zoneBaselineProfile;
+    if (profile == null || zoneMetrics.isEmpty) {
+      return isFraudulent
+          ? 'Receipt is classified as fraudulent ($confidenceText% confidence). The image shows suspicious formatting signals, but zone-level evidence is unavailable on this device.'
+          : 'Receipt is classified as genuine ($confidenceText% confidence). No strong anomalies were detected in available checks.';
+    }
+
+    final tuned = profile.precisionBias;
+    final lowTemplateConfidence =
+        family == 'generic' || templateConfidence < tuned.templateConfidenceMin;
+    final baselineFamily = lowTemplateConfidence
+        ? 'generic'
+        : (profile.stats.containsKey(family) ? family : 'generic');
+
+    final anomalies = <_ZoneAnomalySummary>[];
+    for (final entry in zoneMetrics.entries) {
+      final zone = entry.key;
+      final vector = entry.value;
+      final zoneStats = profile.stats[baselineFamily]?[zone];
+      if (zoneStats == null) {
+        continue;
+      }
+
+      final failures = <String>[];
+      var severeCount = 0;
+      final metricValues = vector.toMap();
+      for (final metricEntry in metricValues.entries) {
+        final metric = metricEntry.key;
+        final value = metricEntry.value;
+        final ref = zoneStats[metric];
+        if (ref == null) {
+          continue;
+        }
+        final z = (value - ref.median).abs() / math.max(ref.mad * 1.4826, 1e-6);
+        final outsideBand = value < ref.p05 || value > ref.p95;
+        if (z >= tuned.metricZThreshold && outsideBand) {
+          failures.add(metric);
+          if (tuned.severeMetrics.contains(metric)) {
+            severeCount++;
+          }
+        }
+      }
+
+      final failsZone = failures.length >= tuned.zoneFailMetricsMin ||
+          (failures.length >= tuned.zoneFailMetricsMinWithSevere && severeCount >= 1);
+      if (failsZone) {
+        anomalies.add(
+          _ZoneAnomalySummary(
+            zoneName: zone,
+            failedMetrics: failures,
+          ),
+        );
+      }
+    }
+
+    if (isFraudulent) {
+      if (lowTemplateConfidence) {
+        return 'Receipt is classified as fraudulent ($confidenceText% confidence). Template family confidence is low, so zone-level claims are intentionally withheld to avoid overconfident localization.';
+      }
+      if (anomalies.isEmpty) {
+        return 'Receipt is classified as fraudulent ($confidenceText% confidence). No zone passed strict anomaly criteria; classification relies on global model evidence.';
+      }
+      final zoneList = anomalies
+          .map((a) => kZoneDisplayNames[a.zoneName] ?? a.zoneName)
+          .join(', ');
+      return 'Receipt is classified as fraudulent ($confidenceText% confidence). Conservative zone anomalies were found in: $zoneList.';
+    }
+
+    return 'Receipt is classified as genuine ($confidenceText% confidence). No zone exceeded strict anomaly thresholds against train-genuine baselines.';
   }
 
   double _runModel(Float32List inputBuffer) {
@@ -1156,6 +1576,20 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           ),
         );
       },
+      onOpenLearnMore: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const LearnMoreScreen(),
+          ),
+        );
+      },
+      onOpenMessengerQr: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const MessengerQrScreen(),
+          ),
+        );
+      },
     );
   }
 }
@@ -1182,6 +1616,9 @@ class _NativePreprocessResult {
     required this.reason,
     required this.areaRatio,
     required this.aspectRatio,
+    required this.templateFamily,
+    required this.templateConfidence,
+    required this.zoneMetrics,
     this.tensor,
   });
 
@@ -1189,6 +1626,9 @@ class _NativePreprocessResult {
   final String reason;
   final double areaRatio;
   final double aspectRatio;
+  final String templateFamily;
+  final double templateConfidence;
+  final Map<String, _ZoneFeatureVector> zoneMetrics;
   final Float32List? tensor;
 }
 
@@ -1210,4 +1650,170 @@ class _PipelineOutcome {
   final int? decodedHeight;
   final String backendUsed;
   final String backendNote;
+}
+
+class _ConnectedComponentStat {
+  const _ConnectedComponentStat({
+    required this.centerX,
+    required this.centerY,
+    required this.height,
+  });
+
+  final double centerX;
+  final double centerY;
+  final double height;
+}
+
+class _ZoneFeatureVector {
+  const _ZoneFeatureVector({
+    required this.laplacianVar,
+    required this.edgeDensity,
+    required this.spacingCv,
+    required this.alignmentStd,
+    required this.fontHeightCv,
+    required this.strokeFillRatio,
+  });
+
+  final double laplacianVar;
+  final double edgeDensity;
+  final double spacingCv;
+  final double alignmentStd;
+  final double fontHeightCv;
+  final double strokeFillRatio;
+
+  Map<String, double> toMap() {
+    return {
+      'laplacian_var': laplacianVar,
+      'edge_density': edgeDensity,
+      'spacing_cv': spacingCv,
+      'alignment_std': alignmentStd,
+      'font_height_cv': fontHeightCv,
+      'stroke_fill_ratio': strokeFillRatio,
+    };
+  }
+}
+
+class _TemplateFamilyGuess {
+  const _TemplateFamilyGuess({
+    required this.family,
+    required this.confidence,
+  });
+
+  final String family;
+  final double confidence;
+}
+
+class _ZoneMetricBaseline {
+  const _ZoneMetricBaseline({
+    required this.median,
+    required this.mad,
+    required this.p05,
+    required this.p95,
+  });
+
+  final double median;
+  final double mad;
+  final double p05;
+  final double p95;
+
+  factory _ZoneMetricBaseline.fromJson(Map<String, dynamic> json) {
+    return _ZoneMetricBaseline(
+      median: (json['median'] as num?)?.toDouble() ?? 0.0,
+      mad: (json['mad'] as num?)?.toDouble() ?? 1e-6,
+      p05: (json['p05'] as num?)?.toDouble() ?? 0.0,
+      p95: (json['p95'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+class _ZonePrecisionBias {
+  const _ZonePrecisionBias({
+    required this.metricZThreshold,
+    required this.zoneFailMetricsMin,
+    required this.zoneFailMetricsMinWithSevere,
+    required this.severeMetrics,
+    required this.templateConfidenceMin,
+  });
+
+  final double metricZThreshold;
+  final int zoneFailMetricsMin;
+  final int zoneFailMetricsMinWithSevere;
+  final Set<String> severeMetrics;
+  final double templateConfidenceMin;
+
+  factory _ZonePrecisionBias.fromJson(Map<String, dynamic> json) {
+    final severe = (json['severe_metrics'] as List?) ?? const <Object>[];
+    return _ZonePrecisionBias(
+      metricZThreshold: (json['metric_z_threshold'] as num?)?.toDouble() ?? 3.5,
+      zoneFailMetricsMin: (json['zone_fail_metrics_min'] as num?)?.toInt() ?? 3,
+      zoneFailMetricsMinWithSevere:
+          (json['zone_fail_metrics_min_with_severe'] as num?)?.toInt() ?? 2,
+      severeMetrics: severe.map((e) => e.toString()).toSet(),
+      templateConfidenceMin:
+          (json['template_confidence_min'] as num?)?.toDouble() ?? 0.8,
+    );
+  }
+}
+
+class _ZoneBaselineProfile {
+  const _ZoneBaselineProfile({
+    required this.stats,
+    required this.precisionBias,
+  });
+
+  final Map<String, Map<String, Map<String, _ZoneMetricBaseline>>> stats;
+  final _ZonePrecisionBias precisionBias;
+
+  factory _ZoneBaselineProfile.fromJson(Map<String, dynamic> json) {
+    final statsRaw = (json['stats'] as Map?) ?? const <Object, Object>{};
+    final stats = <String, Map<String, Map<String, _ZoneMetricBaseline>>>{};
+
+    for (final familyEntry in statsRaw.entries) {
+      final family = familyEntry.key.toString();
+      final zonesRaw = familyEntry.value;
+      if (zonesRaw is! Map) {
+        continue;
+      }
+      final zones = <String, Map<String, _ZoneMetricBaseline>>{};
+      for (final zoneEntry in zonesRaw.entries) {
+        final zone = zoneEntry.key.toString();
+        final metricsRaw = zoneEntry.value;
+        if (metricsRaw is! Map) {
+          continue;
+        }
+        final metrics = <String, _ZoneMetricBaseline>{};
+        for (final metricEntry in metricsRaw.entries) {
+          final metricName = metricEntry.key.toString();
+          final raw = metricEntry.value;
+          if (raw is! Map) {
+            continue;
+          }
+          metrics[metricName] = _ZoneMetricBaseline.fromJson(
+            Map<String, dynamic>.from(raw),
+          );
+        }
+        zones[zone] = metrics;
+      }
+      stats[family] = zones;
+    }
+
+    final precisionRaw =
+        (json['precision_bias'] as Map?) ?? const <Object, Object>{};
+    return _ZoneBaselineProfile(
+      stats: stats,
+      precisionBias: _ZonePrecisionBias.fromJson(
+        Map<String, dynamic>.from(precisionRaw),
+      ),
+    );
+  }
+}
+
+class _ZoneAnomalySummary {
+  const _ZoneAnomalySummary({
+    required this.zoneName,
+    required this.failedMetrics,
+  });
+
+  final String zoneName;
+  final List<String> failedMetrics;
 }

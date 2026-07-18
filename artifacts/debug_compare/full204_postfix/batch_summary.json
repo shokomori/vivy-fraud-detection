@@ -1,0 +1,26 @@
+[
+  {
+    "batch": 1,
+    "row_count": 51,
+    "csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\full204_postfix\\batches\\batch_01\\batch_results_2026-07-12T13-54-45.930372Z.csv",
+    "backend_native_rows": 51
+  },
+  {
+    "batch": 2,
+    "row_count": 51,
+    "csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\full204_postfix\\batches\\batch_02\\batch_results_2026-07-12T13-55-24.075679Z.csv",
+    "backend_native_rows": 51
+  },
+  {
+    "batch": 3,
+    "row_count": 51,
+    "csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\full204_postfix\\batches\\batch_03\\batch_results_2026-07-12T13-55-57.092480Z.csv",
+    "backend_native_rows": 51
+  },
+  {
+    "batch": 4,
+    "row_count": 51,
+    "csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\full204_postfix\\batches\\batch_04\\batch_results_2026-07-12T13-56-38.421317Z.csv",
+    "backend_native_rows": 51
+  }
+]

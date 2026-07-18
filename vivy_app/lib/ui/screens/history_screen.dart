@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/analysis_models.dart';
 import '../theme/vivy_colors.dart';
@@ -35,7 +36,6 @@ class HistoryScreen extends StatelessWidget {
                     : '${(item.confidence! * 100).toStringAsFixed(1)}%';
 
                 final isFraud = item.label.toLowerCase() == 'fraudulent';
-                final accent = isFraud ? VivyColors.danger : VivyColors.success;
                 final soft = isFraud
                     ? VivyColors.dangerSoft
                     : VivyColors.successSoft;
@@ -66,10 +66,14 @@ class HistoryScreen extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            Icon(
-                              Icons.fact_check_outlined,
-                              color: accent,
-                              size: 18,
+                            SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: SvgPicture.asset(
+                                isFraud
+                                    ? 'assets/vivy_assets/fraudulent_check.svg'
+                                    : 'assets/vivy_assets/genuine_check.svg',
+                              ),
                             ),
                             const SizedBox(width: 8),
                             Text(

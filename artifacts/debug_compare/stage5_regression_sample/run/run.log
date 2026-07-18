@@ -1,0 +1,21 @@
+START
+BATCH_START 1 size=12
+ADB shell rm -f /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/*
+ADB shell rm -f /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/trigger.run
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidFraudulent\fA_215.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_145.jfif /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSFraudulent\fI_385.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSFraudulent\fI_326.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_147.jfif /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSGenuine\gI_054.jpg /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidFraudulent\fA_349.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSFraudulent\fI_277.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidFraudulent\fA_122.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\AndroidGenuine\gA_053.jpg /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSFraudulent\fI_122.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB push C:\Users\YUKI\Documents\Vivy\dataset\iOSFraudulent\fI_151.png /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/
+ADB shell touch /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/trigger.run
+ADB shell monkey -p com.example.vivy_app -c android.intent.category.LAUNCHER 1
+BATCH_DONE 1 export=/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports/batch_results_2026-07-12T14-04-53.870682Z.csv
+ADB pull /storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports/batch_results_2026-07-12T14-04-53.870682Z.csv C:\Users\YUKI\Documents\Vivy\artifacts\debug_compare\stage5_regression_sample\run\batches\batch_01\batch_results_2026-07-12T14-04-53.870682Z.csv
+DONE

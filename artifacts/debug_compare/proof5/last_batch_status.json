@@ -1,0 +1,7 @@
+{
+  "trigger_reason": "model_ready",
+  "ran_at_utc": "2026-07-12T11:07:28.275871Z",
+  "inbox_dir": "/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox",
+  "export_csv_path": "/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports/batch_results_2026-07-12T11-07-07.769871Z.csv",
+  "processed_count": 5
+}

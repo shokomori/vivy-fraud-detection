@@ -1,0 +1,144 @@
+{
+  "sample_size": 12,
+  "all_backend_native": true,
+  "app_vs_tflite_max_abs_diff": 5.299999999985872e-07,
+  "app_vs_tflite_mean_abs_diff": 2.309808333302358e-07,
+  "app_vs_keras_max_abs_diff": 0.0004951369999999997,
+  "app_vs_keras_mean_abs_diff": 5.5102297500006396e-05,
+  "label_match_vs_tflite": 12,
+  "label_match_vs_keras": 12,
+  "rows": [
+    {
+      "filename": "fA_122.png",
+      "app_raw_score": 1.0,
+      "tflite_prob": 0.99999994,
+      "keras_prob": 0.99999994,
+      "app_vs_tflite_abs_diff": 5.999999996841865e-08,
+      "app_vs_keras_abs_diff": 5.999999996841865e-08,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fA_215.png",
+      "app_raw_score": 0.999999,
+      "tflite_prob": 0.9999989,
+      "keras_prob": 0.999999,
+      "app_vs_tflite_abs_diff": 9.999999994736442e-08,
+      "app_vs_keras_abs_diff": 0.0,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fA_349.png",
+      "app_raw_score": 1.0,
+      "tflite_prob": 0.9999999,
+      "keras_prob": 0.9999999,
+      "app_vs_tflite_abs_diff": 9.999999994736442e-08,
+      "app_vs_keras_abs_diff": 9.999999994736442e-08,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fI_122.png",
+      "app_raw_score": 0.999956,
+      "tflite_prob": 0.99995583,
+      "keras_prob": 0.99995786,
+      "app_vs_tflite_abs_diff": 1.6999999996603066e-07,
+      "app_vs_keras_abs_diff": 1.8600000000201788e-06,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fI_151.png",
+      "app_raw_score": 0.999947,
+      "tflite_prob": 0.999947,
+      "keras_prob": 0.99995285,
+      "app_vs_tflite_abs_diff": 0.0,
+      "app_vs_keras_abs_diff": 5.849999999973932e-06,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fI_277.png",
+      "app_raw_score": 1.0,
+      "tflite_prob": 0.99999964,
+      "keras_prob": 0.99999964,
+      "app_vs_tflite_abs_diff": 3.600000000325565e-07,
+      "app_vs_keras_abs_diff": 3.600000000325565e-07,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fI_326.png",
+      "app_raw_score": 0.999994,
+      "tflite_prob": 0.9999935,
+      "keras_prob": 0.99999356,
+      "app_vs_tflite_abs_diff": 5.00000000069889e-07,
+      "app_vs_keras_abs_diff": 4.4000000010147033e-07,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "fI_385.png",
+      "app_raw_score": 1.0,
+      "tflite_prob": 0.99999964,
+      "keras_prob": 0.99999964,
+      "app_vs_tflite_abs_diff": 3.600000000325565e-07,
+      "app_vs_keras_abs_diff": 3.600000000325565e-07,
+      "app_label": "fraudulent",
+      "tflite_label": "fraudulent",
+      "keras_label": "fraudulent"
+    },
+    {
+      "filename": "gA_053.jpg",
+      "app_raw_score": 0.005291,
+      "tflite_prob": 0.005291023,
+      "keras_prob": 0.0054447204,
+      "app_vs_tflite_abs_diff": 2.300000000003688e-08,
+      "app_vs_keras_abs_diff": 0.00015372040000000056,
+      "app_label": "genuine",
+      "tflite_label": "genuine",
+      "keras_label": "genuine"
+    },
+    {
+      "filename": "gA_145.jfif",
+      "app_raw_score": 0.000257,
+      "tflite_prob": 0.00025662742,
+      "keras_prob": 0.00025508035,
+      "app_vs_tflite_abs_diff": 3.72580000000016e-07,
+      "app_vs_keras_abs_diff": 1.919650000000025e-06,
+      "app_label": "genuine",
+      "tflite_label": "genuine",
+      "keras_label": "genuine"
+    },
+    {
+      "filename": "gA_147.jfif",
+      "app_raw_score": 8e-05,
+      "tflite_prob": 7.980381e-05,
+      "keras_prob": 7.857948e-05,
+      "app_vs_tflite_abs_diff": 1.9619000000000938e-07,
+      "app_vs_keras_abs_diff": 1.4205200000000058e-06,
+      "app_label": "genuine",
+      "tflite_label": "genuine",
+      "keras_label": "genuine"
+    },
+    {
+      "filename": "gI_054.jpg",
+      "app_raw_score": 0.026715,
+      "tflite_prob": 0.02671447,
+      "keras_prob": 0.027210137,
+      "app_vs_tflite_abs_diff": 5.299999999985872e-07,
+      "app_vs_keras_abs_diff": 0.0004951369999999997,
+      "app_label": "genuine",
+      "tflite_label": "genuine",
+      "keras_label": "genuine"
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height,backend_used,backend_note
+2026-07-12T12:56:29.959353Z,gA_249.jpg,genuine,0.051460,0.16,/storage/emulated/0/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/gA_249.jpg,a8fd225348148ab9dea9c2a5f44ca87ec71d690fe3cf07b9e2e5abf517cd6ebc,87656,1046,2048,native-opencv,ok

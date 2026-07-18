@@ -1,0 +1,9 @@
+[
+  {
+    "batch": 1,
+    "row_count": 12,
+    "csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\stage5_regression_sample\\run\\batches\\batch_01\\batch_results_2026-07-12T14-04-53.870682Z.csv",
+    "backend_expected_rows": 12,
+    "required_backend": "native-opencv"
+  }
+]

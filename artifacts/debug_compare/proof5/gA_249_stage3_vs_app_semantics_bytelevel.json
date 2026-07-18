@@ -1,0 +1,70 @@
+{
+  "image": "C:\\Users\\YUKI\\Documents\\Vivy\\real_world_samples\\Android\\gA_249.jpg",
+  "shape_match": true,
+  "dtype": {
+    "stage3": "float32",
+    "app_semantics": "float32"
+  },
+  "byte_for_byte_equal": true,
+  "allclose_atol_1e-6": true,
+  "diff": {
+    "mean_abs_diff": 0.0,
+    "max_abs_diff": 0.0,
+    "max_abs_diff_location_hwc": [
+      0,
+      0,
+      0
+    ],
+    "stage3_value_at_max": 0.003921568859368563,
+    "app_semantics_value_at_max": 0.003921568859368563,
+    "mae_if_app_channels_reversed": 0.13032212853431702,
+    "mae_if_app_scaled_0_255": 211.8605499267578
+  },
+  "stats": {
+    "stage3": {
+      "mean": 0.8340966105461121,
+      "std": 0.30948492884635925,
+      "min": 0.0,
+      "max": 1.0
+    },
+    "app_semantics": {
+      "mean": 0.8340966105461121,
+      "std": 0.30948492884635925,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "app_semantics_meta": {
+    "source_shape_hw": [
+      2048,
+      1046
+    ],
+    "roi_shape_hw": [
+      1580,
+      1004
+    ],
+    "geometry_pass": true,
+    "reason": "largest_valid_component",
+    "crop_box_xyxy": [
+      21,
+      51,
+      1024,
+      1630
+    ],
+    "component_xywh": [
+      49,
+      95,
+      948,
+      1492
+    ],
+    "component_area": 1344856.5,
+    "area_ratio": 0.627789878480521,
+    "aspect_ratio": 0.6353887399463807
+  },
+  "artifacts": {
+    "stage3_tensor": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\proof5\\gA_249_stage3_vs_app_semantics\\stage3_tensor_f32.bin",
+    "app_semantics_tensor": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\proof5\\gA_249_stage3_vs_app_semantics\\app_semantics_tensor_f32.bin",
+    "stage3_preview_png": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\proof5\\gA_249_stage3_vs_app_semantics\\stage3_preview_224.png",
+    "app_semantics_preview_png": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\debug_compare\\proof5\\gA_249_stage3_vs_app_semantics\\app_semantics_preview_224.png"
+  }
+}

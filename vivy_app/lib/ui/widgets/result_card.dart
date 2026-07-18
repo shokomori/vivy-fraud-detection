@@ -173,7 +173,7 @@ String _technicalLine(AnalysisResult result, double threshold) {
       'geometry area ${result.areaRatio!.toStringAsFixed(3)} / aspect ${result.aspectRatio!.toStringAsFixed(3)}',
     );
   }
-  return parts.join(' • ');
+  return parts.join(' - ');
 }
 
 class _ResultTheme {

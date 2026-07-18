@@ -37,6 +37,7 @@ class AnalysisResult {
     required bool isFraudulent,
     required double score,
     required double confidence,
+    String? explanation,
   }) {
     final confidenceText = (confidence * 100).toStringAsFixed(1);
     return AnalysisResult(
@@ -46,9 +47,10 @@ class AnalysisResult {
           : 'Receipt appears genuine.',
       score: score,
       confidence: confidence,
-      explanation: isFraudulent
+      explanation: explanation ??
+          (isFraudulent
           ? 'This receipt is flagged as fraudulent. The model is $confidenceText% confident in that result.'
-          : 'This receipt is flagged as genuine. The model is $confidenceText% confident in that result.',
+          : 'This receipt is flagged as genuine. The model is $confidenceText% confident in that result.'),
     );
   }
 
