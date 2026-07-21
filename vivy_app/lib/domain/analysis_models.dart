@@ -102,17 +102,35 @@ class HistoryEntry {
     required this.label,
     required this.confidence,
     required this.timestamp,
+    this.imagePath,
+    this.amount,
+    this.explanation,
   });
 
   final String label;
   final double? confidence;
   final DateTime timestamp;
 
+  /// Path to a persisted copy of the scanned receipt image on disk.
+  /// Null for entries created before this field existed, or if the
+  /// image could not be saved.
+  final String? imagePath;
+
+  /// Peso amount parsed from the receipt, if available.
+  final double? amount;
+
+  /// AI explanation text captured at analysis time. If null, the
+  /// detail screen falls back to a generic explanation based on [label].
+  final String? explanation;
+
   Map<String, dynamic> toJson() {
     return {
       'label': label,
       'confidence': confidence,
       'timestamp': timestamp.toIso8601String(),
+      'imagePath': imagePath,
+      'amount': amount,
+      'explanation': explanation,
     };
   }
 
@@ -125,6 +143,9 @@ class HistoryEntry {
       timestamp:
           DateTime.tryParse((json['timestamp'] as String?) ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      imagePath: json['imagePath'] as String?,
+      amount: (json['amount'] as num?)?.toDouble(),
+      explanation: json['explanation'] as String?,
     );
   }
 

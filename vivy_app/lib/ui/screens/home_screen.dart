@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../domain/analysis_models.dart';
 
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(110),
+      constraints: const BoxConstraints(maxWidth: 390),
       builder: (_) => const _HowToUseSheet(),
     );
   }
@@ -40,152 +42,238 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final stats = _SummaryStats.fromEntries(widget.entries);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF0A3D8F),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Row(
-                children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white.withAlpha(20),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: SvgPicture.asset(
-                      'assets/vivy_assets/ViVy.svg',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'ViVy',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withAlpha(28),
-                    ),
-                    child: IconButton(
-                      onPressed: _showHowToModal,
-                      icon: SvgPicture.asset(
-                        'assets/vivy_assets/help.svg',
-                        width: 20,
-                        height: 20,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Welcome back',
-                  style: TextStyle(
-                    color: Color(0xFF9FC0EE),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Stay Protected.',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 44,
-                    fontWeight: FontWeight.w700,
-                    height: 1.08,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFE8ECF4),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(34)),
-                ),
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 24),
-                  child: Column(
-                    children: [
-                      _UploadCard(onTap: widget.onUploadVerify),
-                      const SizedBox(height: 10),
-                      _SummaryCard(stats: stats),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _MiniActionCard(
-                              title: 'History',
-                              subtitle: '${stats.total} results saved',
-                              iconAsset: 'assets/vivy_assets/history.svg',
-                              iconBackground: const Color(0xFFD1FAF5),
-                              onTap: widget.onOpenHistory,
+    return Theme(
+      data: Theme.of(context).copyWith(
+        textTheme: GoogleFonts.plusJakartaSansTextTheme(
+          Theme.of(context).textTheme,
+        ),
+        iconTheme: Theme.of(context).iconTheme.copyWith(color: Colors.white),
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFF0A3D8F),
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: Image.asset(
+                        'assets/vivy_assets/vivy_logo.PNG',
+                        fit: BoxFit.contain,
+                        width: 30,
+                        height: 30,
+                        errorBuilder: (context, error, stackTrace) {
+                          debugPrint('vivy_logo.PNG failed to load: $error');
+                          return Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.16),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: _MiniActionCard(
-                              title: 'Learn More',
-                              subtitle: 'About fraud',
-                              iconAsset: 'assets/vivy_assets/learn.svg',
-                              iconBackground: Color(0xFFFFEDD5),
-                              onTap: widget.onOpenLearnMore,
+                            alignment: Alignment.center,
+                            child: const Text(
+                              'V',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      _QrCard(onTap: widget.onOpenMessengerQr),
-                      const SizedBox(height: 10),
-                      _TipsCard(
-                        expanded: _tipsExpanded,
-                        onToggle: () {
-                          setState(() {
-                            _tipsExpanded = !_tipsExpanded;
-                          });
+                          );
                         },
                       ),
-                    ],
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'ViVy',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        height: 1,
+                        letterSpacing: -0.3,
+                        fontFamily: 'Plus Jakarta Sans',
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      onPressed: _showHowToModal,
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withOpacity(0.14),
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(10),
+                        minimumSize: const Size(44, 44),
+                      ),
+                      icon: Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: SvgPicture.asset(
+                            'assets/vivy_assets/question_mark.svg',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Welcome back',
+                    style: TextStyle(
+                      color: Color(0xFF9FC0EE),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.08,
+                      fontFamily: 'Plus Jakarta Sans',
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Stay Protected.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w800,
+                      height: 1.02,
+                      letterSpacing: -0.45,
+                      fontFamily: 'Plus Jakarta Sans',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Expanded(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFF1F4FB),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                  ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(
+                      14,
+                      14,
+                      14,
+                      20 + MediaQuery.of(context).padding.bottom,
+                    ),
+                    child: Column(
+                      children: [
+                        _UploadCard(onTap: widget.onUploadVerify),
+                        const SizedBox(height: 10),
+                        _SummaryCard(stats: stats),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _MiniActionCard(
+                                title: 'History',
+                                subtitle: '${stats.total} results saved',
+                                iconAsset: 'assets/vivy_assets/history.svg',
+                                iconBackground: const Color(0xFFCCFBF1),
+                                onTap: widget.onOpenHistory,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _MiniActionCard(
+                                title: 'Learn More',
+                                subtitle: 'About fraud',
+                                iconAsset: 'assets/vivy_assets/learn.svg',
+                                iconBackground: const Color(0xFFFFF1D6),
+                                onTap: widget.onOpenLearnMore,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        _QrCard(onTap: widget.onOpenMessengerQr),
+                        const SizedBox(height: 10),
+                        _TipsCard(
+                          expanded: _tipsExpanded,
+                          onToggle: () {
+                            setState(() {
+                              _tipsExpanded = !_tipsExpanded;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
+/// A small wrapper that gives any tappable card a quick, subtle
+/// press-down scale so taps feel responsive without being flashy.
+class _TapScale extends StatefulWidget {
+  const _TapScale({
+    required this.onTap,
+    required this.child,
+    this.borderRadius = BorderRadius.zero,
+  });
+
+  final VoidCallback? onTap;
+  final Widget child;
+  final BorderRadius borderRadius;
+
+  @override
+  State<_TapScale> createState() => _TapScaleState();
+}
+
+class _TapScaleState extends State<_TapScale> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _pressed ? 0.97 : 1.0,
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeOut,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: widget.borderRadius,
+        child: InkWell(
+          onTap: widget.onTap,
+          borderRadius: widget.borderRadius,
+          onHighlightChanged: (value) {
+            if (mounted) setState(() => _pressed = value);
+          },
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+}
+
+/// The "How to Use ViVy" walkthrough sheet.
+///
+/// Sized to exactly 390x490 and anchored to the bottom of the screen so it
+/// sits just below the Upload & Verify card on the Home screen behind it.
 class _HowToUseSheet extends StatefulWidget {
   const _HowToUseSheet();
 
@@ -240,145 +328,144 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFFF8FAFF),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 10, 8),
-                child: Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'How to Use ViVy',
-                        style: TextStyle(
-                          fontSize: 37,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1E293B),
-                          height: 1,
-                        ),
+    return SizedBox(
+      width: 390,
+      height: 490,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 20, 14, 4),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'How to Use ViVy',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1E293B),
+                        fontFamily: 'Plus Jakarta Sans',
+                        height: 1.1,
                       ),
                     ),
-                    Container(
-                      width: 34,
-                      height: 34,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xFFE9EEF7),
-                      ),
-                      child: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close, size: 18),
-                        color: const Color(0xFF334155),
-                      ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: IconButton.styleFrom(
+                      backgroundColor: const Color(0xFFE9EEF7),
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(8),
+                      minimumSize: const Size(36, 36),
                     ),
-                  ],
-                ),
+                    icon: const Icon(Icons.close, size: 18),
+                    color: const Color(0xFF334155),
+                  ),
+                ],
               ),
-              SizedBox(
-                height: 500,
-                child: PageView.builder(
-                  controller: _controller,
-                  itemCount: _steps.length,
-                  onPageChanged: (value) => setState(() => _index = value),
-                  itemBuilder: (context, i) {
-                    final step = _steps[i];
-                    return Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 6, 24, 0),
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: 184,
-                            child: Center(
-                              child: _HowToArt(type: step.art),
-                            ),
-                          ),
-                          const SizedBox(height: 18),
-                          Text(
-                            step.title,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 33,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF1E293B),
-                              height: 1.1,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            step.description,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF64748B),
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _controller,
+                itemCount: _steps.length,
+                onPageChanged: (value) => setState(() => _index = value),
+                itemBuilder: (context, i) {
+                  final step = _steps[i];
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(28, 6, 28, 0),
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(_steps.length, (dotIndex) {
-                        final active = dotIndex == _index;
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: active ? 30 : 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: active
-                                ? const Color(0xFF174AA5)
-                                : const Color(0xFFC8D4E5),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _next,
-                        style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF174AA5),
-                          minimumSize: const Size.fromHeight(54),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                      children: [
+                        SizedBox(
+                          height: 150,
+                          child: Center(
+                            child: _HowToArt(type: step.art),
                           ),
                         ),
-                        child: Text(
-                          _steps[_index].cta,
+                        const SizedBox(height: 18),
+                        Text(
+                          step.title,
+                          textAlign: TextAlign.center,
                           style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            fontSize: 21,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1E293B),
+                            fontFamily: 'Plus Jakarta Sans',
+                            height: 1.15,
                           ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          step.description,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                            fontFamily: 'Plus Jakarta Sans',
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_steps.length, (dotIndex) {
+                      final active = dotIndex == _index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: active ? 30 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: active
+                              ? const Color(0xFF174AA5)
+                              : const Color(0xFFC8D4E5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      );
+                    }),
+                  ),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: _next,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF174AA5),
+                        minimumSize: const Size.fromHeight(54),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Text(
+                        _steps[_index].cta,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontFamily: 'Plus Jakarta Sans',
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -394,67 +481,18 @@ class _HowToArt extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return switch (type) {
-      _HowToArtType.upload => Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 138,
-            height: 138,
-            child: SvgPicture.asset('assets/vivy_assets/scan.svg'),
-          ),
-          SizedBox(
-            width: 86,
-            height: 86,
-            child: SvgPicture.asset('assets/vivy_assets/upload.svg'),
-          ),
-        ],
-      ),
-      _HowToArtType.analysis => Stack(
-        alignment: Alignment.center,
-        children: [
-          SizedBox(
-            width: 130,
-            height: 130,
-            child: SvgPicture.asset('assets/vivy_assets/security.svg'),
-          ),
-          SizedBox(
-            width: 58,
-            height: 58,
-            child: SvgPicture.asset('assets/vivy_assets/analysis.svg'),
-          ),
-        ],
-      ),
-      _HowToArtType.result => Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: 118,
-            height: 118,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: const Color(0xFFDBF5EA),
-              border: Border.all(color: const Color(0xFF0BA47A), width: 2),
-            ),
-          ),
-          Container(
-            width: 88,
-            height: 88,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color(0xFF08A374),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(22),
-              child: SvgPicture.asset(
-                'assets/vivy_assets/checkmark.svg',
-                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-              ),
-            ),
-          ),
-        ],
-      ),
+    final asset = switch (type) {
+      _HowToArtType.upload => 'assets/vivy_assets/scan.svg',
+      _HowToArtType.analysis => 'assets/vivy_assets/security_check.svg',
+      _HowToArtType.result => 'assets/vivy_assets/green_check.svg',
     };
+
+    return SvgPicture.asset(
+      asset,
+      width: 150,
+      height: 150,
+      fit: BoxFit.contain,
+    );
   }
 }
 
@@ -465,66 +503,98 @@ class _UploadCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF174AA5),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+    return _TapScale(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        width: double.infinity,
+        constraints: const BoxConstraints(minHeight: 96),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF0D5FD4), Color(0xFF0A3D8F)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0A3D8F).withOpacity(0.22),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: Colors.white.withAlpha(18),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: SvgPicture.asset('assets/vivy_assets/upload.svg'),
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A3D8F).withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  'assets/vivy_assets/upload_transparent.svg',
+                  fit: BoxFit.contain,
+                  width: 28,
+                  height: 28,
+                ),
               ),
             ),
-            const SizedBox(width: 14),
-            const Expanded(
+            const SizedBox(width: 12),
+            Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: const [
                   Text(
                     'Upload & Verify\nReceipt',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      height: 1.15,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      height: 1.12,
+                      letterSpacing: -0.3,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 3),
                   Text(
                     'Tap to check any GCash receipt now',
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: Color(0xFFBFD3F7),
+                      color: Color(0xFFDBEAFE),
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFF4F7FCA),
+                color: const Color(0xFF0A3D8F).withOpacity(0.4),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: SvgPicture.asset('assets/vivy_assets/blue_back.svg'),
+              alignment: Alignment.center,
+              child: SvgPicture.asset(
+                'assets/vivy_assets/back_transparent.svg',
+                fit: BoxFit.contain,
+                width: 20,
+                height: 20,
               ),
             ),
           ],
@@ -544,40 +614,62 @@ class _SummaryCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF2F4F7),
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE3EAF7), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0A3D8F).withOpacity(0.05),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
             decoration: const BoxDecoration(
-              color: Color(0xFF189B8F),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              color: Color(0xFF0D9488),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             ),
-            child: const Text(
-              'YOUR SCAN SUMMARY',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  'assets/vivy_assets/summary_line.svg',
+                  width: 14,
+                  height: 14,
+                  fit: BoxFit.contain,
+                ),
+                const SizedBox(width: 6),
+                const Text(
+                  'YOUR SCAN SUMMARY',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                    fontFamily: 'Plus Jakarta Sans',
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 Expanded(
                   child: _SummaryPill(
                     value: '${stats.total}',
                     label: 'Scans',
-                    valueColor: const Color(0xFF174AA5),
-                    background: const Color(0xFFDDE4F2),
+                    valueColor: const Color(0xFF0A3D8F),
+                    background: const Color(0xFFE8EFFC),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -586,7 +678,7 @@ class _SummaryCard extends StatelessWidget {
                     value: '${stats.genuine}',
                     label: 'Genuine',
                     valueColor: const Color(0xFF059669),
-                    background: const Color(0xFFDDF3EA),
+                    background: const Color(0xFFDCFCE7),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -595,15 +687,15 @@ class _SummaryCard extends StatelessWidget {
                     value: '${stats.flagged}',
                     label: 'Flagged',
                     valueColor: const Color(0xFFDC2626),
-                    background: const Color(0xFFFBE4E4),
+                    background: const Color(0xFFFEE2E2),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 const Expanded(
@@ -611,49 +703,77 @@ class _SummaryCard extends StatelessWidget {
                     'Safe rate',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF5B6D8D),
-                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7A99),
+                      fontWeight: FontWeight.w700,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
                 ),
                 Text(
                   '${stats.safeRate.toStringAsFixed(0)}%',
                   style: const TextStyle(
-                    fontSize: 18,
-                    color: Color(0xFF174AA5),
-                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                    color: Color(0xFF0A3D8F),
+                    fontWeight: FontWeight.w800,
+                    fontFamily: 'Plus Jakarta Sans',
                   ),
                 ),
               ],
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
+            padding: const EdgeInsets.fromLTRB(10, 7, 10, 1),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(100),
               child: LinearProgressIndicator(
                 value: (stats.safeRate / 100).clamp(0, 1),
                 minHeight: 5,
-                backgroundColor: const Color(0xFFEFD4D8),
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF189B8F)),
+                backgroundColor: const Color(0xFFF1F5F9),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D9488)),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 2),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
             decoration: const BoxDecoration(
-              color: Color(0xFFEDEFF3),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
             ),
-            child: Text(
-              stats.lastScanText,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF5A6B89),
-                fontWeight: FontWeight.w600,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: 1,
+                  margin: const EdgeInsets.only(bottom: 8),
+                  color: const Color(0xFFE3EAF7),
+                ),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time_outlined,
+                      size: 15,
+                      color: Color(0xFF6B7A99),
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF6B7A99),
+                            fontWeight: FontWeight.w700,
+                            fontFamily: 'Plus Jakarta Sans',
+                          ),
+                          children: _buildLastScanTextSpans(stats.lastScanText, stats.lastScanColor),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ],
@@ -682,23 +802,47 @@ class _SummaryPill extends StatelessWidget {
         color: background,
         borderRadius: BorderRadius.circular(14),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       child: Column(
         children: [
-          Text(
-            value,
-            style: TextStyle(
-              color: valueColor,
-              fontSize: 21,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (label == 'Genuine')
+                SvgPicture.asset(
+                  'assets/vivy_assets/genuine_shield.svg',
+                  width: 15,
+                  height: 15,
+                  fit: BoxFit.contain,
+                )
+              else if (label == 'Flagged')
+                SvgPicture.asset(
+                  'assets/vivy_assets/fraudulent_warning.svg',
+                  width: 15,
+                  height: 15,
+                  fit: BoxFit.contain,
+                ),
+              if (label == 'Genuine' || label == 'Flagged') const SizedBox(width: 4),
+              Text(
+                value,
+                style: TextStyle(
+                  color: valueColor,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                  fontFamily: 'Plus Jakarta Sans',
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 1),
-          Text(label,
-            style: TextStyle(
-              color: Color(0xFF5D6C86),
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Color(0xFF6B7A99),
+              fontSize: 9.5,
+              fontWeight: FontWeight.w700,
+              fontFamily: 'Plus Jakarta Sans',
             ),
           ),
         ],
@@ -724,30 +868,36 @@ class _MiniActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return _TapScale(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE4EAF6), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0A3D8F).withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         child: Row(
           children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: iconBackground,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(7),
-                child: SvgPicture.asset(iconAsset),
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: SvgPicture.asset(
+                iconAsset,
+                fit: BoxFit.contain,
+                width: 30,
+                height: 30,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -755,17 +905,20 @@ class _MiniActionCard extends StatelessWidget {
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0E1726),
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
+                  const SizedBox(height: 1),
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF64748B),
+                      fontSize: 11.2,
+                      color: Color(0xFF6B7A99),
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
                 ],
@@ -785,32 +938,37 @@ class _QrCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return _TapScale(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE4EAF6), width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF0A3D8F).withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFE3EDFF),
-                border: Border.all(color: const Color(0xFF2E6BD2), width: 1.3),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: SvgPicture.asset('assets/vivy_assets/qr.svg'),
+            SizedBox(
+              width: 34,
+              height: 34,
+              child: SvgPicture.asset(
+                'assets/vivy_assets/qr.svg',
+                fit: BoxFit.contain,
+                width: 34,
+                height: 34,
               ),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: 8),
             const Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -818,32 +976,42 @@ class _QrCard extends StatelessWidget {
                   Text(
                     'My Facebook Receipt QR',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0E1726),
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
+                  SizedBox(height: 1),
                   Text(
                     'Let customers send you receipts to scan',
                     style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF64748B),
+                      fontSize: 12,
+                      color: Color(0xFF6B7A99),
                       fontWeight: FontWeight.w600,
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
                 ],
               ),
             ),
             Container(
-              width: 34,
-              height: 34,
-              decoration: const BoxDecoration(
+              width: 28,
+              height: 28,
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFE4EAF4),
+                color: const Color(0xFF0A3D8F).withOpacity(0.1),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: SvgPicture.asset('assets/vivy_assets/view.svg'),
+              alignment: Alignment.center,
+              child: SvgPicture.asset(
+                'assets/vivy_assets/back_transparent.svg',
+                fit: BoxFit.contain,
+                width: 16,
+                height: 16,
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF0A3D8F),
+                  BlendMode.srcIn,
+                ),
               ),
             ),
           ],
@@ -864,23 +1032,27 @@ class _TipsCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5ECB8),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE4D888)),
+        color: const Color(0xFFFEF9C3),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE4D888), width: 1),
       ),
       child: Column(
         children: [
           InkWell(
             onTap: onToggle,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               child: Row(
                 children: [
-                  SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: SvgPicture.asset('assets/vivy_assets/warning.svg'),
+                  Container(
+                    width: 20,
+                    height: 20,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      '💡',
+                      style: TextStyle(fontSize: 18),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
@@ -888,26 +1060,44 @@ class _TipsCard extends StatelessWidget {
                       'Tips for Staying Safe',
                       style: TextStyle(
                         fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        fontWeight: FontWeight.w800,
                         color: Color(0xFF8A5603),
+                        fontFamily: 'Plus Jakarta Sans',
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: SvgPicture.asset(
-                      expanded
-                          ? 'assets/vivy_assets/list.svg'
-                          : 'assets/vivy_assets/view.svg',
+                  AnimatedRotation(
+                    duration: const Duration(milliseconds: 200),
+                    turns: expanded ? 0.25 : 0,
+                    curve: Curves.easeOut,
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: Center(
+                        child: const Text(
+                          '>',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Color(0xFF8A5603),
+                            fontWeight: FontWeight.w800,
+                            height: 1.0,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (expanded)
-            Container(
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            sizeCurve: Curves.easeInOut,
+            crossFadeState:
+                expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            firstChild: const SizedBox(width: double.infinity),
+            secondChild: Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
               decoration: const BoxDecoration(
@@ -916,13 +1106,15 @@ class _TipsCard extends StatelessWidget {
               child: const Text(
                 'Always verify a GCash receipt before releasing goods or services. Fraudulent receipts often look identical to real ones. When in doubt, confirm payment inside the GCash app directly.',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
                   color: Color(0xFF875705),
                   height: 1.35,
+                  fontFamily: 'Plus Jakarta Sans',
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -936,6 +1128,7 @@ class _SummaryStats {
     required this.flagged,
     required this.safeRate,
     required this.lastScanText,
+    required this.lastScanColor,
   });
 
   final int total;
@@ -943,6 +1136,7 @@ class _SummaryStats {
   final int flagged;
   final double safeRate;
   final String lastScanText;
+  final Color lastScanColor;
 
   static _SummaryStats fromEntries(List<HistoryEntry> entries) {
     var total = 0;
@@ -965,6 +1159,9 @@ class _SummaryStats {
     final last = entries.isEmpty
       ? 'Last scan: No scans yet'
         : _formatLastScan(entries.first);
+    final lastScanColor = entries.isEmpty
+        ? const Color(0xFF6B7A99)
+        : _scanColorForLabel(entries.first.label);
 
     return _SummaryStats(
       total: total,
@@ -972,6 +1169,7 @@ class _SummaryStats {
       flagged: flagged,
       safeRate: safeRate,
       lastScanText: last,
+      lastScanColor: lastScanColor,
     );
   }
 
@@ -981,4 +1179,36 @@ class _SummaryStats {
         : ' - ${(entry.confidence! * 100).toStringAsFixed(1)}%';
     return 'Last scan: ${entry.label}$confidenceText';
   }
+
+  static Color _scanColorForLabel(String label) {
+    final normalized = label.toLowerCase();
+    if (normalized == 'genuine') {
+      return const Color(0xFF059669);
+    }
+    if (normalized == 'unclear' || normalized == 'fraudulent') {
+      return const Color(0xFFDC2626);
+    }
+    return const Color(0xFF6B7A99);
+  }
+}
+
+List<TextSpan> _buildLastScanTextSpans(String text, Color resultColor) {
+  final prefix = 'Last scan: ';
+  final prefixIndex = text.indexOf(prefix);
+  if (prefixIndex == -1) {
+    return [TextSpan(text: text)];
+  }
+
+  final prefixText = text.substring(0, prefixIndex + prefix.length);
+  final remainder = text.substring(prefixIndex + prefix.length);
+  final resultText = remainder.trim();
+
+  if (resultText.isEmpty) {
+    return [TextSpan(text: text)];
+  }
+
+  return [
+    TextSpan(text: prefixText),
+    TextSpan(text: resultText, style: TextStyle(color: resultColor)),
+  ];
 }

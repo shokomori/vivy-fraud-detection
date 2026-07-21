@@ -34,14 +34,14 @@ class HelpDesksContactsScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   Container(
-                    width: 42,
-                    height: 42,
+                    width: 48,
+                    height: 48,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: Color(0xFFF0F5FF),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(9),
                       child: SvgPicture.asset('assets/vivy_assets/help.svg'),
                     ),
                   ),
@@ -67,18 +67,18 @@ class HelpDesksContactsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _ContactCard(
-                      dotColor: const Color(0xFF2563EB),
+                      dotColor: const Color(0xFF0D9488),
                       title: 'GCash Support',
-                      lines: const ['help.gcash.com', 'In-app Help Center'],
+                      lines: const ['help.gcash.com'],
                       onTapLine: (line) async {
                         if (line == 'help.gcash.com') {
                           await _launchUri('https://help.gcash.com');
                         }
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _ContactCard(
-                      dotColor: const Color(0xFF06B6D4),
+                      dotColor: const Color(0xFF0A3D8F),
                       title: 'BSP Consumer Assistance',
                       lines: const [
                         '(02) 5306-2584',
@@ -92,9 +92,9 @@ class HelpDesksContactsScreen extends StatelessWidget {
                         }
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _ContactCard(
-                      dotColor: const Color(0xFFF97316),
+                      dotColor: const Color(0xFFDC2626),
                       title: 'PNP Anti-Cybercrime Group',
                       lines: const ['+63 (02) 8723-0401', 'cpiu.acg@pnp.gov.ph'],
                       onTapLine: (line) async {
@@ -105,9 +105,9 @@ class HelpDesksContactsScreen extends StatelessWidget {
                         }
                       },
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _ContactCard(
-                      dotColor: const Color(0xFF8B5CF6),
+                      dotColor: const Color(0xFFD97706),
                       title: 'DTI Consumer Hotline',
                       lines: const ['1-DTI (384)', 'ftesb@dti.gov.ph'],
                       onTapLine: (line) async {
@@ -119,20 +119,15 @@ class HelpDesksContactsScreen extends StatelessWidget {
                       },
                     ),
                     const SizedBox(height: 12),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF7ED),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: const Color(0xFFFED7AA)),
-                      ),
-                      child: const Text(
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4),
+                      child: Text(
                         'Keep records of the fraudulent receipt and reference number before reporting.',
+                        textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF9A3412),
+                          color: Color(0xFF64748B),
                           height: 1.4,
                         ),
                       ),
@@ -208,7 +203,7 @@ class _ContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 9),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -217,10 +212,10 @@ class _ContactCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 6),
+            padding: const EdgeInsets.only(top: 5),
             child: Container(
-              width: 11,
-              height: 11,
+              width: 10,
+              height: 10,
               decoration: BoxDecoration(shape: BoxShape.circle, color: dotColor),
             ),
           ),
@@ -232,30 +227,44 @@ class _ContactCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 17,
+                    fontSize: 15,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1E293B),
                   ),
                 ),
-                const SizedBox(height: 4),
-                for (final line in lines)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => onTapLine(line),
-                      child: Text(
-                        line,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF2563EB),
-                          decoration: TextDecoration.underline,
-                          decorationColor: Color(0xFF93C5FD),
+                const SizedBox(height: 2),
+                // All contact lines rendered side by side, separated by a
+                // dot, rather than stacked underneath each other.
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    for (int i = 0; i < lines.length; i++) ...[
+                      if (i > 0)
+                        const Text(
+                          ' · ',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => onTapLine(lines[i]),
+                        child: Text(
+                          lines[i],
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF2563EB),
+                            decoration: TextDecoration.underline,
+                            decorationColor: Color(0xFF93C5FD),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    ],
+                  ],
+                ),
               ],
             ),
           ),
