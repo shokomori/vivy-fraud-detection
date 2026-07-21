@@ -54,11 +54,22 @@ class HistoryScreen extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
                 final item = entries[index];
-                final isFraud = item.label.toLowerCase() == 'fraudulent';
-                final accent =
-                    isFraud ? const Color(0xFFDC2626) : const Color(0xFF059669);
-                final tintBg =
-                    isFraud ? const Color(0xFFF8D9D9) : const Color(0xFFCFF2DE);
+                final labelLower = item.label.toLowerCase();
+                final isFraud = labelLower == 'fraudulent';
+                final isGenuine = labelLower == 'genuine';
+                
+                late Color accent, tintBg;
+                if (isFraud) {
+                  accent = const Color(0xFFDC2626);
+                  tintBg = const Color(0xFFF8D9D9);
+                } else if (isGenuine) {
+                  accent = const Color(0xFF059669);
+                  tintBg = const Color(0xFFCFF2DE);
+                } else {
+                  // unclear, not receipt, error, and any other warning states
+                  accent = const Color(0xFFD97706);
+                  tintBg = const Color(0xFFFFF2D9);
+                }
                 final confidenceText = item.confidence == null
                     ? 'N/A confidence'
                     : '${(item.confidence! * 100).toStringAsFixed(1)}% confidence';
@@ -116,13 +127,16 @@ class HistoryScreen extends StatelessWidget {
                                       size: 13,
                                       color: VivyColors.textSecondary),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    _formatShort(item.timestamp),
-                                    style: const TextStyle(
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      fontSize: 12,
-                                      color: VivyColors.textSecondary,
-                                      fontWeight: FontWeight.w500,
+                                  Flexible(
+                                    child: Text(
+                                      _formatShort(item.timestamp),
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        fontSize: 12,
+                                        color: VivyColors.textSecondary,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:crypto/crypto.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -71,6 +72,8 @@ class VivyApp extends StatelessWidget {
           foregroundColor: VivyColors.textPrimary,
           elevation: 0,
         ),
+        fontFamily: 'Plus Jakarta Sans',
+        textTheme: GoogleFonts.plusJakartaSansTextTheme(),
         useMaterial3: true,
       ),
       home: const AppLaunchFlow(),

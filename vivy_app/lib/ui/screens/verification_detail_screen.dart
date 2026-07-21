@@ -11,16 +11,30 @@ class VerificationDetailScreen extends StatelessWidget {
   final HistoryEntry entry;
 
   bool get _isFraud => entry.label.toLowerCase() == 'fraudulent';
+  bool get _isGenuine => entry.label.toLowerCase() == 'genuine';
+  bool get _isNotReceipt => entry.label.toLowerCase().contains('not') && entry.label.toLowerCase().contains('receipt');
+  bool get _isUnclear => entry.label.toLowerCase() == 'unclear' || (entry.label.toLowerCase().contains('unclear'));
 
   @override
   Widget build(BuildContext context) {
-    final accent = _isFraud ? const Color(0xFFDC2626) : const Color(0xFF059669);
-    final tintBg = _isFraud ? const Color(0xFFF5E7E7) : const Color(0xFFDFF1E7);
-    final badgeBg = _isFraud ? const Color(0xFFF8D9D9) : const Color(0xFFCFF2DE);
+    late Color accent, tintBg, badgeBg;
+    if (_isFraud) {
+      accent = const Color(0xFFDC2626);
+      tintBg = const Color(0xFFF5E7E7);
+      badgeBg = const Color(0xFFF8D9D9);
+    } else if (_isGenuine) {
+      accent = const Color(0xFF059669);
+      tintBg = const Color(0xFFDFF1E7);
+      badgeBg = const Color(0xFFCFF2DE);
+    } else {
+      // unclear, not receipt, error, and any other warning states
+      accent = const Color(0xFFD97706);
+      tintBg = const Color(0xFFFFF2D9);
+      badgeBg = const Color(0xFFFFF2D9);
+    }
     final confidenceText = entry.confidence == null
         ? 'N/A'
         : '${(entry.confidence! * 100).toStringAsFixed(1)}%';
-    final referenceNo = _referenceFromTimestamp(entry.timestamp);
     final explanation = entry.explanation ?? _fallbackExplanation(_isFraud);
 
     return Scaffold(
@@ -98,9 +112,9 @@ class VerificationDetailScreen extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Icon(
-                                      _isFraud
-                                          ? Icons.error_outline
-                                          : Icons.check_circle_outline,
+                                      _isGenuine
+                                          ? Icons.check_circle_outline
+                                          : Icons.error_outline,
                                       size: 18,
                                       color: accent,
                                     ),
@@ -170,8 +184,6 @@ class VerificationDetailScreen extends StatelessWidget {
                         value: _formatDateTime(entry.timestamp)),
                     const Divider(height: 1, color: VivyColors.cardBorder),
                     _DetailRow(label: 'Confidence Score', value: confidenceText),
-                    const Divider(height: 1, color: VivyColors.cardBorder),
-                    _DetailRow(label: 'Reference No.', value: referenceNo),
                   ],
                 ),
               ),
@@ -443,11 +455,6 @@ class _DetailRow extends StatelessWidget {
       ),
     );
   }
-}
-
-String _referenceFromTimestamp(DateTime dt) {
-  String p2(int n) => n.toString().padLeft(2, '0');
-  return '${dt.year}${p2(dt.month)}${p2(dt.day)}${p2(dt.hour)}${p2(dt.minute)}';
 }
 
 String _formatDateTime(DateTime dt) {

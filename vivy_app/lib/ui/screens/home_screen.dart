@@ -296,7 +296,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
     (
       title: 'Step 2: AI Analysis',
       description:
-          'ViVy scans the receipt image for signs of tampering, font inconsistencies, and metadata anomalies.',
+          'ViVy scans the receipt image for signs of tampering, inconsistencies, and anomalies.',
       art: _HowToArtType.analysis,
       cta: 'Next',
     ),

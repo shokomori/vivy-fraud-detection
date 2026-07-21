@@ -6,6 +6,98 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// ---------------------------------------------------------------------------
+// Color tokens (per spec)
+// ---------------------------------------------------------------------------
+const _kBrowseGalleryBlue = const Color(0xFF1877F2); // Browse Gallery button + Watch Video pill + headings
+const _kDisplayQrBlue = Color(0xFF0A3D8F); // Display QR to Customer button
+const _kProTipBlue = Color(0xFF0369A1); // Pro tip text + icon
+const _kTextDark = Color(0xFF1B2434);
+const _kTextMuted = Color(0xFF6A7A96);
+const _kBorder = Color(0xFFE8ECF4);
+const _kBackgroundLight = Color(0xFFE8EFFC); // Light background
+const _kContainerWhite = Color(0xFFFFFFFF); // White containers
+
+// ---------------------------------------------------------------------------
+// Reusable "quick tap" animation wrapper — used on every tappable surface
+// ---------------------------------------------------------------------------
+class _AnimatedTapScale extends StatefulWidget {
+  const _AnimatedTapScale({required this.child, required this.onTap});
+
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  State<_AnimatedTapScale> createState() => _AnimatedTapScaleState();
+}
+
+class _AnimatedTapScaleState extends State<_AnimatedTapScale> {
+  double _scale = 1;
+
+  void _setScale(double value) => setState(() => _scale = value);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setScale(0.96),
+      onTapUp: (_) => _setScale(1),
+      onTapCancel: () => _setScale(1),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Dashed border painter for upload box
+// ---------------------------------------------------------------------------
+class _DashedBorderPainter extends CustomPainter {
+  const _DashedBorderPainter({
+    required this.color,
+    required this.width,
+    this.dashLength = 6,
+    this.gapLength = 4,
+  });
+
+  final Color color;
+  final double width;
+  final double dashLength;
+  final double gapLength;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke;
+
+    final radius = 14.0;
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+    final path = Path()..addRRect(rrect);
+
+    final metrics = path.computeMetrics(forceClosed: false);
+    for (var metric in metrics) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        final extractedPath =
+            metric.extractPath(distance, distance + dashLength);
+        canvas.drawPath(extractedPath, paint);
+        distance += dashLength + gapLength;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) => false;
+}
+
 class MessengerQrScreen extends StatefulWidget {
   const MessengerQrScreen({super.key});
 
@@ -57,428 +149,205 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
     });
   }
 
-  void _showComingSoon(String label) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('$label coming soon.')));
-  }
-
   void _openFullScreen() {
     final file = _qrFile;
     if (file == null) {
       return;
     }
     Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => _MessengerQrFullScreen(
-          qrFile: file,
-          onDownloadTap: () => _showComingSoon('Download'),
-          onShareTap: () => _showComingSoon('Share'),
-        ),
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 300),
+        reverseTransitionDuration: const Duration(milliseconds: 250),
+        pageBuilder: (_, __, ___) => _MessengerQrFullScreen(qrFile: file),
+        transitionsBuilder: (_, animation, __, child) {
+          final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
+          return FadeTransition(
+            opacity: curved,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.96, end: 1).animate(curved),
+              child: child,
+            ),
+          );
+        },
       ),
     );
   }
 
-  void _showHelpModal() {
+  void _showWatchVideoDialog() {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) {
-        return Container(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE3E8F0),
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Color(0xFFF0F5FF),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: SvgPicture.asset('assets/vivy_assets/question.svg'),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'How This QR Works',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'This QR is stored only on this device. Upload your own Facebook Messenger receipt QR code so customers can quickly send payment receipts for verification.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF475569),
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF174AA5),
-                    minimumSize: const Size.fromHeight(48),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text('Got it!'),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFE8ECF4),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: SvgPicture.asset('assets/vivy_assets/back.svg', width: 18),
-        ),
-        title: const Text(
-          'Facebook QR',
-          style: TextStyle(
-            color: Color(0xFF1E293B),
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _showHelpModal,
-            icon: SvgPicture.asset('assets/vivy_assets/help.svg', width: 20),
-          ),
-          const SizedBox(width: 6),
-        ],
+      barrierColor: Colors.black54,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
-      body: SafeArea(
-        top: false,
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.54,
+          minChildSize: 0.35,
+          maxChildSize: 0.75,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: _kContainerWhite,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SingleChildScrollView(
+                controller: scrollController,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 24),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    const SizedBox(height: 12),
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
+                      width: 48,
+                      height: 4,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF174AA5),
-                        borderRadius: BorderRadius.circular(18),
+                        color: const Color(0xFFE2E8F0),
+                        borderRadius: BorderRadius.circular(99),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 16, 0),
                       child: Row(
                         children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withAlpha(20),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(9),
-                              child: SvgPicture.asset('assets/vivy_assets/facebook.svg'),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'How to Set Up Your QR',
+                                  style: TextStyle(
+                                    color: _kTextDark,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                    fontFamily: 'Plus Jakarta Sans',
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  'Step-by-step instructions · 1:42',
+                                  style: TextStyle(
+                                    color: _kTextMuted,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Plus Jakarta Sans',
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 10),
-                          const Expanded(
-                            child: Text(
-                              'Manage your Messenger receipt QR locally on this device.',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                height: 1.35,
+                          _AnimatedTapScale(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F5FB),
+                                shape: BoxShape.circle,
                               ),
+                              child: const Icon(Icons.close, size: 20, color: _kTextDark),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    if (_qrFile == null) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 84,
-                              height: 84,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: const Color(0xFFEAF1FF),
-                                border: Border.all(color: const Color(0xFFC4D5F7)),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(18),
-                                child: SvgPicture.asset('assets/vivy_assets/upload_qr.svg'),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'No Messenger QR configured yet.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Upload your own QR image to display it full-screen for customers.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF64748B),
-                                height: 1.35,
-                              ),
-                            ),
-                            const SizedBox(height: 14),
-                            SizedBox(
-                              width: double.infinity,
-                              child: FilledButton.icon(
-                                onPressed: _uploadQr,
-                                icon: SvgPicture.asset(
-                                  'assets/vivy_assets/upload.svg',
-                                  width: 16,
-                                  height: 16,
-                                  colorFilter: const ColorFilter.mode(
-                                    Colors.white,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                                style: FilledButton.styleFrom(
-                                  backgroundColor: const Color(0xFF174AA5),
-                                  minimumSize: const Size.fromHeight(48),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                ),
-                                label: const Text('Upload Messenger QR'),
-                              ),
-                            ),
-                          ],
-                        ),
+                    const SizedBox(height: 18),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildVideoCard(),
+                    ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+                      child: Column(
+                        children: [
+                          _buildVideoStep('Open Facebook Messenger and go to Settings', 1),
+                          const SizedBox(height: 12),
+                          _buildVideoStep('Tap on your QR Code and save it to your gallery', 2),
+                          const SizedBox(height: 12),
+                          _buildVideoStep('Come back to ViVy and upload it here', 3),
+                        ],
                       ),
-                    ] else ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Active Messenger QR',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1E293B),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            AspectRatio(
-                              aspectRatio: 1,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(14),
-                                child: Image.file(_qrFile!, fit: BoxFit.cover),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: _openFullScreen,
-                                    style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(color: Color(0xFFCAD5E5)),
-                                      minimumSize: const Size.fromHeight(46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: const Text('View Full Screen'),
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: FilledButton(
-                                    onPressed: _uploadQr,
-                                    style: FilledButton.styleFrom(
-                                      backgroundColor: const Color(0xFF174AA5),
-                                      minimumSize: const Size.fromHeight(46),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    child: const Text('Replace QR'),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: _VisualActionButton(
-                                label: 'Download',
-                                icon: SvgPicture.asset(
-                                  'assets/vivy_assets/download.svg',
-                                  width: 16,
-                                  height: 16,
-                                ),
-                                onTap: () => _showComingSoon('Download'),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _VisualActionButton(
-                                label: 'Share',
-                                icon: SvgPicture.asset(
-                                  'assets/vivy_assets/facebook.svg',
-                                  width: 16,
-                                  height: 16,
-                                ),
-                                onTap: () => _showComingSoon('Share'),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                    ),
                   ],
                 ),
               ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
-}
 
-class _MessengerQrFullScreen extends StatelessWidget {
-  const _MessengerQrFullScreen({
-    required this.qrFile,
-    required this.onDownloadTap,
-    required this.onShareTap,
-  });
-
-  final File qrFile;
-  final VoidCallback onDownloadTap;
-  final VoidCallback onShareTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
-      body: SafeArea(
-        child: Column(
+  Widget _buildVideoCard() {
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Video player placeholder — your video will appear here.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F3FE6).withOpacity(0.08),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: const Color(0xFFDCE3F0)),
+        ),
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: SvgPicture.asset(
-                      'assets/vivy_assets/back.svg',
-                      width: 18,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: onDownloadTap,
-                    icon: SvgPicture.asset(
-                      'assets/vivy_assets/download.svg',
-                      width: 18,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: onShareTap,
-                    icon: SvgPicture.asset(
-                      'assets/vivy_assets/facebook.svg',
-                      width: 18,
-                      height: 18,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ),
-                ],
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  color: const Color(0xFFF7F9FE),
+                ),
               ),
             ),
-            const SizedBox(height: 18),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.file(qrFile, fit: BoxFit.contain),
+            Positioned.fill(
+              child: Center(
+                child: Container(
+                  width: 72,
+                  height: 72,
+                  decoration: BoxDecoration(
+                    color: _kBrowseGalleryBlue,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _kBrowseGalleryBlue.withOpacity(0.24),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.play_arrow, color: Colors.white, size: 38),
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              top: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _kBrowseGalleryBlue,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  '1:42',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Plus Jakarta Sans',
                   ),
                 ),
               ),
@@ -488,44 +357,698 @@ class _MessengerQrFullScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-class _VisualActionButton extends StatelessWidget {
-  const _VisualActionButton({
-    required this.label,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String label;
-  final Widget icon;
-  final VoidCallback onTap;
+  Widget _buildVideoStep(String text, int index) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: index < 3 ? const Color(0xFFDCEAFB) : const Color(0xFFD1FAE5),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              index.toString(),
+              style: TextStyle(
+                color: index < 3 ? _kBrowseGalleryBlue : const Color(0xFF0F9D74),
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontFamily: 'Plus Jakarta Sans',
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: _kTextDark,
+              height: 1.5,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFFF2F5FA),
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      backgroundColor: _kBackgroundLight,
+      appBar: AppBar(
+        backgroundColor: _kBackgroundLight,
+        elevation: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: _kContainerWhite,
+              shape: BoxShape.circle,
+              border: Border.all(color: const Color(0xFFDCE3F0)),
+            ),
+            alignment: Alignment.center,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back, size: 19, color: _kTextDark),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+            ),
+          ),
+        ),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'My Facebook Receipt QR',
+              style: TextStyle(
+                color: _kTextDark,
+                fontWeight: FontWeight.w800, // ExtraBold
+                fontSize: 20,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+            Text(
+              'Let customers send you receipts',
+              style: TextStyle(
+                color: _kTextMuted,
+                fontWeight: FontWeight.w600, // SemiBold
+                fontSize: 14,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+          ],
+        ),
+        centerTitle: false,
+        titleSpacing: 12,
+      ),
+      body: SafeArea(
+        top: false,
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // HOW IT WORKS section — wrapped in white container
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _kContainerWhite,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'HOW IT WORKS',
+                                style: TextStyle(
+                                  color: const Color(0xFF1877F2),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              _AnimatedTapScale(
+                                onTap: _showWatchVideoDialog,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: _kBrowseGalleryBlue,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.play_arrow, color: Colors.white, size: 16),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Watch Video',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                          fontFamily: 'Plus Jakarta Sans',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          // Steps — 1 & 2 use the blue badge, 3 uses the mint/teal badge
+                          _buildStep(
+                            number: '1',
+                            title: 'Download your QR from Facebook Messenger settings',
+                            badgeColor: const Color(0xFFDCEAFB),
+                            numberColor: _kBrowseGalleryBlue,
+                          ),
+                          _buildStep(
+                            number: '2',
+                            title: 'Upload it here so ViVy can display it',
+                            badgeColor: const Color(0xFFDCEAFB),
+                            numberColor: _kBrowseGalleryBlue,
+                          ),
+                          _buildStep(
+                            number: '3',
+                            title: 'Show it to customers — they scan & send you the receipt',
+                            badgeColor: const Color(0xFFD1FAE5),
+                            numberColor: const Color(0xFF0F9D74),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 300),
+                      switchInCurve: Curves.easeOutCubic,
+                      switchOutCurve: Curves.easeInCubic,
+                      transitionBuilder: (child, animation) => FadeTransition(
+                        opacity: animation,
+                        child: SizeTransition(sizeFactor: animation, child: child),
+                      ),
+                      child: _qrFile == null
+                          ? _buildUploadState(key: const ValueKey('empty'))
+                          : _buildActiveState(key: const ValueKey('active')),
+                    ),
+                    const SizedBox(height: 16),
+                    // Pro tip
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: _kProTipBlue.withAlpha(18),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _kProTipBlue.withAlpha(60)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.storefront_rounded, color: _kProTipBlue, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: RichText(
+                              text: const TextSpan(
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600, // SemiBold
+                                  color: _kProTipBlue,
+                                  height: 1.4,
+                                  fontFamily: 'Plus Jakarta Sans',
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'Pro tip: ',
+                                    style: TextStyle(fontWeight: FontWeight.w800), // ExtraBold
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        'Post your QR at your cashier or storefront so customers can scan and send you their receipt screenshot via Messenger.',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+
+  // Container-20: no QR uploaded yet
+  Widget _buildUploadState({Key? key}) {
+    return CustomPaint(
+      key: key,
+      painter: _DashedBorderPainter(
+        color: const Color.fromARGB(255, 244, 244, 245),
+        width: 2,
+      ),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: _kContainerWhite,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          children: [
+            // Just the raw icon asset — no wrapping circular/rounded background container.
+            SvgPicture.asset('assets/vivy_assets/upload_qr.svg', width: 56, height: 56),
+            const SizedBox(height: 16),
+            const Text(
+              'Upload Your QR Code',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800, // ExtraBold
+                color: _kTextDark,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Find it in Facebook Messenger → Settings → QR Code. Save it to your gallery, then upload here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600, // SemiBold
+                color: _kTextMuted,
+                height: 1.4,
+                fontFamily: 'Plus Jakarta Sans',
+              ),
+            ),
+            const SizedBox(height: 16),
+            _AnimatedTapScale(
+              onTap: _uploadQr,
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: _kBrowseGalleryBlue,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Text(
+                  'Browse Gallery',
+                  style: TextStyle(
+                    fontFamily: 'Plus Jakarta Sans',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Container-21: user's own uploaded QR is displayed
+  Widget _buildActiveState({Key? key}) {
+    return Column(
+      key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: _kContainerWhite,
+            border: Border.all(color: _kBorder),
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(5),
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              icon,
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1E293B),
+              // Blue line header
+              Container(
+                width: double.infinity,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1877F2),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(60),
+                    topRight: Radius.circular(60),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(19),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset('assets/vivy_assets/facebook.svg', width: 20, height: 20),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Facebook Messenger QR',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF1877F2),
+                            fontFamily: 'Plus Jakarta Sans',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    // This is the user's own uploaded QR image (their receipt QR).
+                    Hero(
+                      tag: 'messenger_qr_hero',
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.file(_qrFile!, fit: BoxFit.cover),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Text(
+                        'Tap below to display full-screen for your customer',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _kTextMuted,
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Plus Jakarta Sans',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    _AnimatedTapScale(
+                      onTap: _openFullScreen,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: _kDisplayQrBlue,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.visibility, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text(
+                              'Display QR to Customer',
+                              style: TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _AnimatedTapScale(
+                      onTap: _uploadQr,
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: _kBorder),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.refresh_rounded, color: _kTextDark, size: 18),
+                            SizedBox(width: 8),
+                            Text(
+                              'Replace QR Code',
+                              style: TextStyle(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                                color: _kTextDark,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStep({
+    required String number,
+    required String title,
+    required Color badgeColor,
+    required Color numberColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: badgeColor,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                number,
+                style: TextStyle(
+                  color: numberColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 12,
+                  fontFamily: 'Plus Jakarta Sans',
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600, // SemiBold
+                  color: _kTextDark,
+                  height: 1.4,
+                  fontFamily: 'Plus Jakarta Sans',
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MessengerQrFullScreen extends StatelessWidget {
+  const _MessengerQrFullScreen({
+    required this.qrFile,
+  });
+
+  final File qrFile;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F172A),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top bar with back button and title
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+              child: Row(
+                children: [
+                  _AnimatedTapScale(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xFF2A3B52),
+                      ),
+                      child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                    ),
+                  ),
+                  const Spacer(),
+                  Opacity(
+                    opacity: 0.6,
+                    child: const Text(
+                      'SHOW TO CUSTOMER',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        letterSpacing: 0.5,
+                        fontFamily: 'Plus Jakarta Sans',
+                      ),
+                    ),
+                  ),
+                  const Spacer(),
+                  SizedBox(width: 40),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Centered content area
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        // Facebook Messenger branding
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SvgPicture.asset('assets/vivy_assets/facebook.svg', width: 25, height: 25),
+                            const SizedBox(width: 8),
+                            Opacity(
+                              opacity: 0.8,
+                              child: const Text(
+                                'Facebook Messenger QR',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                  fontFamily: 'Plus Jakarta Sans',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // White rounded container with QR
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Hero(
+                            tag: 'messenger_qr_hero',
+                            child: SizedBox(
+                              width: 262,
+                              height: 262,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.file(qrFile, fit: BoxFit.cover),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        // Three dots pagination indicator
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1877F2),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1877F2),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1877F2),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        // Instruction text
+                        Opacity(
+                          opacity: 0.6,
+                          child: const Text(
+                            'Ask your customer to open Facebook Messenger, tap the QR icon, and scan this code to send you their receipt.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFFB8C1D1),
+                              height: 1.5,
+                              fontFamily: 'Plus Jakarta Sans',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // Done button at bottom
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: _AnimatedTapScale(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF2A3B52),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: const Text(
+                    'Done',
+                    style: TextStyle(
+                      fontFamily: 'Plus Jakarta Sans',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
