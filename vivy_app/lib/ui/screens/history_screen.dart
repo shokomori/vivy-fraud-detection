@@ -6,7 +6,7 @@ import '../theme/vivy_spacing.dart';
 import '../theme/vivy_text_styles.dart';
 import 'verification_detail_screen.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({
     super.key,
     required this.entries,
@@ -18,6 +18,45 @@ class HistoryScreen extends StatelessWidget {
   final Future<void> Function(HistoryEntry)? onDeleteEntry;
   final Future<void> Function()? onClearAll;
 
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  late List<HistoryEntry> _entries;
+
+  @override
+  void initState() {
+    super.initState();
+    _entries = List<HistoryEntry>.from(widget.entries);
+  }
+
+  @override
+  void didUpdateWidget(covariant HistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.entries, widget.entries)) {
+      _entries = List<HistoryEntry>.from(widget.entries);
+    }
+  }
+
+  Future<void> _handleDeleteEntry(HistoryEntry item) async {
+    if (mounted) {
+      setState(() {
+        _entries = _entries.where((entry) => entry != item).toList();
+      });
+    }
+    await widget.onDeleteEntry?.call(item);
+  }
+
+  Future<void> _handleClearAll() async {
+    if (mounted) {
+      setState(() {
+        _entries = <HistoryEntry>[];
+      });
+    }
+    await widget.onClearAll?.call();
+  }
+
   void _openDetail(BuildContext context, HistoryEntry item) {
     Navigator.of(context).push(
       PageRouteBuilder<void>(
@@ -26,8 +65,8 @@ class HistoryScreen extends StatelessWidget {
         pageBuilder: (context, animation, secondaryAnimation) =>
             VerificationDetailScreen(
               entry: item,
-              onDelete: onDeleteEntry != null
-                  ? () => onDeleteEntry!(item)
+            onDelete: widget.onDeleteEntry != null
+              ? () => _handleDeleteEntry(item)
                   : null,
             ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -63,7 +102,7 @@ class HistoryScreen extends StatelessWidget {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await onDeleteEntry?.call(item);
+              await _handleDeleteEntry(item);
             },
             child: const Text(
               'Delete',
@@ -89,9 +128,9 @@ class HistoryScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              onClearAll?.call();
+              await _handleClearAll();
             },
             child: const Text(
               'Clear All',
@@ -126,7 +165,7 @@ class HistoryScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         foregroundColor: VivyColors.textPrimary,
         elevation: 0,
-        actions: entries.isNotEmpty && onClearAll != null
+        actions: _entries.isNotEmpty && widget.onClearAll != null
             ? [
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
@@ -150,7 +189,7 @@ class HistoryScreen extends StatelessWidget {
               ]
             : null,
       ),
-      body: entries.isEmpty
+      body: _entries.isEmpty
           ? Center(
               child: Text(
                 'No local history yet.',
@@ -161,10 +200,10 @@ class HistoryScreen extends StatelessWidget {
             )
           : ListView.separated(
               padding: const EdgeInsets.all(VivySpacing.pagePadding),
-              itemCount: entries.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemCount: _entries.length,
+              separatorBuilder: (_, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                final item = entries[index];
+                final item = _entries[index];
                 final labelLower = item.label.toLowerCase();
                 final isFraud = labelLower == 'fraudulent';
                 final isGenuine = labelLower == 'genuine';
@@ -182,8 +221,8 @@ class HistoryScreen extends StatelessWidget {
                   tintBg = const Color(0xFFFFF2D9);
                 }
                 final confidenceText = item.confidence == null
-                    ? 'N/A confidence'
-                    : '${(item.confidence! * 100).toStringAsFixed(1)}% confidence';
+                  ? 'N/A'
+                  : '${(item.confidence! * 100).toStringAsFixed(1)}%';
 
                 return _TapScale(
                   borderRadius: BorderRadius.circular(VivySpacing.radiusMedium),
@@ -214,22 +253,31 @@ class HistoryScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: tintBg,
-                                  borderRadius: BorderRadius.circular(99),
-                                ),
-                                child: Text(
-                                  item.label,
-                                  style: TextStyle(
-                                    fontFamily: 'Plus Jakarta Sans',
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w700,
-                                    color: accent,
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 5),
+                                      decoration: BoxDecoration(
+                                        color: tintBg,
+                                        borderRadius: BorderRadius.circular(99),
+                                      ),
+                                      child: Text(
+                                        item.label,
+                                        maxLines: 1,
+                                        softWrap: false,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontFamily: 'Plus Jakarta Sans',
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w700,
+                                          color: accent,
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                               const SizedBox(height: 6),
                               Row(
@@ -252,35 +300,33 @@ class HistoryScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                confidenceText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: 'Plus Jakarta Sans',
+                                  fontSize: 12,
+                                  color: VivyColors.textSecondary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            if (item.amount != null)
-                              Text(
-                                '₱${item.amount!.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: VivyColors.textPrimary,
-                                ),
-                              ),
-                            Text(
-                              confidenceText,
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 12,
-                                color: VivyColors.textSecondary,
-                                fontWeight: FontWeight.w600,
-                              ),
+                        if (item.amount != null)
+                          Text(
+                            '₱${item.amount!.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontFamily: 'Plus Jakarta Sans',
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: VivyColors.textPrimary,
                             ),
-                          ],
-                        ),
-                        if (onDeleteEntry != null) ...[
+                          ),
+                        if (widget.onDeleteEntry != null) ...[
                           const SizedBox(width: 8),
                           _TapScale(
                             onTap: () => _showDeleteConfirmation(context, item),
