@@ -289,6 +289,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       label: result.type.displayLabel,
       confidence: result.confidence,
       timestamp: DateTime.now(),
+      explanation: result.explanation,
     );
 
     final updated = <HistoryEntry>[entry, ..._historyEntries];

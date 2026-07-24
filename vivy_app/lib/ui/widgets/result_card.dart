@@ -140,7 +140,7 @@ class ResultCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'AI EXPLANATION',
+                        'EXPLANATION',
                         style: TextStyle(
                           fontSize: 13,
                           color: Color(0xFF687A96),

@@ -61,9 +61,9 @@ class HistoryScreen extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(context).pop();
-              onDeleteEntry?.call(item);
+              await onDeleteEntry?.call(item);
             },
             child: const Text(
               'Delete',
