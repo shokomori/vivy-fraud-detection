@@ -8,8 +8,8 @@ extension ResultTypeLabel on ResultType {
   String get displayLabel => switch (this) {
     ResultType.fraudulent => 'Fraudulent',
     ResultType.genuine => 'Genuine',
-    ResultType.notReceipt => 'Not a GCash Receipt',
-    ResultType.unclear => 'Unclear Result',
+    ResultType.notReceipt => 'Unclear',
+    ResultType.unclear => 'Unclear',
     ResultType.error => 'Error',
   };
 }

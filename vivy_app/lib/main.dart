@@ -195,6 +195,14 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     }
   }
 
+  void _clearResult() {
+    setState(() {
+      _result = null;
+      _selectedFile = null;
+    });
+    _syncAnalyzeUiState();
+  }
+
   void _syncAnalyzeUiState() {
     _analyzeUiState.value = AnalyzeUiState(
       result: _result,
@@ -298,6 +306,40 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       await prefs.setStringList(_historyStorageKey, encoded);
     } catch (_) {
       // Ignore persistence failures to avoid blocking inference flow.
+    }
+  }
+
+  Future<void> _deleteHistoryEntry(HistoryEntry entry) async {
+    final updated = _historyEntries.where((item) => item != entry).toList();
+    if (mounted) {
+      setState(() {
+        _historyEntries = updated;
+      });
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = updated
+          .map((item) => item.toStorageString())
+          .toList(growable: false);
+      await prefs.setStringList(_historyStorageKey, encoded);
+    } catch (_) {
+      // Keep list updated even if persistence fails.
+    }
+  }
+
+  Future<void> _clearAllHistory() async {
+    if (mounted) {
+      setState(() {
+        _historyEntries = [];
+      });
+    }
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(_historyStorageKey, []);
+    } catch (_) {
+      // Keep list updated even if persistence fails.
     }
   }
 
@@ -1548,16 +1590,25 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     return HomeScreen(
       entries: _historyEntries,
       onUploadVerify: () {
+        _clearResult();
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => AnalyzeScreen(
               uiStateListenable: _analyzeUiState,
               threshold: kFraudThreshold,
               onPickPhoto: _pickPhoto,
+              onDone: () {
+                _clearResult();
+                Navigator.of(context).pop();
+              },
               onOpenHistory: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (_) => HistoryScreen(entries: _historyEntries),
+                    builder: (_) => HistoryScreen(
+                      entries: _historyEntries,
+                      onDeleteEntry: _deleteHistoryEntry,
+                      onClearAll: _clearAllHistory,
+                    ),
                   ),
                 );
               },
@@ -1575,7 +1626,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       onOpenHistory: () {
         Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (_) => HistoryScreen(entries: _historyEntries),
+            builder: (_) => HistoryScreen(
+              entries: _historyEntries,
+              onDeleteEntry: _deleteHistoryEntry,
+              onClearAll: _clearAllHistory,
+            ),
           ),
         );
       },

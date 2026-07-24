@@ -1139,7 +1139,6 @@ class _SummaryStats {
   final Color lastScanColor;
 
   static _SummaryStats fromEntries(List<HistoryEntry> entries) {
-    var total = 0;
     var genuine = 0;
     var flagged = 0;
 
@@ -1147,13 +1146,13 @@ class _SummaryStats {
       final label = entry.label.toLowerCase();
       if (label == 'genuine') {
         genuine++;
-        total++;
       } else if (label == 'fraudulent') {
         flagged++;
-        total++;
       }
     }
 
+    // Total includes all records: Genuine, Fraudulent, Unclear, and Not a GCash Receipt
+    final total = entries.length;
     final safeRate = total == 0 ? 0.0 : (genuine / total) * 100;
 
     final last = entries.isEmpty

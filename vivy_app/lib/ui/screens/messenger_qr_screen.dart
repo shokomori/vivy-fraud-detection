@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 // ---------------------------------------------------------------------------
 // Color tokens (per spec)
@@ -111,6 +112,7 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
 
   File? _qrFile;
   bool _loading = true;
+  int _qrVersion = 0;
 
   @override
   void initState() {
@@ -143,8 +145,12 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
       return;
     }
 
+    // Evict the cached image so Flutter loads the new file from disk.
+    await FileImage(saved).evict();
+
     setState(() {
       _qrFile = saved;
+      _qrVersion++;
       _loading = false;
     });
   }
@@ -230,7 +236,7 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
                                 ),
                                 SizedBox(height: 8),
                                 Text(
-                                  'Step-by-step instructions · 1:42',
+                                  'Step-by-step instructions',
                                   style: TextStyle(
                                     color: _kTextMuted,
                                     fontSize: 13,
@@ -285,75 +291,14 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
   }
 
   Widget _buildVideoCard() {
-    return GestureDetector(
-      onTap: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Video player placeholder — your video will appear here.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      },
-      child: Container(
-        width: double.infinity,
-        height: 180,
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F3FE6).withOpacity(0.08),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFDCE3F0)),
-        ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  color: const Color(0xFFF7F9FE),
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: Center(
-                child: Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: _kBrowseGalleryBlue,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: _kBrowseGalleryBlue.withOpacity(0.24),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Icon(Icons.play_arrow, color: Colors.white, size: 38),
-                ),
-              ),
-            ),
-            Positioned(
-              right: 16,
-              top: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: _kBrowseGalleryBlue,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: const Text(
-                  '1:42',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    fontFamily: 'Plus Jakarta Sans',
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+    final controller = YoutubePlayerController();
+    controller.loadVideoById(videoId: 'Uf7ti0cEMJQ');
+    
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: YoutubePlayer(
+        controller: controller,
+        aspectRatio: 16 / 9,
       ),
     );
   }
@@ -545,7 +490,7 @@ class _MessengerQrScreenState extends State<MessengerQrScreen> {
                       ),
                       child: _qrFile == null
                           ? _buildUploadState(key: const ValueKey('empty'))
-                          : _buildActiveState(key: const ValueKey('active')),
+                          : _buildActiveState(key: ValueKey('active_$_qrVersion')),
                     ),
                     const SizedBox(height: 16),
                     // Pro tip

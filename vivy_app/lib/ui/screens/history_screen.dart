@@ -7,12 +7,100 @@ import '../theme/vivy_text_styles.dart';
 import 'verification_detail_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
-  const HistoryScreen({super.key, required this.entries});
+  const HistoryScreen({
+    super.key,
+    required this.entries,
+    this.onDeleteEntry,
+    this.onClearAll,
+  });
 
   final List<HistoryEntry> entries;
+  final Future<void> Function(HistoryEntry)? onDeleteEntry;
+  final Future<void> Function()? onClearAll;
 
   void _openDetail(BuildContext context, HistoryEntry item) {
-    Navigator.of(context).push(_detailRoute(item));
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        transitionDuration: const Duration(milliseconds: 260),
+        reverseTransitionDuration: const Duration(milliseconds: 200),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            VerificationDetailScreen(
+              entry: item,
+              onDelete: onDeleteEntry != null
+                  ? () => onDeleteEntry!(item)
+                  : null,
+            ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+          return FadeTransition(
+            opacity: curved,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.04),
+                end: Offset.zero,
+              ).animate(curved),
+              child: child,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, HistoryEntry item) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Record?'),
+        content: const Text(
+          'Are you sure you want to delete this verification record? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onDeleteEntry?.call(item);
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showClearAllConfirmation(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear History?'),
+        content: const Text(
+          'Are you sure you want to clear your entire verification history? This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onClearAll?.call();
+            },
+            child: const Text(
+              'Clear All',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -38,6 +126,29 @@ class HistoryScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         foregroundColor: VivyColors.textPrimary,
         elevation: 0,
+        actions: entries.isNotEmpty && onClearAll != null
+            ? [
+                Padding(
+                  padding: const EdgeInsets.only(right: 12),
+                  child: _TapScale(
+                    onTap: () => _showClearAllConfirmation(context),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F5FB),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: VivyColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+              ]
+            : null,
       ),
       body: entries.isEmpty
           ? Center(
@@ -169,6 +280,20 @@ class HistoryScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                        if (onDeleteEntry != null) ...[
+                          const SizedBox(width: 8),
+                          _TapScale(
+                            onTap: () => _showDeleteConfirmation(context, item),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Icon(
+                                Icons.close,
+                                size: 20,
+                                color: VivyColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -262,28 +387,6 @@ class _BackButton extends StatelessWidget {
 /// detail screen, giving the navigation a softer feel than the default
 /// platform slide (echoes the motion used by the "How to Use" sheet on
 /// Home).
-Route<void> _detailRoute(HistoryEntry entry) {
-  return PageRouteBuilder<void>(
-    transitionDuration: const Duration(milliseconds: 260),
-    reverseTransitionDuration: const Duration(milliseconds: 200),
-    pageBuilder: (context, animation, secondaryAnimation) =>
-        VerificationDetailScreen(entry: entry),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.04),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
-  );
-}
-
 String _formatShort(DateTime dt) {
   const months = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',

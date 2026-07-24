@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../domain/analysis_models.dart';
 import '../widgets/result_card.dart';
@@ -25,6 +26,7 @@ class AnalyzeScreen extends StatelessWidget {
     required this.onPickPhoto,
     required this.onOpenHistory,
     required this.onExportRawScores,
+    this.onDone,
     this.onDebugGenuine,
     this.onDebugFraudulent,
   });
@@ -34,6 +36,7 @@ class AnalyzeScreen extends StatelessWidget {
   final VoidCallback onPickPhoto;
   final VoidCallback onOpenHistory;
   final VoidCallback onExportRawScores;
+  final VoidCallback? onDone;
   final VoidCallback? onDebugGenuine;
   final VoidCallback? onDebugFraudulent;
 
@@ -63,6 +66,7 @@ class AnalyzeScreen extends StatelessWidget {
                 threshold: threshold,
                 onPickPhoto: onPickPhoto,
                 onExportRawScores: onExportRawScores,
+                onDone: onDone,
               ),
             },
           ),
@@ -250,6 +254,8 @@ class _UploadStateView extends StatelessWidget {
               ],
             ),
           ),
+          const SizedBox(height: 12),
+          const _GuideVideoCard(),
           if (loadError != null) ...[
             const SizedBox(height: 12),
             Container(
@@ -326,12 +332,14 @@ class _ResultStateView extends StatelessWidget {
     required this.threshold,
     required this.onPickPhoto,
     required this.onExportRawScores,
+    this.onDone,
   });
 
   final AnalysisResult result;
   final double threshold;
   final VoidCallback onPickPhoto;
   final VoidCallback onExportRawScores;
+  final VoidCallback? onDone;
 
   @override
   Widget build(BuildContext context) {
@@ -388,7 +396,13 @@ class _ResultStateView extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    if (onDone != null) {
+                      onDone!();
+                    } else {
+                      Navigator.of(context).pop();
+                    }
+                  },
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF15489D),
                     minimumSize: const Size.fromHeight(56),
@@ -738,6 +752,102 @@ class _TipBullet extends StatelessWidget {
   }
 }
 
+class _GuideVideoCard extends StatefulWidget {
+  const _GuideVideoCard();
+
+  @override
+  State<_GuideVideoCard> createState() => _GuideVideoCardState();
+}
+
+class _GuideVideoCardState extends State<_GuideVideoCard> {
+  late YoutubePlayerController _youtubeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _youtubeController = YoutubePlayerController();
+    _youtubeController.loadVideoById(videoId: 'Uf7ti0cEMJQ');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white.withAlpha(225),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFD7DFED)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 10),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F0FC),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.play_circle_outline_rounded,
+                    color: Color(0xFF15489D),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Guide Video',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF1B2434),
+                          fontFamily: 'Plus Jakarta Sans',
+                        ),
+                      ),
+                      Text(
+                        'How to share your Facebook QR receipt',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                          fontFamily: 'Plus Jakarta Sans',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(17),
+              bottomRight: Radius.circular(17),
+            ),
+            child: YoutubePlayer(
+              controller: _youtubeController,
+              aspectRatio: 16 / 9,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _DashedBorderPainter extends CustomPainter {
   const _DashedBorderPainter({
     required this.color,
@@ -865,14 +975,14 @@ List<String> _recommendations(ResultType type) {
       'Request a fresh payment confirmation from sender.',
     ],
     ResultType.notReceipt => const [
-      'Upload a full GCash receipt screenshot.',
-      'Ensure transaction details are visible and clear.',
-      'Avoid cropped or heavily edited images.',
+      'The image does not appear to be a GCash receipt.',
+      'Upload a full, unedited GCash e-receipt screenshot.',
+      'Ensure all transaction details are fully visible.',
     ],
     ResultType.unclear => const [
-      'Retake a clear and complete screenshot.',
-      'Keep the receipt fully in frame.',
-      'Try another screenshot source if available.',
+      'The system could not confidently verify this receipt.',
+      'Retake a clear, well-lit, and complete screenshot.',
+      'Try uploading the original GCash e-receipt without edits.',
     ],
     ResultType.error => const [
       'Retry the analysis with a clear image.',
