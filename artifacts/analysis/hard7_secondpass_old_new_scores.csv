@@ -1,0 +1,8 @@
+source_path,y_true,label_text,old_pre_ai_score,old_pre_ai_pred,new_ai_expansion_score,new_ai_expansion_pred,secondpass_candidate_score,secondpass_candidate_pred
+dataset/iOSGenuine/gI_388.jpg,0,ios_genuine,0.009605404920876026,0,0.9133595824241638,1,0.03474876657128334,0
+dataset/iOSGenuine/gI_390.jpg,0,ios_genuine,0.020850541070103645,0,0.9562393426895142,1,0.08566834032535553,0
+dataset/iOSGenuine/gI_391.jpg,0,ios_genuine,0.03836873918771744,0,0.9833683371543884,1,0.13028556108474731,0
+dataset/AndroidGenuine/gA_192.jpg,0,android_genuine,0.009297762997448444,0,0.32519325613975525,1,0.11430778354406357,0
+dataset/AndroidGenuine/gA_272.jfif,0,android_genuine,0.03407007083296776,0,0.46774187684059143,1,0.4256284236907959,1
+dataset/iOSGenuine/gI_014.PNG,0,ios_genuine,0.02443261630833149,0,0.3653288781642914,1,0.33117619156837463,1
+dataset/iOSGenuine/gI_059.jpg,0,ios_genuine,0.013026513159275055,0,0.1186869665980339,1,0.24308109283447266,1

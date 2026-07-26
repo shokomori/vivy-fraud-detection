@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "probe-output",
+			"type": "shell",
+			"command": "c:/Users/YUKI/Documents/Vivy/.venv311/Scripts/python.exe",
+			"args": [
+				"-c",
+				"print('task-ok')"
+			]
+		}
+	]
+}

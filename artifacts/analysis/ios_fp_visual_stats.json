@@ -1,0 +1,32 @@
+[
+  {
+    "width": 1055.0,
+    "height": 2048.0,
+    "mean_luma": 160.12522030509479,
+    "std_luma": 87.8069060789277,
+    "p10_luma": 77.0,
+    "p90_luma": 255.0,
+    "laplacian_var_focus": 242.43407694016588,
+    "path": "dataset/iOSGenuine/gI_388.jpg"
+  },
+  {
+    "width": 1055.0,
+    "height": 2048.0,
+    "mean_luma": 160.17021993483414,
+    "std_luma": 87.64569049036798,
+    "p10_luma": 77.0,
+    "p90_luma": 255.0,
+    "laplacian_var_focus": 244.3400455420616,
+    "path": "dataset/iOSGenuine/gI_390.jpg"
+  },
+  {
+    "width": 1060.0,
+    "height": 2048.0,
+    "mean_luma": 157.68563900353774,
+    "std_luma": 87.63428265703483,
+    "p10_luma": 77.0,
+    "p90_luma": 255.0,
+    "laplacian_var_focus": 285.9286565816627,
+    "path": "dataset/iOSGenuine/gI_391.jpg"
+  }
+]

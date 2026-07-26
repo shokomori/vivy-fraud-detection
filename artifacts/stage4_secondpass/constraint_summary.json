@@ -1,0 +1,22 @@
+{
+  "baseline_old_on_val": {
+    "val_non_ai_accuracy": 0.96875,
+    "val_non_ai_genuine_fpr": 0.0125,
+    "val_overall_fraud_recall": 0.9294117647058824
+  },
+  "best_epoch_row": {
+    "epoch": 1.0,
+    "all_constraints_ok": 0.0,
+    "hard_all_ok": 0.0,
+    "hard_ok_count": 4.0,
+    "hard_max_prob": 0.4256284236907959,
+    "val_fraud_recall": 0.9882352941176471,
+    "val_non_ai_accuracy": 0.95625,
+    "val_non_ai_genuine_fpr": 0.075,
+    "val_loss": 0.08788071572780609
+  },
+  "all_constraints_ever_satisfied": false,
+  "threshold": 0.16,
+  "min_fraud_recall": 0.98,
+  "final_model_path": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4_secondpass\\mobilenetv2_secondpass_from_old.keras"
+}

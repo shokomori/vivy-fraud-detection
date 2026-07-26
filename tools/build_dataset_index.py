@@ -3,8 +3,10 @@ import csv
 
 CLASS_MAP = {
     "AndroidFraudulent": "android_fraudulent",
+    "AndroidAIFraudulent": "android_ai_fraudulent",
     "AndroidGenuine": "android_genuine",
     "iOSFraudulent": "ios_fraudulent",
+    "iOSAIFraudulent": "ios_ai_fraudulent",
     "iOSGenuine": "ios_genuine",
 }
 

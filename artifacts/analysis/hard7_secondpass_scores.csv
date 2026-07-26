@@ -1,0 +1,8 @@
+source_path,fraud_probability,y_pred
+dataset/AndroidGenuine/gA_192.jpg,0.11430778,0
+dataset/AndroidGenuine/gA_272.jfif,0.42562842,1
+dataset/iOSGenuine/gI_014.PNG,0.3311762,1
+dataset/iOSGenuine/gI_059.jpg,0.2430811,0
+dataset/iOSGenuine/gI_388.jpg,0.034748767,0
+dataset/iOSGenuine/gI_390.jpg,0.08566834,0
+dataset/iOSGenuine/gI_391.jpg,0.13028556,0

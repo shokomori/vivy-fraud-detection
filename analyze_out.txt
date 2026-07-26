@@ -1,0 +1,24 @@
+Analyzing vivy_app...                                           
+
+warning - A value for optional parameter 'dashLength' isn't ever given. Try removing the unused parameter - lib\ui\screens\analyze_screen.dart:713:10 - unused_element_parameter
+warning - A value for optional parameter 'gapLength' isn't ever given. Try removing the unused parameter - lib\ui\screens\analyze_screen.dart:714:10 - unused_element_parameter
+warning - A value for optional parameter 'borderRadius' isn't ever given. Try removing the unused parameter - lib\ui\screens\analyze_screen.dart:756:10 - unused_element_parameter
+  error - Expected to find ';' - lib\ui\screens\history_screen.dart:331:11 - expected_token
+warning - Dead code. Try removing the code, or fixing the code before it so that it can be reached - lib\ui\screens\history_screen.dart:331:12 - dead_code
+  error - Expected an identifier - lib\ui\screens\history_screen.dart:331:12 - missing_identifier
+  error - Expected to find ';' - lib\ui\screens\history_screen.dart:331:12 - expected_token
+  error - Unexpected text ';'. Try removing the text - lib\ui\screens\history_screen.dart:331:12 - unexpected_token
+  error - Expected an identifier - lib\ui\screens\history_screen.dart:332:9 - missing_identifier
+  error - Unexpected text ';'. Try removing the text - lib\ui\screens\history_screen.dart:332:9 - unexpected_token
+   info - Unnecessary empty statement. Try removing the empty statement or restructuring the code - lib\ui\screens\history_screen.dart:332:10 - empty_statements
+   info - The import of 'package:flutter/foundation.dart' is unnecessary because all of the used elements are also provided by the import of 'package:flutter/material.dart'. Try removing the import directive - lib\ui\screens\home_screen.dart:2:8 - unnecessary_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement - lib\ui\screens\splash_screen.dart:155:25 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement - lib\ui\screens\splash_screen.dart:208:35 - deprecated_member_use
+warning - The declaration '_isNotReceipt' isn't referenced. Try removing the declaration of '_isNotReceipt' - lib\ui\screens\verification_detail_screen.dart:20:12 - unused_element
+warning - The declaration '_isUnclear' isn't referenced. Try removing the declaration of '_isUnclear' - lib\ui\screens\verification_detail_screen.dart:23:12 - unused_element
+   info - Don't use 'BuildContext's across async gaps. Try rewriting the code to not use the 'BuildContext', or guard the use with a 'mounted' check - lib\ui\screens\verification_detail_screen.dart:44:30 - use_build_context_synchronously
+warning - A value for optional parameter 'borderRadius' isn't ever given. Try removing the unused parameter - lib\ui\screens\verification_detail_screen.dart:313:10 - unused_element_parameter
+warning - A value for optional parameter 'imagePath' isn't ever given. Try removing the unused parameter - lib\ui\screens\verification_detail_screen.dart:446:10 - unused_element_parameter
+   info - Invalid use of a private type in a public API. Try making the private type public, or making the API that uses the private type also be private - tool\export_flutter_preprocess.dart:411:19 - library_private_types_in_public_api
+   info - Invalid use of a private type in a public API. Try making the private type public, or making the API that uses the private type also be private - tool\export_flutter_preprocess.dart:422:9 - library_private_types_in_public_api
+

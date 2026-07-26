@@ -1,0 +1,38 @@
+{
+  "threshold": 0.16,
+  "old_non_ai_reference": {
+    "accuracy": 0.99375,
+    "precision_fraudulent": 1.0,
+    "recall_fraudulent": 0.9875,
+    "f1_fraudulent": 0.9937106918238994,
+    "genuine_fpr": 0.0,
+    "confusion_matrix": [
+      [
+        80,
+        0
+      ],
+      [
+        1,
+        79
+      ]
+    ]
+  },
+  "summary_rows": [
+    {
+      "subset_size": 10,
+      "gate_hard7_all_genuine_at_0_16": false,
+      "gate_non_ai_match_or_beat_old": false,
+      "gate_fraud_recall_ge_0_98": true,
+      "all_gates_pass": false,
+      "full_accuracy": 0.9878787878787879,
+      "full_precision_fraud": 0.9770114942528736,
+      "full_recall_fraud": 1.0,
+      "full_f1_fraud": 0.9883720930232558,
+      "non_ai_accuracy": 0.9875,
+      "non_ai_genuine_fpr": 0.025,
+      "ai_samples_used_in_train": 10
+    }
+  ],
+  "selected_subset": null,
+  "any_pass": false
+}

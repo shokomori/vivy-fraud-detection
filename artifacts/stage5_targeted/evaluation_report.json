@@ -1,0 +1,46 @@
+{
+  "label_mapping": {
+    "0": "Genuine",
+    "1": "Fraudulent",
+    "positive_class_for_metrics_and_threshold": 1
+  },
+  "model_path": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4_targeted\\mobilenetv2_fraud_detector_targeted.keras",
+  "threshold_tuning": {
+    "selected_threshold": 0.2149999999999999,
+    "min_fraud_recall_target": 0.95,
+    "max_genuine_fpr_ceiling": 0.05,
+    "selection_rationale": "No threshold met both constraints; selected lowest genuine-FPR among recall-eligible thresholds, then best F2.",
+    "search_range": [
+      0.05,
+      0.95,
+      0.005
+    ]
+  },
+  "test_metrics": {
+    "accuracy": 0.8666666666666667,
+    "precision_fraudulent": 0.8118811881188119,
+    "recall_fraudulent": 0.9647058823529412,
+    "f1_fraudulent": 0.8817204301075269
+  },
+  "confusion_matrix_test": {
+    "labels_order": [
+      "Genuine (0)",
+      "Fraudulent (1)"
+    ],
+    "matrix": [
+      [
+        61,
+        19
+      ],
+      [
+        3,
+        82
+      ]
+    ]
+  },
+  "artifacts": {
+    "threshold_search_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage5_targeted\\threshold_search_val.csv",
+    "confusion_matrix_png": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage5_targeted\\confusion_matrix_test.png",
+    "test_predictions_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage5_targeted\\test_predictions.csv"
+  }
+}

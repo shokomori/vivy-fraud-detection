@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/analysis_models.dart';
@@ -10,11 +11,13 @@ class HistoryScreen extends StatefulWidget {
   const HistoryScreen({
     super.key,
     required this.entries,
+    this.entriesListenable,
     this.onDeleteEntry,
     this.onClearAll,
   });
 
   final List<HistoryEntry> entries;
+  final ValueNotifier<List<HistoryEntry>>? entriesListenable;
   final Future<void> Function(HistoryEntry)? onDeleteEntry;
   final Future<void> Function()? onClearAll;
 
@@ -23,37 +26,48 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
-  late List<HistoryEntry> _entries;
+  late ValueNotifier<List<HistoryEntry>> _entriesNotifier;
 
   @override
   void initState() {
     super.initState();
-    _entries = List<HistoryEntry>.from(widget.entries);
+    _entriesNotifier = widget.entriesListenable ??
+        ValueNotifier<List<HistoryEntry>>(List<HistoryEntry>.from(widget.entries));
+    _entriesNotifier.value = List<HistoryEntry>.from(widget.entries);
   }
 
   @override
   void didUpdateWidget(covariant HistoryScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.entries, widget.entries)) {
-      _entries = List<HistoryEntry>.from(widget.entries);
+    if (widget.entriesListenable != oldWidget.entriesListenable) {
+      if (oldWidget.entriesListenable == null) {
+        _entriesNotifier.dispose();
+      }
+      _entriesNotifier = widget.entriesListenable ??
+          ValueNotifier<List<HistoryEntry>>(List<HistoryEntry>.from(widget.entries));
+    }
+    if (widget.entriesListenable == null &&
+        !identical(oldWidget.entries, widget.entries)) {
+      _entriesNotifier.value = List<HistoryEntry>.from(widget.entries);
     }
   }
 
-  Future<void> _handleDeleteEntry(HistoryEntry item) async {
-    if (mounted) {
-      setState(() {
-        _entries = _entries.where((entry) => entry != item).toList();
-      });
+  @override
+  void dispose() {
+    if (widget.entriesListenable == null) {
+      _entriesNotifier.dispose();
     }
+    super.dispose();
+  }
+
+  Future<void> _handleDeleteEntry(HistoryEntry item) async {
+    final updated = _entriesNotifier.value.where((entry) => entry != item).toList();
+    _entriesNotifier.value = updated;
     await widget.onDeleteEntry?.call(item);
   }
 
   Future<void> _handleClearAll() async {
-    if (mounted) {
-      setState(() {
-        _entries = <HistoryEntry>[];
-      });
-    }
+    _entriesNotifier.value = <HistoryEntry>[];
     await widget.onClearAll?.call();
   }
 
@@ -144,208 +158,214 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: VivyColors.appBackground,
-      appBar: AppBar(
-        titleSpacing: 8,
-        leadingWidth: 56,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 12),
-          child: _BackButton(onTap: () => Navigator.of(context).maybePop()),
-        ),
-        title: const Text(
-          'Verification History',
-          style: TextStyle(
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w800,
-            fontSize: 20,
-            color: VivyColors.textPrimary,
+    return ValueListenableBuilder<List<HistoryEntry>>(
+      valueListenable: widget.entriesListenable ?? _entriesNotifier,
+      builder: (context, entries, _) {
+        final displayEntries = entries;
+        return Scaffold(
+          backgroundColor: VivyColors.appBackground,
+          appBar: AppBar(
+            titleSpacing: 8,
+            leadingWidth: 56,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: _BackButton(onTap: () => Navigator.of(context).maybePop()),
+            ),
+            title: const Text(
+              'Verification History',
+              style: TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                fontWeight: FontWeight.w800,
+                fontSize: 20,
+                color: VivyColors.textPrimary,
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            foregroundColor: VivyColors.textPrimary,
+            elevation: 0,
+            actions: displayEntries.isNotEmpty && widget.onClearAll != null
+                ? [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: _TapScale(
+                        onTap: () => _showClearAllConfirmation(context),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F5FB),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.delete_outline,
+                            size: 20,
+                            color: VivyColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ]
+                : null,
           ),
-        ),
-        backgroundColor: Colors.transparent,
-        foregroundColor: VivyColors.textPrimary,
-        elevation: 0,
-        actions: _entries.isNotEmpty && widget.onClearAll != null
-            ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _TapScale(
-                    onTap: () => _showClearAllConfirmation(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F5FB),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.delete_outline,
-                        size: 20,
-                        color: VivyColors.textPrimary,
-                      ),
+          body: displayEntries.isEmpty
+              ? Center(
+                  child: Text(
+                    'No local history yet.',
+                    style: VivyTextStyles.body.copyWith(
+                      fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
-                ),
-              ]
-            : null,
-      ),
-      body: _entries.isEmpty
-          ? Center(
-              child: Text(
-                'No local history yet.',
-                style: VivyTextStyles.body.copyWith(
-                  fontFamily: 'Plus Jakarta Sans',
-                ),
-              ),
-            )
-          : ListView.separated(
-              padding: const EdgeInsets.all(VivySpacing.pagePadding),
-              itemCount: _entries.length,
-              separatorBuilder: (_, index) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = _entries[index];
-                final labelLower = item.label.toLowerCase();
-                final isFraud = labelLower == 'fraudulent';
-                final isGenuine = labelLower == 'genuine';
-                
-                late Color accent, tintBg;
-                if (isFraud) {
-                  accent = const Color(0xFFDC2626);
-                  tintBg = const Color(0xFFF8D9D9);
-                } else if (isGenuine) {
-                  accent = const Color(0xFF059669);
-                  tintBg = const Color(0xFFCFF2DE);
-                } else {
-                  // unclear, not receipt, error, and any other warning states
-                  accent = const Color(0xFFD97706);
-                  tintBg = const Color(0xFFFFF2D9);
-                }
-                final confidenceText = item.confidence == null
-                  ? 'N/A'
-                  : '${(item.confidence! * 100).toStringAsFixed(1)}%';
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.all(VivySpacing.pagePadding),
+                  itemCount: displayEntries.length,
+                  separatorBuilder: (_, index) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final item = displayEntries[index];
+                    final labelLower = item.label.toLowerCase();
+                    final isFraud = labelLower == 'fraudulent';
+                    final isGenuine = labelLower == 'genuine';
 
-                return _TapScale(
-                  borderRadius: BorderRadius.circular(VivySpacing.radiusMedium),
-                  onTap: () => _openDetail(context, item),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: VivyColors.surface,
-                      borderRadius:
-                          BorderRadius.circular(VivySpacing.radiusMedium),
-                      border: Border.all(color: VivyColors.cardBorder),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: tintBg,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(Icons.receipt_long_outlined,
-                              color: accent, size: 22),
+                    late Color accent, tintBg;
+                    if (isFraud) {
+                      accent = const Color(0xFFDC2626);
+                      tintBg = const Color(0xFFF8D9D9);
+                    } else if (isGenuine) {
+                      accent = const Color(0xFF059669);
+                      tintBg = const Color(0xFFCFF2DE);
+                    } else {
+                      // unclear, not receipt, error, and any other warning states
+                      accent = const Color(0xFFD97706);
+                      tintBg = const Color(0xFFFFF2D9);
+                    }
+                    final confidenceText = item.confidence == null
+                        ? 'N/A'
+                        : '${(item.confidence! * 100).toStringAsFixed(1)}%';
+
+                    return _TapScale(
+                      borderRadius: BorderRadius.circular(VivySpacing.radiusMedium),
+                      onTap: () => _openDetail(context, item),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: VivyColors.surface,
+                          borderRadius:
+                              BorderRadius.circular(VivySpacing.radiusMedium),
+                          border: Border.all(color: VivyColors.cardBorder),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: tintBg,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(Icons.receipt_long_outlined,
+                                  color: accent, size: 22),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Flexible(
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: tintBg,
-                                        borderRadius: BorderRadius.circular(99),
-                                      ),
-                                      child: Text(
-                                        item.label,
-                                        maxLines: 1,
-                                        softWrap: false,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontFamily: 'Plus Jakarta Sans',
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: accent,
+                                  Row(
+                                    children: [
+                                      Flexible(
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10, vertical: 5),
+                                          decoration: BoxDecoration(
+                                            color: tintBg,
+                                            borderRadius: BorderRadius.circular(99),
+                                          ),
+                                          child: Text(
+                                            item.label,
+                                            maxLines: 1,
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontFamily: 'Plus Jakarta Sans',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: accent,
+                                            ),
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  const Icon(Icons.schedule,
-                                      size: 13,
-                                      color: VivyColors.textSecondary),
-                                  const SizedBox(width: 4),
-                                  Flexible(
-                                    child: Text(
-                                      _formatShort(item.timestamp),
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        fontFamily: 'Plus Jakarta Sans',
-                                        fontSize: 12,
-                                        color: VivyColors.textSecondary,
-                                        fontWeight: FontWeight.w500,
+                                  const SizedBox(height: 6),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.schedule,
+                                          size: 13,
+                                          color: VivyColors.textSecondary),
+                                      const SizedBox(width: 4),
+                                      Flexible(
+                                        child: Text(
+                                          _formatShort(item.timestamp),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontFamily: 'Plus Jakarta Sans',
+                                            fontSize: 12,
+                                            color: VivyColors.textSecondary,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
                                       ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    confidenceText,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      fontSize: 12,
+                                      color: VivyColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                            ),
+                            const SizedBox(width: 8),
+                            if (item.amount != null)
                               Text(
-                                confidenceText,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                '₱${item.amount!.toStringAsFixed(2)}',
                                 style: const TextStyle(
                                   fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 12,
-                                  color: VivyColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: VivyColors.textPrimary,
+                                ),
+                              ),
+                            if (widget.onDeleteEntry != null) ...[
+                              const SizedBox(width: 8),
+                              _TapScale(
+                                onTap: () => _showDeleteConfirmation(context, item),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8),
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 20,
+                                    color: VivyColors.textSecondary,
+                                  ),
                                 ),
                               ),
                             ],
-                          ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        if (item.amount != null)
-                          Text(
-                            '₱${item.amount!.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: VivyColors.textPrimary,
-                            ),
-                          ),
-                        if (widget.onDeleteEntry != null) ...[
-                          const SizedBox(width: 8),
-                          _TapScale(
-                            onTap: () => _showDeleteConfirmation(context, item),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8),
-                              child: Icon(
-                                Icons.close,
-                                size: 20,
-                                color: VivyColors.textSecondary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
+                      ),
+                    );
+                  },
+                ),
+        );
+      },
     );
   }
 }

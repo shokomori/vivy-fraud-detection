@@ -19,7 +19,6 @@ import 'ui/screens/guidelines_screen.dart';
 import 'ui/screens/history_screen.dart';
 import 'ui/screens/home_screen.dart';
 import 'ui/screens/learn_more_screen.dart';
-import 'ui/screens/messenger_qr_screen.dart';
 import 'ui/screens/splash_screen.dart';
 import 'ui/theme/vivy_colors.dart';
 
@@ -164,6 +163,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   XFile? _selectedFile;
   AnalysisResult? _result;
   List<HistoryEntry> _historyEntries = const [];
+  final ValueNotifier<List<HistoryEntry>> _historyEntriesNotifier =
+      ValueNotifier<List<HistoryEntry>>(const []);
   bool _isBusy = false;
   String? _loadError;
   bool _isDebugBatchRunning = false;
@@ -184,6 +185,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _analyzeUiState.dispose();
+    _historyEntriesNotifier.dispose();
     _interpreter?.close();
     super.dispose();
   }
@@ -279,6 +281,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       setState(() {
         _historyEntries = parsed;
       });
+      _historyEntriesNotifier.value = parsed;
     } catch (_) {
       // Keep app usable even if local history cannot be loaded.
     }
@@ -317,6 +320,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         _historyEntries = updated;
       });
     }
+    _historyEntriesNotifier.value = updated;
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -335,6 +339,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         _historyEntries = [];
       });
     }
+    _historyEntriesNotifier.value = const [];
 
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -1607,6 +1612,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
                   MaterialPageRoute<void>(
                     builder: (_) => HistoryScreen(
                       entries: _historyEntries,
+                      entriesListenable: _historyEntriesNotifier,
                       onDeleteEntry: _deleteHistoryEntry,
                       onClearAll: _clearAllHistory,
                     ),
@@ -1629,6 +1635,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           MaterialPageRoute<void>(
             builder: (_) => HistoryScreen(
               entries: _historyEntries,
+              entriesListenable: _historyEntriesNotifier,
               onDeleteEntry: _deleteHistoryEntry,
               onClearAll: _clearAllHistory,
             ),
@@ -1639,13 +1646,6 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         Navigator.of(context).push(
           MaterialPageRoute<void>(
             builder: (_) => const LearnMoreScreen(),
-          ),
-        );
-      },
-      onOpenMessengerQr: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const MessengerQrScreen(),
           ),
         );
       },

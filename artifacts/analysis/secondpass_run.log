@@ -1,0 +1,463 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1785063779.719813   33312 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1785063784.805098   33312 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+I0000 00:00:1785063800.965179   33312 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: SSE3 SSE4.1 SSE4.2 AVX AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING:tensorflow:TensorFlow GPU support is not available on native Windows for TensorFlow >= 2.11. Even if CUDA/cuDNN are installed, GPU will not be used. Please use WSL2 or the TensorFlow-DirectML plugin.
+c:\Users\YUKI\Documents\Vivy\.venv311\Lib\site-packages\keras\src\trainers\epoch_iterator.py:74: UserWarning: `shuffle=True` was passed, but will be ignored since the data `x` was provided as a tf.data.Dataset. The Dataset is expected to already be shuffled (via `.shuffle(buffer_size)`).
+  self.data_adapter = data_adapters.get_data_adapter(
+Epoch 1/6
+
+[1m 1/83[0m [37m====================[0m [1m18:48[0m 14s/step - binary_accuracy: 0.8438 - loss: 0.4401 - precision: 1.0000 - recall: 0.7368
+[1m 2/83[0m [37m====================[0m [1m57s[0m 710ms/step - binary_accuracy: 0.9062 - loss: 0.2483 - precision: 0.9655 - recall: 0.8485
+[1m 3/83[0m [37m====================[0m [1m53s[0m 666ms/step - binary_accuracy: 0.9167 - loss: 0.2002 - precision: 0.9792 - recall: 0.8704
+[1m 4/83[0m [37m====================[0m [1m51s[0m 652ms/step - binary_accuracy: 0.9219 - loss: 0.2332 - precision: 0.9839 - recall: 0.8714
+[1m 5/83[0m [32m=[0m[37m===================[0m [1m50s[0m 648ms/step - binary_accuracy: 0.9375 - loss: 0.1919 - precision: 0.9867 - recall: 0.8916
+[1m 6/83[0m [32m=[0m[37m===================[0m [1m50s[0m 653ms/step - binary_accuracy: 0.9479 - loss: 0.1689 - precision: 0.9892 - recall: 0.9109
+[1m 7/83[0m [32m=[0m[37m===================[0m [1m50s[0m 662ms/step - binary_accuracy: 0.9554 - loss: 0.1510 - precision: 0.9907 - recall: 0.9224
+[1m 8/83[0m [32m=[0m[37m===================[0m [1m50s[0m 677ms/step - binary_accuracy: 0.9570 - loss: 0.1436 - precision: 0.9836 - recall: 0.9302
+[1m 9/83[0m [32m==[0m[37m==================[0m [1m50s[0m 679ms/step - binary_accuracy: 0.9618 - loss: 0.1332 - precision: 0.9858 - recall: 0.9392
+[1m10/83[0m [32m==[0m[37m==================[0m [1m49s[0m 680ms/step - binary_accuracy: 0.9531 - loss: 0.1533 - precision: 0.9742 - recall: 0.9321
+[1m11/83[0m [32m==[0m[37m==================[0m [1m49s[0m 686ms/step - binary_accuracy: 0.9517 - loss: 0.1471 - precision: 0.9697 - recall: 0.9302
+[1m12/83[0m [32m==[0m[37m==================[0m [1m49s[0m 690ms/step - binary_accuracy: 0.9505 - loss: 0.1459 - precision: 0.9684 - recall: 0.9340
+[1m13/83[0m [32m===[0m[37m=================[0m [1m48s[0m 694ms/step - binary_accuracy: 0.9495 - loss: 0.1454 - precision: 0.9621 - recall: 0.9398
+[1m14/83[0m [32m===[0m[37m=================[0m [1m48s[0m 698ms/step - binary_accuracy: 0.9509 - loss: 0.1398 - precision: 0.9602 - recall: 0.9435
+[1m15/83[0m [32m===[0m[37m=================[0m [1m48s[0m 711ms/step - binary_accuracy: 0.9521 - loss: 0.1349 - precision: 0.9588 - recall: 0.9472
+[1m16/83[0m [32m===[0m[37m=================[0m [1m48s[0m 719ms/step - binary_accuracy: 0.9492 - loss: 0.1346 - precision: 0.9531 - recall: 0.9457
+[1m17/83[0m [32m====[0m[37m================[0m [1m47s[0m 727ms/step - binary_accuracy: 0.9504 - loss: 0.1307 - precision: 0.9513 - recall: 0.9478
+[1m18/83[0m [32m====[0m[37m================[0m [1m47s[0m 733ms/step - binary_accuracy: 0.9514 - loss: 0.1281 - precision: 0.9541 - recall: 0.9474
+[1m19/83[0m [32m====[0m[37m================[0m [1m47s[0m 736ms/step - binary_accuracy: 0.9539 - loss: 0.1227 - precision: 0.9568 - recall: 0.9505
+[1m20/83[0m [32m====[0m[37m================[0m [1m46s[0m 744ms/step - binary_accuracy: 0.9531 - loss: 0.1226 - precision: 0.9586 - recall: 0.9465
+[1m21/83[0m [32m=====[0m[37m===============[0m [1m46s[0m 748ms/step - binary_accuracy: 0.9524 - loss: 0.1219 - precision: 0.9573 - recall: 0.9458
+[1m22/83[0m [32m=====[0m[37m===============[0m [1m46s[0m 754ms/step - binary_accuracy: 0.9531 - loss: 0.1191 - precision: 0.9601 - recall: 0.9466
+[1m23/83[0m [32m=====[0m[37m===============[0m [1m45s[0m 767ms/step - binary_accuracy: 0.9538 - loss: 0.1191 - precision: 0.9625 - recall: 0.9472
+[1m24/83[0m [32m=====[0m[37m===============[0m [1m45s[0m 771ms/step - binary_accuracy: 0.9518 - loss: 0.1208 - precision: 0.9614 - recall: 0.9444
+[1m25/83[0m [32m======[0m[37m==============[0m [1m44s[0m 773ms/step - binary_accuracy: 0.9525 - loss: 0.1236 - precision: 0.9630 - recall: 0.9443
+[1m26/83[0m [32m======[0m[37m==============[0m [1m43s[0m 770ms/step - binary_accuracy: 0.9543 - loss: 0.1209 - precision: 0.9644 - recall: 0.9464
+[1m27/83[0m [32m======[0m[37m==============[0m [1m42s[0m 767ms/step - binary_accuracy: 0.9560 - loss: 0.1173 - precision: 0.9654 - recall: 0.9480
+[1m28/83[0m [32m======[0m[37m==============[0m [1m42s[0m 766ms/step - binary_accuracy: 0.9576 - loss: 0.1139 - precision: 0.9665 - recall: 0.9496
+[1m29/83[0m [32m======[0m[37m==============[0m [1m41s[0m 763ms/step - binary_accuracy: 0.9591 - loss: 0.1107 - precision: 0.9676 - recall: 0.9512
+[1m30/83[0m [32m=======[0m[37m=============[0m [1m40s[0m 764ms/step - binary_accuracy: 0.9604 - loss: 0.1090 - precision: 0.9685 - recall: 0.9525
+[1m31/83[0m [32m=======[0m[37m=============[0m [1m39s[0m 761ms/step - binary_accuracy: 0.9617 - loss: 0.1078 - precision: 0.9698 - recall: 0.9545
+[1m32/83[0m [32m=======[0m[37m=============[0m [1m38s[0m 762ms/step - binary_accuracy: 0.9629 - loss: 0.1059 - precision: 0.9706 - recall: 0.9556
+[1m33/83[0m [32m=======[0m[37m=============[0m [1m38s[0m 762ms/step - binary_accuracy: 0.9631 - loss: 0.1059 - precision: 0.9715 - recall: 0.9551
+[1m34/83[0m [32m========[0m[37m============[0m [1m37s[0m 761ms/step - binary_accuracy: 0.9605 - loss: 0.1140 - precision: 0.9703 - recall: 0.9508
+[1m35/83[0m [32m========[0m[37m============[0m [1m36s[0m 759ms/step - binary_accuracy: 0.9607 - loss: 0.1127 - precision: 0.9711 - recall: 0.9504
+[1m36/83[0m [32m========[0m[37m============[0m [1m35s[0m 757ms/step - binary_accuracy: 0.9609 - loss: 0.1132 - precision: 0.9719 - recall: 0.9502
+[1m37/83[0m [32m========[0m[37m============[0m [1m34s[0m 756ms/step - binary_accuracy: 0.9611 - loss: 0.1127 - precision: 0.9727 - recall: 0.9500
+[1m38/83[0m [32m=========[0m[37m===========[0m [1m33s[0m 753ms/step - binary_accuracy: 0.9622 - loss: 0.1106 - precision: 0.9732 - recall: 0.9510
+[1m39/83[0m [32m=========[0m[37m===========[0m [1m33s[0m 752ms/step - binary_accuracy: 0.9631 - loss: 0.1081 - precision: 0.9739 - recall: 0.9521
+[1m40/83[0m [32m=========[0m[37m===========[0m [1m32s[0m 751ms/step - binary_accuracy: 0.9633 - loss: 0.1070 - precision: 0.9730 - recall: 0.9533
+[1m41/83[0m [32m=========[0m[37m===========[0m [1m31s[0m 751ms/step - binary_accuracy: 0.9642 - loss: 0.1057 - precision: 0.9736 - recall: 0.9544
+[1m42/83[0m [32m==========[0m[37m==========[0m [1m30s[0m 753ms/step - binary_accuracy: 0.9650 - loss: 0.1035 - precision: 0.9742 - recall: 0.9554
+[1m43/83[0m [32m==========[0m[37m==========[0m [1m30s[0m 755ms/step - binary_accuracy: 0.9637 - loss: 0.1053 - precision: 0.9734 - recall: 0.9536
+[1m44/83[0m [32m==========[0m[37m==========[0m [1m29s[0m 758ms/step - binary_accuracy: 0.9638 - loss: 0.1056 - precision: 0.9740 - recall: 0.9534
+[1m45/83[0m [32m==========[0m[37m==========[0m [1m28s[0m 759ms/step - binary_accuracy: 0.9639 - loss: 0.1051 - precision: 0.9746 - recall: 0.9532
+[1m46/83[0m [32m===========[0m[37m=========[0m [1m28s[0m 762ms/step - binary_accuracy: 0.9647 - loss: 0.1033 - precision: 0.9752 - recall: 0.9541
+[1m47/83[0m [32m===========[0m[37m=========[0m [1m27s[0m 765ms/step - binary_accuracy: 0.9648 - loss: 0.1033 - precision: 0.9746 - recall: 0.9554
+[1m48/83[0m [32m===========[0m[37m=========[0m [1m26s[0m 767ms/step - binary_accuracy: 0.9622 - loss: 0.1069 - precision: 0.9751 - recall: 0.9502
+[1m49/83[0m [32m===========[0m[37m=========[0m [1m26s[0m 766ms/step - binary_accuracy: 0.9617 - loss: 0.1074 - precision: 0.9756 - recall: 0.9489
+[1m50/83[0m [32m============[0m[37m========[0m [1m25s[0m 766ms/step - binary_accuracy: 0.9625 - loss: 0.1058 - precision: 0.9762 - recall: 0.9500
+[1m51/83[0m [32m============[0m[37m========[0m [1m24s[0m 765ms/step - binary_accuracy: 0.9632 - loss: 0.1042 - precision: 0.9766 - recall: 0.9508
+[1m52/83[0m [32m============[0m[37m========[0m [1m23s[0m 765ms/step - binary_accuracy: 0.9633 - loss: 0.1033 - precision: 0.9770 - recall: 0.9505
+[1m53/83[0m [32m============[0m[37m========[0m [1m22s[0m 765ms/step - binary_accuracy: 0.9640 - loss: 0.1018 - precision: 0.9774 - recall: 0.9514
+[1m54/83[0m [32m=============[0m[37m=======[0m [1m22s[0m 766ms/step - binary_accuracy: 0.9641 - loss: 0.1016 - precision: 0.9766 - recall: 0.9521
+[1m55/83[0m [32m=============[0m[37m=======[0m [1m21s[0m 769ms/step - binary_accuracy: 0.9648 - loss: 0.1005 - precision: 0.9770 - recall: 0.9530
+[1m56/83[0m [32m=============[0m[37m=======[0m [1m20s[0m 770ms/step - binary_accuracy: 0.9654 - loss: 0.0991 - precision: 0.9776 - recall: 0.9541
+[1m57/83[0m [32m=============[0m[37m=======[0m [1m20s[0m 772ms/step - binary_accuracy: 0.9660 - loss: 0.0981 - precision: 0.9780 - recall: 0.9549
+[1m58/83[0m [32m=============[0m[37m=======[0m [1m19s[0m 772ms/step - binary_accuracy: 0.9655 - loss: 0.0985 - precision: 0.9762 - recall: 0.9556
+[1m59/83[0m [32m==============[0m[37m======[0m [1m18s[0m 772ms/step - binary_accuracy: 0.9656 - loss: 0.0983 - precision: 0.9756 - recall: 0.9563
+[1m60/83[0m [32m==============[0m[37m======[0m [1m17s[0m 772ms/step - binary_accuracy: 0.9656 - loss: 0.0982 - precision: 0.9750 - recall: 0.9571
+[1m61/83[0m [32m==============[0m[37m======[0m [1m16s[0m 772ms/step - binary_accuracy: 0.9662 - loss: 0.0968 - precision: 0.9754 - recall: 0.9577
+[1m62/83[0m [32m==============[0m[37m======[0m [1m16s[0m 771ms/step - binary_accuracy: 0.9667 - loss: 0.0957 - precision: 0.9757 - recall: 0.9582
+[1m63/83[0m [32m===============[0m[37m=====[0m [1m15s[0m 770ms/step - binary_accuracy: 0.9668 - loss: 0.0951 - precision: 0.9761 - recall: 0.9580
+[1m64/83[0m [32m===============[0m[37m=====[0m [1m14s[0m 771ms/step - binary_accuracy: 0.9673 - loss: 0.0940 - precision: 0.9764 - recall: 0.9585
+[1m65/83[0m [32m===============[0m[37m=====[0m [1m13s[0m 772ms/step - binary_accuracy: 0.9673 - loss: 0.0934 - precision: 0.9759 - recall: 0.9593
+[1m66/83[0m [32m===============[0m[37m=====[0m [1m13s[0m 772ms/step - binary_accuracy: 0.9673 - loss: 0.0942 - precision: 0.9763 - recall: 0.9590
+[1m67/83[0m [32m================[0m[37m====[0m [1m12s[0m 773ms/step - binary_accuracy: 0.9674 - loss: 0.0939 - precision: 0.9767 - recall: 0.9589
+[1m68/83[0m [32m================[0m[37m====[0m [1m11s[0m 773ms/step - binary_accuracy: 0.9678 - loss: 0.0932 - precision: 0.9770 - recall: 0.9594
+[1m69/83[0m [32m================[0m[37m====[0m [1m10s[0m 773ms/step - binary_accuracy: 0.9669 - loss: 0.0963 - precision: 0.9765 - recall: 0.9584
+[1m70/83[0m [32m================[0m[37m====[0m [1m10s[0m 773ms/step - binary_accuracy: 0.9665 - loss: 0.0967 - precision: 0.9770 - recall: 0.9575
+[1m71/83[0m [32m=================[0m[37m===[0m [1m9s[0m 774ms/step - binary_accuracy: 0.9661 - loss: 0.1001 - precision: 0.9772 - recall: 0.9561 
+[1m72/83[0m [32m=================[0m[37m===[0m [1m8s[0m 777ms/step - binary_accuracy: 0.9666 - loss: 0.0990 - precision: 0.9775 - recall: 0.9569
+[1m73/83[0m [32m=================[0m[37m===[0m [1m7s[0m 779ms/step - binary_accuracy: 0.9662 - loss: 0.1025 - precision: 0.9778 - recall: 0.9558
+[1m74/83[0m [32m=================[0m[37m===[0m [1m7s[0m 781ms/step - binary_accuracy: 0.9658 - loss: 0.1026 - precision: 0.9773 - recall: 0.9555
+[1m75/83[0m [32m==================[0m[37m==[0m [1m6s[0m 782ms/step - binary_accuracy: 0.9663 - loss: 0.1016 - precision: 0.9775 - recall: 0.9560
+[1m76/83[0m [32m==================[0m[37m==[0m [1m5s[0m 783ms/step - binary_accuracy: 0.9655 - loss: 0.1033 - precision: 0.9770 - recall: 0.9550
+[1m77/83[0m [32m==================[0m[37m==[0m [1m4s[0m 783ms/step - binary_accuracy: 0.9659 - loss: 0.1021 - precision: 0.9773 - recall: 0.9557
+[1m78/83[0m [32m==================[0m[37m==[0m [1m3s[0m 782ms/step - binary_accuracy: 0.9663 - loss: 0.1009 - precision: 0.9777 - recall: 0.9563
+[1m79/83[0m [32m===================[0m[37m=[0m [1m3s[0m 784ms/step - binary_accuracy: 0.9660 - loss: 0.1015 - precision: 0.9771 - recall: 0.9560
+[1m80/83[0m [32m===================[0m[37m=[0m [1m2s[0m 785ms/step - binary_accuracy: 0.9660 - loss: 0.1009 - precision: 0.9775 - recall: 0.9559
+[1m81/83[0m [32m===================[0m[37m=[0m [1m1s[0m 787ms/step - binary_accuracy: 0.9660 - loss: 0.1020 - precision: 0.9777 - recall: 0.9557
+[1m82/83[0m [32m===================[0m[37m=[0m [1m0s[0m 797ms/step - binary_accuracy: 0.9665 - loss: 0.1010 - precision: 0.9780 - recall: 0.9563
+[1m83/83[0m [32m====================[0m[37m[0m [1m0s[0m 799ms/step - binary_accuracy: 0.9663 - loss: 0.1013 - precision: 0.9781 - recall: 0.9558
+[1m83/83[0m [32m====================[0m[37m[0m [1m98s[0m 1s/step - binary_accuracy: 0.9663 - loss: 0.1013 - precision: 0.9781 - recall: 0.9558 - val_binary_accuracy: 0.9636 - val_loss: 0.0869 - val_precision: 0.9877 - val_recall: 0.9412
+Epoch 2/6
+
+[1m 1/83[0m [37m====================[0m [1m1:09[0m 843ms/step - binary_accuracy: 0.9688 - loss: 0.0858 - precision: 1.0000 - recall: 0.9375
+[1m 2/83[0m [37m====================[0m [1m56s[0m 702ms/step - binary_accuracy: 0.9844 - loss: 0.0486 - precision: 1.0000 - recall: 0.9667 
+[1m 3/83[0m [37m====================[0m [1m1:03[0m 792ms/step - binary_accuracy: 0.9792 - loss: 0.0704 - precision: 0.9783 - recall: 0.9783
+[1m 4/83[0m [37m====================[0m [1m1:04[0m 812ms/step - binary_accuracy: 0.9844 - loss: 0.0577 - precision: 0.9851 - recall: 0.9851
+[1m 5/83[0m [32m=[0m[37m===================[0m [1m1:04[0m 824ms/step - binary_accuracy: 0.9812 - loss: 0.0572 - precision: 0.9767 - recall: 0.9882
+[1m 6/83[0m [32m=[0m[37m===================[0m [1m1:02[0m 816ms/step - binary_accuracy: 0.9792 - loss: 0.0586 - precision: 0.9697 - recall: 0.9897
+[1m 7/83[0m [32m=[0m[37m===================[0m [1m1:02[0m 822ms/step - binary_accuracy: 0.9821 - loss: 0.0545 - precision: 0.9735 - recall: 0.9910
+[1m 8/83[0m [32m=[0m[37m===================[0m [1m1:01[0m 824ms/step - binary_accuracy: 0.9766 - loss: 0.0712 - precision: 0.9762 - recall: 0.9762
+[1m 9/83[0m [32m==[0m[37m==================[0m [1m1:00[0m 811ms/step - binary_accuracy: 0.9792 - loss: 0.0686 - precision: 0.9790 - recall: 0.9790
+[1m10/83[0m [32m==[0m[37m==================[0m [1m59s[0m 821ms/step - binary_accuracy: 0.9812 - loss: 0.0654 - precision: 0.9809 - recall: 0.9809 
+[1m11/83[0m [32m==[0m[37m==================[0m [1m58s[0m 815ms/step - binary_accuracy: 0.9773 - loss: 0.0732 - precision: 0.9771 - recall: 0.9771
+[1m12/83[0m [32m==[0m[37m==================[0m [1m57s[0m 807ms/step - binary_accuracy: 0.9766 - loss: 0.0707 - precision: 0.9744 - recall: 0.9794
+[1m13/83[0m [32m===[0m[37m=================[0m [1m57s[0m 818ms/step - binary_accuracy: 0.9784 - loss: 0.0662 - precision: 0.9770 - recall: 0.9815
+[1m14/83[0m [32m===[0m[37m=================[0m [1m56s[0m 814ms/step - binary_accuracy: 0.9799 - loss: 0.0658 - precision: 0.9788 - recall: 0.9830
+[1m15/83[0m [32m===[0m[37m=================[0m [1m55s[0m 809ms/step - binary_accuracy: 0.9792 - loss: 0.0668 - precision: 0.9765 - recall: 0.9842
+[1m16/83[0m [32m===[0m[37m=================[0m [1m54s[0m 811ms/step - binary_accuracy: 0.9766 - loss: 0.0724 - precision: 0.9741 - recall: 0.9813
+[1m17/83[0m [32m====[0m[37m================[0m [1m53s[0m 812ms/step - binary_accuracy: 0.9779 - loss: 0.0692 - precision: 0.9754 - recall: 0.9823
+[1m18/83[0m [32m====[0m[37m================[0m [1m52s[0m 811ms/step - binary_accuracy: 0.9757 - loss: 0.0767 - precision: 0.9765 - recall: 0.9765
+[1m19/83[0m [32m====[0m[37m================[0m [1m51s[0m 812ms/step - binary_accuracy: 0.9770 - loss: 0.0741 - precision: 0.9778 - recall: 0.9778
+[1m20/83[0m [32m====[0m[37m================[0m [1m51s[0m 815ms/step - binary_accuracy: 0.9766 - loss: 0.0785 - precision: 0.9789 - recall: 0.9759
+[1m21/83[0m [32m=====[0m[37m===============[0m [1m50s[0m 821ms/step - binary_accuracy: 0.9762 - loss: 0.0782 - precision: 0.9797 - recall: 0.9741
+[1m22/83[0m [32m=====[0m[37m===============[0m [1m50s[0m 823ms/step - binary_accuracy: 0.9759 - loss: 0.0797 - precision: 0.9806 - recall: 0.9725
+[1m23/83[0m [32m=====[0m[37m===============[0m [1m49s[0m 826ms/step - binary_accuracy: 0.9742 - loss: 0.0799 - precision: 0.9789 - recall: 0.9712
+[1m24/83[0m [32m=====[0m[37m===============[0m [1m48s[0m 825ms/step - binary_accuracy: 0.9740 - loss: 0.0806 - precision: 0.9798 - recall: 0.9701
+[1m25/83[0m [32m======[0m[37m==============[0m [1m48s[0m 831ms/step - binary_accuracy: 0.9737 - loss: 0.0799 - precision: 0.9808 - recall: 0.9691
+[1m26/83[0m [32m======[0m[37m==============[0m [1m47s[0m 833ms/step - binary_accuracy: 0.9748 - loss: 0.0781 - precision: 0.9813 - recall: 0.9699
+[1m27/83[0m [32m======[0m[37m==============[0m [1m46s[0m 835ms/step - binary_accuracy: 0.9757 - loss: 0.0762 - precision: 0.9820 - recall: 0.9710
+[1m28/83[0m [32m======[0m[37m==============[0m [1m46s[0m 839ms/step - binary_accuracy: 0.9754 - loss: 0.0763 - precision: 0.9804 - recall: 0.9719
+[1m29/83[0m [32m======[0m[37m==============[0m [1m45s[0m 838ms/step - binary_accuracy: 0.9752 - loss: 0.0787 - precision: 0.9812 - recall: 0.9711
+[1m30/83[0m [32m=======[0m[37m=============[0m [1m44s[0m 836ms/step - binary_accuracy: 0.9760 - loss: 0.0770 - precision: 0.9817 - recall: 0.9718
+[1m31/83[0m [32m=======[0m[37m=============[0m [1m43s[0m 837ms/step - binary_accuracy: 0.9768 - loss: 0.0761 - precision: 0.9823 - recall: 0.9727
+[1m32/83[0m [32m=======[0m[37m=============[0m [1m42s[0m 836ms/step - binary_accuracy: 0.9756 - loss: 0.0768 - precision: 0.9790 - recall: 0.9735
+[1m33/83[0m [32m=======[0m[37m=============[0m [1m41s[0m 838ms/step - binary_accuracy: 0.9754 - loss: 0.0765 - precision: 0.9796 - recall: 0.9724
+[1m34/83[0m [32m========[0m[37m============[0m [1m41s[0m 847ms/step - binary_accuracy: 0.9752 - loss: 0.0753 - precision: 0.9783 - recall: 0.9731
+[1m35/83[0m [32m========[0m[37m============[0m [1m40s[0m 848ms/step - binary_accuracy: 0.9750 - loss: 0.0784 - precision: 0.9789 - recall: 0.9720
+[1m36/83[0m [32m========[0m[37m============[0m [1m40s[0m 854ms/step - binary_accuracy: 0.9714 - loss: 0.0839 - precision: 0.9779 - recall: 0.9663
+[1m37/83[0m [32m========[0m[37m============[0m [1m39s[0m 859ms/step - binary_accuracy: 0.9713 - loss: 0.0839 - precision: 0.9770 - recall: 0.9674
+[1m38/83[0m [32m=========[0m[37m===========[0m [1m38s[0m 864ms/step - binary_accuracy: 0.9712 - loss: 0.0840 - precision: 0.9775 - recall: 0.9666
+[1m39/83[0m [32m=========[0m[37m===========[0m [1m38s[0m 867ms/step - binary_accuracy: 0.9720 - loss: 0.0820 - precision: 0.9779 - recall: 0.9672
+[1m40/83[0m [32m=========[0m[37m===========[0m [1m37s[0m 871ms/step - binary_accuracy: 0.9719 - loss: 0.0816 - precision: 0.9771 - recall: 0.9682
+[1m41/83[0m [32m=========[0m[37m===========[0m [1m36s[0m 871ms/step - binary_accuracy: 0.9718 - loss: 0.0847 - precision: 0.9775 - recall: 0.9674
+[1m42/83[0m [32m==========[0m[37m==========[0m [1m35s[0m 871ms/step - binary_accuracy: 0.9725 - loss: 0.0844 - precision: 0.9780 - recall: 0.9681
+[1m43/83[0m [32m==========[0m[37m==========[0m [1m34s[0m 870ms/step - binary_accuracy: 0.9717 - loss: 0.0852 - precision: 0.9769 - recall: 0.9671
+[1m44/83[0m [32m==========[0m[37m==========[0m [1m33s[0m 869ms/step - binary_accuracy: 0.9709 - loss: 0.0874 - precision: 0.9774 - recall: 0.9652
+[1m45/83[0m [32m==========[0m[37m==========[0m [1m32s[0m 868ms/step - binary_accuracy: 0.9694 - loss: 0.0902 - precision: 0.9766 - recall: 0.9633
+[1m46/83[0m [32m===========[0m[37m=========[0m [1m32s[0m 866ms/step - binary_accuracy: 0.9694 - loss: 0.0900 - precision: 0.9759 - recall: 0.9642
+[1m47/83[0m [32m===========[0m[37m=========[0m [1m31s[0m 867ms/step - binary_accuracy: 0.9681 - loss: 0.0913 - precision: 0.9751 - recall: 0.9624
+[1m48/83[0m [32m===========[0m[37m=========[0m [1m30s[0m 866ms/step - binary_accuracy: 0.9681 - loss: 0.0914 - precision: 0.9756 - recall: 0.9620
+[1m49/83[0m [32m===========[0m[37m=========[0m [1m29s[0m 869ms/step - binary_accuracy: 0.9668 - loss: 0.0947 - precision: 0.9761 - recall: 0.9593
+[1m50/83[0m [32m============[0m[37m========[0m [1m28s[0m 870ms/step - binary_accuracy: 0.9675 - loss: 0.0937 - precision: 0.9765 - recall: 0.9598
+[1m51/83[0m [32m============[0m[37m========[0m [1m27s[0m 870ms/step - binary_accuracy: 0.9675 - loss: 0.0960 - precision: 0.9769 - recall: 0.9595
+[1m52/83[0m [32m============[0m[37m========[0m [1m26s[0m 871ms/step - binary_accuracy: 0.9669 - loss: 0.0972 - precision: 0.9762 - recall: 0.9591
+[1m53/83[0m [32m============[0m[37m========[0m [1m26s[0m 872ms/step - binary_accuracy: 0.9670 - loss: 0.0987 - precision: 0.9767 - recall: 0.9589
+[1m54/83[0m [32m=============[0m[37m=======[0m [1m25s[0m 872ms/step - binary_accuracy: 0.9676 - loss: 0.0979 - precision: 0.9771 - recall: 0.9595
+[1m55/83[0m [32m=============[0m[37m=======[0m [1m24s[0m 871ms/step - binary_accuracy: 0.9676 - loss: 0.0974 - precision: 0.9765 - recall: 0.9603
+[1m56/83[0m [32m=============[0m[37m=======[0m [1m23s[0m 870ms/step - binary_accuracy: 0.9676 - loss: 0.0976 - precision: 0.9769 - recall: 0.9600
+[1m57/83[0m [32m=============[0m[37m=======[0m [1m22s[0m 871ms/step - binary_accuracy: 0.9682 - loss: 0.0963 - precision: 0.9774 - recall: 0.9609
+[1m58/83[0m [32m=============[0m[37m=======[0m [1m21s[0m 870ms/step - binary_accuracy: 0.9677 - loss: 0.0966 - precision: 0.9766 - recall: 0.9603
+[1m59/83[0m [32m==============[0m[37m======[0m [1m20s[0m 867ms/step - binary_accuracy: 0.9672 - loss: 0.0969 - precision: 0.9771 - recall: 0.9591
+[1m60/83[0m [32m==============[0m[37m======[0m [1m19s[0m 866ms/step - binary_accuracy: 0.9677 - loss: 0.0963 - precision: 0.9773 - recall: 0.9596
+[1m61/83[0m [32m==============[0m[37m======[0m [1m19s[0m 864ms/step - binary_accuracy: 0.9677 - loss: 0.0960 - precision: 0.9777 - recall: 0.9592
+[1m62/83[0m [32m==============[0m[37m======[0m [1m18s[0m 862ms/step - binary_accuracy: 0.9682 - loss: 0.0951 - precision: 0.9781 - recall: 0.9599
+[1m63/83[0m [32m===============[0m[37m=====[0m [1m17s[0m 860ms/step - binary_accuracy: 0.9683 - loss: 0.0950 - precision: 0.9774 - recall: 0.9605
+[1m64/83[0m [32m===============[0m[37m=====[0m [1m16s[0m 859ms/step - binary_accuracy: 0.9683 - loss: 0.0948 - precision: 0.9778 - recall: 0.9602
+[1m65/83[0m [32m===============[0m[37m=====[0m [1m15s[0m 857ms/step - binary_accuracy: 0.9683 - loss: 0.0942 - precision: 0.9773 - recall: 0.9609
+[1m66/83[0m [32m===============[0m[37m=====[0m [1m14s[0m 856ms/step - binary_accuracy: 0.9683 - loss: 0.0939 - precision: 0.9776 - recall: 0.9606
+[1m67/83[0m [32m================[0m[37m====[0m [1m13s[0m 854ms/step - binary_accuracy: 0.9688 - loss: 0.0930 - precision: 0.9779 - recall: 0.9610
+[1m68/83[0m [32m================[0m[37m====[0m [1m12s[0m 852ms/step - binary_accuracy: 0.9692 - loss: 0.0923 - precision: 0.9782 - recall: 0.9616
+[1m69/83[0m [32m================[0m[37m====[0m [1m11s[0m 851ms/step - binary_accuracy: 0.9692 - loss: 0.0917 - precision: 0.9785 - recall: 0.9613
+[1m70/83[0m [32m================[0m[37m====[0m [1m11s[0m 852ms/step - binary_accuracy: 0.9688 - loss: 0.0922 - precision: 0.9779 - recall: 0.9610
+[1m71/83[0m [32m=================[0m[37m===[0m [1m10s[0m 851ms/step - binary_accuracy: 0.9688 - loss: 0.0922 - precision: 0.9782 - recall: 0.9606
+[1m72/83[0m [32m=================[0m[37m===[0m [1m9s[0m 852ms/step - binary_accuracy: 0.9692 - loss: 0.0911 - precision: 0.9785 - recall: 0.9611 
+[1m73/83[0m [32m=================[0m[37m===[0m [1m8s[0m 855ms/step - binary_accuracy: 0.9692 - loss: 0.0907 - precision: 0.9788 - recall: 0.9608
+[1m74/83[0m [32m=================[0m[37m===[0m [1m7s[0m 857ms/step - binary_accuracy: 0.9696 - loss: 0.0898 - precision: 0.9790 - recall: 0.9613
+[1m75/83[0m [32m==================[0m[37m==[0m [1m6s[0m 858ms/step - binary_accuracy: 0.9700 - loss: 0.0891 - precision: 0.9793 - recall: 0.9618
+[1m76/83[0m [32m==================[0m[37m==[0m [1m6s[0m 858ms/step - binary_accuracy: 0.9700 - loss: 0.0888 - precision: 0.9787 - recall: 0.9622
+[1m77/83[0m [32m==================[0m[37m==[0m [1m5s[0m 857ms/step - binary_accuracy: 0.9696 - loss: 0.0897 - precision: 0.9791 - recall: 0.9613
+[1m78/83[0m [32m==================[0m[37m==[0m [1m4s[0m 856ms/step - binary_accuracy: 0.9688 - loss: 0.0909 - precision: 0.9794 - recall: 0.9596
+[1m79/83[0m [32m===================[0m[37m=[0m [1m3s[0m 854ms/step - binary_accuracy: 0.9691 - loss: 0.0901 - precision: 0.9796 - recall: 0.9601
+[1m80/83[0m [32m===================[0m[37m=[0m [1m2s[0m 853ms/step - binary_accuracy: 0.9695 - loss: 0.0891 - precision: 0.9799 - recall: 0.9607
+[1m81/83[0m [32m===================[0m[37m=[0m [1m1s[0m 850ms/step - binary_accuracy: 0.9695 - loss: 0.0893 - precision: 0.9801 - recall: 0.9603
+[1m82/83[0m [32m===================[0m[37m=[0m [1m0s[0m 848ms/step - binary_accuracy: 0.9699 - loss: 0.0889 - precision: 0.9804 - recall: 0.9609
+[1m83/83[0m [32m====================[0m[37m[0m [1m0s[0m 842ms/step - binary_accuracy: 0.9701 - loss: 0.0886 - precision: 0.9805 - recall: 0.9610
+[1m83/83[0m [32m====================[0m[37m[0m [1m80s[0m 960ms/step - binary_accuracy: 0.9701 - loss: 0.0886 - precision: 0.9805 - recall: 0.9610 - val_binary_accuracy: 0.9576 - val_loss: 0.0974 - val_precision: 0.9875 - val_recall: 0.9294
+Epoch 3/6
+
+[1m 1/83[0m [37m====================[0m [1m1:17[0m 950ms/step - binary_accuracy: 1.0000 - loss: 0.0348 - precision: 1.0000 - recall: 1.0000
+[1m 2/83[0m [37m====================[0m [1m1:13[0m 913ms/step - binary_accuracy: 0.9844 - loss: 0.0523 - precision: 1.0000 - recall: 0.9697
+[1m 3/83[0m [37m====================[0m [1m1:14[0m 925ms/step - binary_accuracy: 0.9583 - loss: 0.0847 - precision: 0.9787 - recall: 0.9388
+[1m 4/83[0m [37m====================[0m [1m1:13[0m 934ms/step - binary_accuracy: 0.9688 - loss: 0.0680 - precision: 0.9844 - recall: 0.9545
+[1m 5/83[0m [32m=[0m[37m===================[0m [1m1:13[0m 944ms/step - binary_accuracy: 0.9750 - loss: 0.0601 - precision: 0.9880 - recall: 0.9647
+[1m 6/83[0m [32m=[0m[37m===================[0m [1m1:15[0m 983ms/step - binary_accuracy: 0.9740 - loss: 0.0585 - precision: 0.9787 - recall: 0.9684
+[1m 7/83[0m [32m=[0m[37m===================[0m [1m1:14[0m 985ms/step - binary_accuracy: 0.9732 - loss: 0.0560 - precision: 0.9821 - recall: 0.9649
+[1m 8/83[0m [32m=[0m[37m===================[0m [1m1:13[0m 980ms/step - binary_accuracy: 0.9766 - loss: 0.0517 - precision: 0.9848 - recall: 0.9701
+[1m 9/83[0m [32m==[0m[37m==================[0m [1m1:12[0m 982ms/step - binary_accuracy: 0.9757 - loss: 0.0580 - precision: 0.9860 - recall: 0.9658
+[1m10/83[0m [32m==[0m[37m==================[0m [1m1:13[0m 1s/step - binary_accuracy: 0.9750 - loss: 0.0577 - precision: 0.9873 - recall: 0.9630   
+[1m11/83[0m [32m==[0m[37m==================[0m [1m1:13[0m 1s/step - binary_accuracy: 0.9744 - loss: 0.0630 - precision: 0.9884 - recall: 0.9607
+[1m12/83[0m [32m==[0m[37m==================[0m [1m1:13[0m 1s/step - binary_accuracy: 0.9740 - loss: 0.0626 - precision: 0.9894 - recall: 0.9590
+[1m13/83[0m [32m===[0m[37m=================[0m [1m1:12[0m 1s/step - binary_accuracy: 0.9760 - loss: 0.0599 - precision: 0.9903 - recall: 0.9623
+[1m14/83[0m [32m===[0m[37m=================[0m [1m1:10[0m 1s/step - binary_accuracy: 0.9777 - loss: 0.0591 - precision: 0.9910 - recall: 0.9649
+[1m15/83[0m [32m===[0m[37m=================[0m [1m1:09[0m 1s/step - binary_accuracy: 0.9771 - loss: 0.0593 - precision: 0.9874 - recall: 0.9672
+[1m16/83[0m [32m===[0m[37m=================[0m [1m1:07[0m 1s/step - binary_accuracy: 0.9766 - loss: 0.0595 - precision: 0.9845 - recall: 0.9695
+[1m17/83[0m [32m====[0m[37m================[0m [1m1:07[0m 1s/step - binary_accuracy: 0.9743 - loss: 0.0601 - precision: 0.9819 - recall: 0.9679
+[1m18/83[0m [32m====[0m[37m================[0m [1m1:08[0m 1s/step - binary_accuracy: 0.9740 - loss: 0.0604 - precision: 0.9827 - recall: 0.9660
+[1m19/83[0m [32m====[0m[37m================[0m [1m1:09[0m 1s/step - binary_accuracy: 0.9753 - loss: 0.0594 - precision: 0.9836 - recall: 0.9676
+[1m20/83[0m [32m====[0m[37m================[0m [1m1:09[0m 1s/step - binary_accuracy: 0.9719 - loss: 0.0715 - precision: 0.9814 - recall: 0.9634
+[1m21/83[0m [32m=====[0m[37m===============[0m [1m1:08[0m 1s/step - binary_accuracy: 0.9717 - loss: 0.0716 - precision: 0.9821 - recall: 0.9620
+[1m22/83[0m [32m=====[0m[37m===============[0m [1m1:07[0m 1s/step - binary_accuracy: 0.9716 - loss: 0.0707 - precision: 0.9801 - recall: 0.9637
+[1m23/83[0m [32m=====[0m[37m===============[0m [1m1:06[0m 1s/step - binary_accuracy: 0.9715 - loss: 0.0709 - precision: 0.9811 - recall: 0.9629
+[1m24/83[0m [32m=====[0m[37m===============[0m [1m1:05[0m 1s/step - binary_accuracy: 0.9688 - loss: 0.0746 - precision: 0.9765 - recall: 0.9614
+[1m25/83[0m [32m======[0m[37m==============[0m [1m1:05[0m 1s/step - binary_accuracy: 0.9700 - loss: 0.0727 - precision: 0.9774 - recall: 0.9630
+[1m26/83[0m [32m======[0m[37m==============[0m [1m1:04[0m 1s/step - binary_accuracy: 0.9712 - loss: 0.0718 - precision: 0.9783 - recall: 0.9643
+[1m27/83[0m [32m======[0m[37m==============[0m [1m1:05[0m 1s/step - binary_accuracy: 0.9722 - loss: 0.0703 - precision: 0.9790 - recall: 0.9655
+[1m28/83[0m [32m======[0m[37m==============[0m [1m1:05[0m 1s/step - binary_accuracy: 0.9721 - loss: 0.0749 - precision: 0.9799 - recall: 0.9648
+[1m29/83[0m [32m======[0m[37m==============[0m [1m1:05[0m 1s/step - binary_accuracy: 0.9698 - loss: 0.0795 - precision: 0.9784 - recall: 0.9617
+[1m30/83[0m [32m=======[0m[37m=============[0m [1m1:04[0m 1s/step - binary_accuracy: 0.9698 - loss: 0.0796 - precision: 0.9770 - recall: 0.9630
+[1m31/83[0m [32m=======[0m[37m=============[0m [1m1:03[0m 1s/step - binary_accuracy: 0.9698 - loss: 0.0798 - precision: 0.9779 - recall: 0.9624
+[1m32/83[0m [32m=======[0m[37m=============[0m [1m1:03[0m 1s/step - binary_accuracy: 0.9697 - loss: 0.0783 - precision: 0.9786 - recall: 0.9617
+[1m33/83[0m [32m=======[0m[37m=============[0m [1m1:02[0m 1s/step - binary_accuracy: 0.9706 - loss: 0.0775 - precision: 0.9793 - recall: 0.9630
+[1m34/83[0m [32m========[0m[37m============[0m [1m1:01[0m 1s/step - binary_accuracy: 0.9715 - loss: 0.0757 - precision: 0.9800 - recall: 0.9642
+[1m35/83[0m [32m========[0m[37m============[0m [1m1:00[0m 1s/step - binary_accuracy: 0.9723 - loss: 0.0743 - precision: 0.9805 - recall: 0.9652
+[1m36/83[0m [32m========[0m[37m============[0m [1m59s[0m 1s/step - binary_accuracy: 0.9722 - loss: 0.0742 - precision: 0.9809 - recall: 0.9642 
+[1m37/83[0m [32m========[0m[37m============[0m [1m57s[0m 1s/step - binary_accuracy: 0.9730 - loss: 0.0730 - precision: 0.9816 - recall: 0.9654
+[1m38/83[0m [32m=========[0m[37m===========[0m [1m56s[0m 1s/step - binary_accuracy: 0.9720 - loss: 0.0743 - precision: 0.9804 - recall: 0.9646
+[1m39/83[0m [32m=========[0m[37m===========[0m [1m55s[0m 1s/step - binary_accuracy: 0.9728 - loss: 0.0734 - precision: 0.9809 - recall: 0.9655
+[1m40/83[0m [32m=========[0m[37m===========[0m [1m54s[0m 1s/step - binary_accuracy: 0.9734 - loss: 0.0728 - precision: 0.9813 - recall: 0.9663
+[1m41/83[0m [32m=========[0m[37m===========[0m [1m53s[0m 1s/step - binary_accuracy: 0.9733 - loss: 0.0728 - precision: 0.9804 - recall: 0.9672
+[1m42/83[0m [32m==========[0m[37m==========[0m [1m52s[0m 1s/step - binary_accuracy: 0.9740 - loss: 0.0716 - precision: 0.9809 - recall: 0.9680
+[1m43/83[0m [32m==========[0m[37m==========[0m [1m52s[0m 1s/step - binary_accuracy: 0.9746 - loss: 0.0710 - precision: 0.9813 - recall: 0.9688
+[1m44/83[0m [32m==========[0m[37m==========[0m [1m51s[0m 1s/step - binary_accuracy: 0.9744 - loss: 0.0725 - precision: 0.9818 - recall: 0.9683
+[1m45/83[0m [32m==========[0m[37m==========[0m [1m49s[0m 1s/step - binary_accuracy: 0.9736 - loss: 0.0730 - precision: 0.9809 - recall: 0.9677
+[1m46/83[0m [32m===========[0m[37m=========[0m [1m48s[0m 1s/step - binary_accuracy: 0.9742 - loss: 0.0718 - precision: 0.9813 - recall: 0.9683
+[1m47/83[0m [32m===========[0m[37m=========[0m [1m46s[0m 1s/step - binary_accuracy: 0.9734 - loss: 0.0734 - precision: 0.9804 - recall: 0.9677
+[1m48/83[0m [32m===========[0m[37m=========[0m [1m45s[0m 1s/step - binary_accuracy: 0.9740 - loss: 0.0725 - precision: 0.9807 - recall: 0.9682
+[1m49/83[0m [32m===========[0m[37m=========[0m [1m44s[0m 1s/step - binary_accuracy: 0.9739 - loss: 0.0720 - precision: 0.9811 - recall: 0.9677
+[1m50/83[0m [32m============[0m[37m========[0m [1m43s[0m 1s/step - binary_accuracy: 0.9737 - loss: 0.0726 - precision: 0.9815 - recall: 0.9671
+[1m51/83[0m [32m============[0m[37m========[0m [1m42s[0m 1s/step - binary_accuracy: 0.9730 - loss: 0.0730 - precision: 0.9794 - recall: 0.9676
+[1m52/83[0m [32m============[0m[37m========[0m [1m41s[0m 1s/step - binary_accuracy: 0.9724 - loss: 0.0733 - precision: 0.9786 - recall: 0.9671
+[1m53/83[0m [32m============[0m[37m========[0m [1m39s[0m 1s/step - binary_accuracy: 0.9717 - loss: 0.0747 - precision: 0.9779 - recall: 0.9667
+[1m54/83[0m [32m=============[0m[37m=======[0m [1m38s[0m 1s/step - binary_accuracy: 0.9711 - loss: 0.0762 - precision: 0.9782 - recall: 0.9649
+[1m55/83[0m [32m=============[0m[37m=======[0m [1m36s[0m 1s/step - binary_accuracy: 0.9716 - loss: 0.0748 - precision: 0.9786 - recall: 0.9656
+[1m56/83[0m [32m=============[0m[37m=======[0m [1m35s[0m 1s/step - binary_accuracy: 0.9721 - loss: 0.0739 - precision: 0.9791 - recall: 0.9663
+[1m57/83[0m [32m=============[0m[37m=======[0m [1m34s[0m 1s/step - binary_accuracy: 0.9720 - loss: 0.0734 - precision: 0.9795 - recall: 0.9659
+[1m58/83[0m [32m=============[0m[37m=======[0m [1m32s[0m 1s/step - binary_accuracy: 0.9714 - loss: 0.0761 - precision: 0.9798 - recall: 0.9644
+[1m59/83[0m [32m==============[0m[37m======[0m [1m31s[0m 1s/step - binary_accuracy: 0.9719 - loss: 0.0759 - precision: 0.9801 - recall: 0.9650
+[1m60/83[0m [32m==============[0m[37m======[0m [1m29s[0m 1s/step - binary_accuracy: 0.9719 - loss: 0.0758 - precision: 0.9805 - recall: 0.9647
+[1m61/83[0m [32m==============[0m[37m======[0m [1m28s[0m 1s/step - binary_accuracy: 0.9723 - loss: 0.0748 - precision: 0.9809 - recall: 0.9653
+[1m62/83[0m [32m==============[0m[37m======[0m [1m27s[0m 1s/step - binary_accuracy: 0.9723 - loss: 0.0753 - precision: 0.9803 - recall: 0.9660
+[1m63/83[0m [32m===============[0m[37m=====[0m [1m25s[0m 1s/step - binary_accuracy: 0.9727 - loss: 0.0743 - precision: 0.9805 - recall: 0.9664
+[1m64/83[0m [32m===============[0m[37m=====[0m [1m24s[0m 1s/step - binary_accuracy: 0.9731 - loss: 0.0738 - precision: 0.9807 - recall: 0.9667
+[1m65/83[0m [32m===============[0m[37m=====[0m [1m22s[0m 1s/step - binary_accuracy: 0.9721 - loss: 0.0743 - precision: 0.9790 - recall: 0.9661
+[1m66/83[0m [32m===============[0m[37m=====[0m [1m21s[0m 1s/step - binary_accuracy: 0.9721 - loss: 0.0742 - precision: 0.9793 - recall: 0.9656
+[1m67/83[0m [32m================[0m[37m====[0m [1m20s[0m 1s/step - binary_accuracy: 0.9725 - loss: 0.0735 - precision: 0.9796 - recall: 0.9662
+[1m68/83[0m [32m================[0m[37m====[0m [1m18s[0m 1s/step - binary_accuracy: 0.9729 - loss: 0.0729 - precision: 0.9799 - recall: 0.9667
+[1m69/83[0m [32m================[0m[37m====[0m [1m17s[0m 1s/step - binary_accuracy: 0.9724 - loss: 0.0737 - precision: 0.9802 - recall: 0.9655
+[1m70/83[0m [32m================[0m[37m====[0m [1m16s[0m 1s/step - binary_accuracy: 0.9719 - loss: 0.0758 - precision: 0.9805 - recall: 0.9643
+[1m71/83[0m [32m=================[0m[37m===[0m [1m14s[0m 1s/step - binary_accuracy: 0.9723 - loss: 0.0749 - precision: 0.9808 - recall: 0.9648
+[1m72/83[0m [32m=================[0m[37m===[0m [1m13s[0m 1s/step - binary_accuracy: 0.9722 - loss: 0.0762 - precision: 0.9811 - recall: 0.9646
+[1m73/83[0m [32m=================[0m[37m===[0m [1m12s[0m 1s/step - binary_accuracy: 0.9722 - loss: 0.0768 - precision: 0.9814 - recall: 0.9643
+[1m74/83[0m [32m=================[0m[37m===[0m [1m10s[0m 1s/step - binary_accuracy: 0.9717 - loss: 0.0777 - precision: 0.9808 - recall: 0.9639
+[1m75/83[0m [32m==================[0m[37m==[0m [1m9s[0m 1s/step - binary_accuracy: 0.9712 - loss: 0.0783 - precision: 0.9802 - recall: 0.9636 
+[1m76/83[0m [32m==================[0m[37m==[0m [1m8s[0m 1s/step - binary_accuracy: 0.9716 - loss: 0.0776 - precision: 0.9805 - recall: 0.9640
+[1m77/83[0m [32m==================[0m[37m==[0m [1m7s[0m 1s/step - binary_accuracy: 0.9716 - loss: 0.0775 - precision: 0.9807 - recall: 0.9636
+[1m78/83[0m [32m==================[0m[37m==[0m [1m6s[0m 1s/step - binary_accuracy: 0.9720 - loss: 0.0766 - precision: 0.9810 - recall: 0.9641
+[1m79/83[0m [32m===================[0m[37m=[0m [1m4s[0m 1s/step - binary_accuracy: 0.9715 - loss: 0.0776 - precision: 0.9804 - recall: 0.9638
+[1m80/83[0m [32m===================[0m[37m=[0m [1m3s[0m 1s/step - binary_accuracy: 0.9707 - loss: 0.0786 - precision: 0.9799 - recall: 0.9627
+[1m81/83[0m [32m===================[0m[37m=[0m [1m2s[0m 1s/step - binary_accuracy: 0.9711 - loss: 0.0779 - precision: 0.9802 - recall: 0.9634
+[1m82/83[0m [32m===================[0m[37m=[0m [1m1s[0m 1s/step - binary_accuracy: 0.9707 - loss: 0.0783 - precision: 0.9804 - recall: 0.9623
+[1m83/83[0m [32m====================[0m[37m[0m [1m0s[0m 1s/step - binary_accuracy: 0.9704 - loss: 0.0785 - precision: 0.9798 - recall: 0.9624
+[1m83/83[0m [32m====================[0m[37m[0m [1m111s[0m 1s/step - binary_accuracy: 0.9704 - loss: 0.0785 - precision: 0.9798 - recall: 0.9624 - val_binary_accuracy: 0.9758 - val_loss: 0.0849 - val_precision: 0.9880 - val_recall: 0.9647
+Epoch 4/6
+
+[1m 1/83[0m [37m====================[0m [1m43:05[0m 32s/step - binary_accuracy: 0.9688 - loss: 0.0602 - precision: 0.9286 - recall: 1.0000
+[1m 2/83[0m [37m====================[0m [1m1:03[0m 789ms/step - binary_accuracy: 0.9531 - loss: 0.0939 - precision: 0.9722 - recall: 0.9459
+[1m 3/83[0m [37m====================[0m [1m1:00[0m 760ms/step - binary_accuracy: 0.9583 - loss: 0.0938 - precision: 0.9600 - recall: 0.9600
+[1m 4/83[0m [37m====================[0m [1m1:00[0m 762ms/step - binary_accuracy: 0.9688 - loss: 0.0834 - precision: 0.9706 - recall: 0.9706
+[1m 5/83[0m [32m=[0m[37m===================[0m [1m58s[0m 749ms/step - binary_accuracy: 0.9688 - loss: 0.0791 - precision: 0.9756 - recall: 0.9639 
+[1m 6/83[0m [32m=[0m[37m===================[0m [1m56s[0m 729ms/step - binary_accuracy: 0.9688 - loss: 0.0792 - precision: 0.9800 - recall: 0.9608
+[1m 7/83[0m [32m=[0m[37m===================[0m [1m54s[0m 715ms/step - binary_accuracy: 0.9688 - loss: 0.0745 - precision: 0.9821 - recall: 0.9565
+[1m 8/83[0m [32m=[0m[37m===================[0m [1m52s[0m 699ms/step - binary_accuracy: 0.9609 - loss: 0.0880 - precision: 0.9843 - recall: 0.9398
+[1m 9/83[0m [32m==[0m[37m==================[0m [1m51s[0m 695ms/step - binary_accuracy: 0.9653 - loss: 0.0876 - precision: 0.9860 - recall: 0.9463
+[1m10/83[0m [32m==[0m[37m==================[0m [1m50s[0m 688ms/step - binary_accuracy: 0.9688 - loss: 0.0839 - precision: 0.9873 - recall: 0.9509
+[1m11/83[0m [32m==[0m[37m==================[0m [1m49s[0m 681ms/step - binary_accuracy: 0.9688 - loss: 0.0812 - precision: 0.9884 - recall: 0.9500
+[1m12/83[0m [32m==[0m[37m==================[0m [1m48s[0m 690ms/step - binary_accuracy: 0.9714 - loss: 0.0801 - precision: 0.9892 - recall: 0.9534
+[1m13/83[0m [32m===[0m[37m=================[0m [1m48s[0m 686ms/step - binary_accuracy: 0.9712 - loss: 0.0767 - precision: 0.9901 - recall: 0.9526
+[1m14/83[0m [32m===[0m[37m=================[0m [1m47s[0m 687ms/step - binary_accuracy: 0.9732 - loss: 0.0738 - precision: 0.9908 - recall: 0.9556
+[1m15/83[0m [32m===[0m[37m=================[0m [1m46s[0m 688ms/step - binary_accuracy: 0.9729 - loss: 0.0774 - precision: 0.9872 - recall: 0.9585
+[1m16/83[0m [32m===[0m[37m=================[0m [1m46s[0m 688ms/step - binary_accuracy: 0.9727 - loss: 0.0797 - precision: 0.9876 - recall: 0.9560
+[1m17/83[0m [32m====[0m[37m================[0m [1m45s[0m 687ms/step - binary_accuracy: 0.9688 - loss: 0.0812 - precision: 0.9808 - recall: 0.9552
+[1m18/83[0m [32m====[0m[37m================[0m [1m44s[0m 687ms/step - binary_accuracy: 0.9653 - loss: 0.0868 - precision: 0.9782 - recall: 0.9505
+[1m19/83[0m [32m====[0m[37m================[0m [1m43s[0m 685ms/step - binary_accuracy: 0.9655 - loss: 0.0886 - precision: 0.9790 - recall: 0.9492
+[1m20/83[0m [32m====[0m[37m================[0m [1m42s[0m 682ms/step - binary_accuracy: 0.9672 - loss: 0.0857 - precision: 0.9799 - recall: 0.9513
+[1m21/83[0m [32m=====[0m[37m===============[0m [1m42s[0m 681ms/step - binary_accuracy: 0.9673 - loss: 0.0842 - precision: 0.9778 - recall: 0.9536
+[1m22/83[0m [32m=====[0m[37m===============[0m [1m41s[0m 679ms/step - binary_accuracy: 0.9673 - loss: 0.0826 - precision: 0.9788 - recall: 0.9528
+[1m23/83[0m [32m=====[0m[37m===============[0m [1m40s[0m 676ms/step - binary_accuracy: 0.9674 - loss: 0.0811 - precision: 0.9772 - recall: 0.9554
+[1m24/83[0m [32m=====[0m[37m===============[0m [1m39s[0m 675ms/step - binary_accuracy: 0.9674 - loss: 0.0811 - precision: 0.9782 - recall: 0.9548
+[1m25/83[0m [32m======[0m[37m==============[0m [1m39s[0m 674ms/step - binary_accuracy: 0.9688 - loss: 0.0802 - precision: 0.9790 - recall: 0.9564
+[1m26/83[0m [32m======[0m[37m==============[0m [1m38s[0m 674ms/step - binary_accuracy: 0.9688 - loss: 0.0784 - precision: 0.9774 - recall: 0.9581
+[1m27/83[0m [32m======[0m[37m==============[0m [1m37s[0m 675ms/step - binary_accuracy: 0.9699 - loss: 0.0757 - precision: 0.9782 - recall: 0.9595
+[1m28/83[0m [32m======[0m[37m==============[0m [1m36s[0m 673ms/step - binary_accuracy: 0.9710 - loss: 0.0752 - precision: 0.9790 - recall: 0.9611
+[1m29/83[0m [32m======[0m[37m==============[0m [1m36s[0m 670ms/step - binary_accuracy: 0.9709 - loss: 0.0742 - precision: 0.9797 - recall: 0.9602
+[1m30/83[0m [32m=======[0m[37m=============[0m [1m35s[0m 668ms/step - binary_accuracy: 0.9698 - loss: 0.0790 - precision: 0.9804 - recall: 0.9574
+[1m31/83[0m [32m=======[0m[37m=============[0m [1m34s[0m 665ms/step - binary_accuracy: 0.9688 - loss: 0.0788 - precision: 0.9810 - recall: 0.9548
+[1m32/83[0m [32m=======[0m[37m=============[0m [1m33s[0m 664ms/step - binary_accuracy: 0.9688 - loss: 0.0783 - precision: 0.9816 - recall: 0.9543
+[1m33/83[0m [32m=======[0m[37m=============[0m [1m33s[0m 663ms/step - binary_accuracy: 0.9688 - loss: 0.0783 - precision: 0.9822 - recall: 0.9538
+[1m34/83[0m [32m========[0m[37m============[0m [1m32s[0m 663ms/step - binary_accuracy: 0.9697 - loss: 0.0765 - precision: 0.9827 - recall: 0.9551
+[1m35/83[0m [32m========[0m[37m============[0m [1m31s[0m 663ms/step - binary_accuracy: 0.9705 - loss: 0.0749 - precision: 0.9831 - recall: 0.9562
+[1m36/83[0m [32m========[0m[37m============[0m [1m31s[0m 663ms/step - binary_accuracy: 0.9705 - loss: 0.0751 - precision: 0.9835 - recall: 0.9556
+[1m37/83[0m [32m========[0m[37m============[0m [1m30s[0m 662ms/step - binary_accuracy: 0.9713 - loss: 0.0737 - precision: 0.9841 - recall: 0.9570
+[1m38/83[0m [32m=========[0m[37m===========[0m [1m29s[0m 665ms/step - binary_accuracy: 0.9712 - loss: 0.0740 - precision: 0.9846 - recall: 0.9567
+[1m39/83[0m [32m=========[0m[37m===========[0m [1m29s[0m 665ms/step - binary_accuracy: 0.9712 - loss: 0.0730 - precision: 0.9851 - recall: 0.9565
+[1m40/83[0m [32m=========[0m[37m===========[0m [1m28s[0m 666ms/step - binary_accuracy: 0.9719 - loss: 0.0716 - precision: 0.9856 - recall: 0.9579
+[1m41/83[0m [32m=========[0m[37m===========[0m [1m27s[0m 665ms/step - binary_accuracy: 0.9726 - loss: 0.0703 - precision: 0.9860 - recall: 0.9590
+[1m42/83[0m [32m==========[0m[37m==========[0m [1m27s[0m 663ms/step - binary_accuracy: 0.9732 - loss: 0.0691 - precision: 0.9864 - recall: 0.9602
+[1m43/83[0m [32m==========[0m[37m==========[0m [1m26s[0m 662ms/step - binary_accuracy: 0.9731 - loss: 0.0689 - precision: 0.9866 - recall: 0.9596
+[1m44/83[0m [32m==========[0m[37m==========[0m [1m25s[0m 662ms/step - binary_accuracy: 0.9723 - loss: 0.0704 - precision: 0.9870 - recall: 0.9578
+[1m45/83[0m [32m==========[0m[37m==========[0m [1m25s[0m 661ms/step - binary_accuracy: 0.9722 - loss: 0.0708 - precision: 0.9859 - recall: 0.9587
+[1m46/83[0m [32m===========[0m[37m=========[0m [1m24s[0m 661ms/step - binary_accuracy: 0.9728 - loss: 0.0698 - precision: 0.9862 - recall: 0.9597
+[1m47/83[0m [32m===========[0m[37m=========[0m [1m23s[0m 660ms/step - binary_accuracy: 0.9727 - loss: 0.0717 - precision: 0.9865 - recall: 0.9594
+[1m48/83[0m [32m===========[0m[37m=========[0m [1m23s[0m 660ms/step - binary_accuracy: 0.9727 - loss: 0.0723 - precision: 0.9855 - recall: 0.9602
+[1m49/83[0m [32m===========[0m[37m=========[0m [1m22s[0m 660ms/step - binary_accuracy: 0.9726 - loss: 0.0719 - precision: 0.9846 - recall: 0.9612
+[1m50/83[0m [32m============[0m[37m========[0m [1m21s[0m 660ms/step - binary_accuracy: 0.9719 - loss: 0.0729 - precision: 0.9849 - recall: 0.9597
+[1m51/83[0m [32m============[0m[37m========[0m [1m21s[0m 660ms/step - binary_accuracy: 0.9724 - loss: 0.0721 - precision: 0.9853 - recall: 0.9605
+[1m52/83[0m [32m============[0m[37m========[0m [1m20s[0m 659ms/step - binary_accuracy: 0.9724 - loss: 0.0736 - precision: 0.9856 - recall: 0.9603
+[1m53/83[0m [32m============[0m[37m========[0m [1m19s[0m 659ms/step - binary_accuracy: 0.9729 - loss: 0.0726 - precision: 0.9859 - recall: 0.9611
+[1m54/83[0m [32m=============[0m[37m=======[0m [1m19s[0m 658ms/step - binary_accuracy: 0.9728 - loss: 0.0725 - precision: 0.9851 - recall: 0.9618
+[1m55/83[0m [32m=============[0m[37m=======[0m [1m18s[0m 657ms/step - binary_accuracy: 0.9733 - loss: 0.0715 - precision: 0.9854 - recall: 0.9628
+[1m56/83[0m [32m=============[0m[37m=======[0m [1m17s[0m 656ms/step - binary_accuracy: 0.9732 - loss: 0.0717 - precision: 0.9857 - recall: 0.9623
+[1m57/83[0m [32m=============[0m[37m=======[0m [1m17s[0m 655ms/step - binary_accuracy: 0.9737 - loss: 0.0718 - precision: 0.9859 - recall: 0.9630
+[1m58/83[0m [32m=============[0m[37m=======[0m [1m16s[0m 655ms/step - binary_accuracy: 0.9741 - loss: 0.0706 - precision: 0.9862 - recall: 0.9638
+[1m59/83[0m [32m==============[0m[37m======[0m [1m15s[0m 654ms/step - binary_accuracy: 0.9740 - loss: 0.0713 - precision: 0.9854 - recall: 0.9644
+[1m60/83[0m [32m==============[0m[37m======[0m [1m15s[0m 654ms/step - binary_accuracy: 0.9734 - loss: 0.0739 - precision: 0.9846 - recall: 0.9639
+[1m61/83[0m [32m==============[0m[37m======[0m [1m14s[0m 655ms/step - binary_accuracy: 0.9739 - loss: 0.0731 - precision: 0.9849 - recall: 0.9644
+[1m62/83[0m [32m==============[0m[37m======[0m [1m13s[0m 656ms/step - binary_accuracy: 0.9743 - loss: 0.0722 - precision: 0.9851 - recall: 0.9649
+[1m63/83[0m [32m===============[0m[37m=====[0m [1m13s[0m 655ms/step - binary_accuracy: 0.9747 - loss: 0.0714 - precision: 0.9854 - recall: 0.9656
+[1m64/83[0m [32m===============[0m[37m=====[0m [1m12s[0m 656ms/step - binary_accuracy: 0.9746 - loss: 0.0711 - precision: 0.9856 - recall: 0.9652
+[1m65/83[0m [32m===============[0m[37m=====[0m [1m11s[0m 656ms/step - binary_accuracy: 0.9750 - loss: 0.0705 - precision: 0.9858 - recall: 0.9656
+[1m66/83[0m [32m===============[0m[37m=====[0m [1m11s[0m 656ms/step - binary_accuracy: 0.9740 - loss: 0.0725 - precision: 0.9859 - recall: 0.9634
+[1m67/83[0m [32m================[0m[37m====[0m [1m10s[0m 656ms/step - binary_accuracy: 0.9743 - loss: 0.0719 - precision: 0.9861 - recall: 0.9639
+[1m68/83[0m [32m================[0m[37m====[0m [1m9s[0m 656ms/step - binary_accuracy: 0.9747 - loss: 0.0712 - precision: 0.9864 - recall: 0.9644 
+[1m69/83[0m [32m================[0m[37m====[0m [1m9s[0m 658ms/step - binary_accuracy: 0.9751 - loss: 0.0704 - precision: 0.9866 - recall: 0.9650
+[1m70/83[0m [32m================[0m[37m====[0m [1m8s[0m 657ms/step - binary_accuracy: 0.9746 - loss: 0.0734 - precision: 0.9867 - recall: 0.9638
+[1m71/83[0m [32m=================[0m[37m===[0m [1m7s[0m 657ms/step - binary_accuracy: 0.9749 - loss: 0.0728 - precision: 0.9869 - recall: 0.9643
+[1m72/83[0m [32m=================[0m[37m===[0m [1m7s[0m 657ms/step - binary_accuracy: 0.9748 - loss: 0.0725 - precision: 0.9863 - recall: 0.9647
+[1m73/83[0m [32m=================[0m[37m===[0m [1m6s[0m 656ms/step - binary_accuracy: 0.9752 - loss: 0.0720 - precision: 0.9865 - recall: 0.9652
+[1m74/83[0m [32m=================[0m[37m===[0m [1m5s[0m 656ms/step - binary_accuracy: 0.9751 - loss: 0.0716 - precision: 0.9858 - recall: 0.9656
+[1m75/83[0m [32m==================[0m[37m==[0m [1m5s[0m 655ms/step - binary_accuracy: 0.9754 - loss: 0.0714 - precision: 0.9860 - recall: 0.9661
+[1m76/83[0m [32m==================[0m[37m==[0m [1m4s[0m 656ms/step - binary_accuracy: 0.9757 - loss: 0.0707 - precision: 0.9862 - recall: 0.9667
+[1m77/83[0m [32m==================[0m[37m==[0m [1m3s[0m 655ms/step - binary_accuracy: 0.9756 - loss: 0.0718 - precision: 0.9864 - recall: 0.9663
+[1m78/83[0m [32m==================[0m[37m==[0m [1m3s[0m 655ms/step - binary_accuracy: 0.9760 - loss: 0.0710 - precision: 0.9866 - recall: 0.9667
+[1m79/83[0m [32m===================[0m[37m=[0m [1m2s[0m 656ms/step - binary_accuracy: 0.9755 - loss: 0.0716 - precision: 0.9867 - recall: 0.9656
+[1m80/83[0m [32m===================[0m[37m=[0m [1m1s[0m 656ms/step - binary_accuracy: 0.9758 - loss: 0.0709 - precision: 0.9869 - recall: 0.9660
+[1m81/83[0m [32m===================[0m[37m=[0m [1m1s[0m 656ms/step - binary_accuracy: 0.9761 - loss: 0.0702 - precision: 0.9870 - recall: 0.9664
+[1m82/83[0m [32m===================[0m[37m=[0m [1m0s[0m 656ms/step - binary_accuracy: 0.9764 - loss: 0.0700 - precision: 0.9872 - recall: 0.9667
+[1m83/83[0m [32m====================[0m[37m[0m [1m0s[0m 652ms/step - binary_accuracy: 0.9765 - loss: 0.0696 - precision: 0.9872 - recall: 0.9669
+[1m83/83[0m [32m====================[0m[37m[0m [1m92s[0m 732ms/step - binary_accuracy: 0.9765 - loss: 0.0696 - precision: 0.9872 - recall: 0.9669 - val_binary_accuracy: 0.9697 - val_loss: 0.0953 - val_precision: 0.9878 - val_recall: 0.9529
+Epoch 5/6
+
+[1m 1/83[0m [37m====================[0m [1m53s[0m 658ms/step - binary_accuracy: 1.0000 - loss: 0.0514 - precision: 1.0000 - recall: 1.0000
+[1m 2/83[0m [37m====================[0m [1m50s[0m 625ms/step - binary_accuracy: 0.9688 - loss: 0.0976 - precision: 1.0000 - recall: 0.9200
+[1m 3/83[0m [37m====================[0m [1m51s[0m 638ms/step - binary_accuracy: 0.9792 - loss: 0.0754 - precision: 1.0000 - recall: 0.9512
+[1m 4/83[0m [37m====================[0m [1m49s[0m 632ms/step - binary_accuracy: 0.9844 - loss: 0.0673 - precision: 1.0000 - recall: 0.9649
+[1m 5/83[0m [32m=[0m[37m===================[0m [1m49s[0m 632ms/step - binary_accuracy: 0.9875 - loss: 0.0556 - precision: 1.0000 - recall: 0.9726
+[1m 6/83[0m [32m=[0m[37m===================[0m [1m49s[0m 642ms/step - binary_accuracy: 0.9896 - loss: 0.0514 - precision: 1.0000 - recall: 0.9778
+[1m 7/83[0m [32m=[0m[37m===================[0m [1m49s[0m 650ms/step - binary_accuracy: 0.9911 - loss: 0.0488 - precision: 1.0000 - recall: 0.9818
+[1m 8/83[0m [32m=[0m[37m===================[0m [1m49s[0m 656ms/step - binary_accuracy: 0.9883 - loss: 0.0516 - precision: 1.0000 - recall: 0.9762
+[1m 9/83[0m [32m==[0m[37m==================[0m [1m48s[0m 657ms/step - binary_accuracy: 0.9826 - loss: 0.0539 - precision: 1.0000 - recall: 0.9658
+[1m10/83[0m [32m==[0m[37m==================[0m [1m47s[0m 656ms/step - binary_accuracy: 0.9844 - loss: 0.0524 - precision: 1.0000 - recall: 0.9697
+[1m11/83[0m [32m==[0m[37m==================[0m [1m47s[0m 664ms/step - binary_accuracy: 0.9858 - loss: 0.0525 - precision: 1.0000 - recall: 0.9719
+[1m12/83[0m [32m==[0m[37m==================[0m [1m47s[0m 665ms/step - binary_accuracy: 0.9844 - loss: 0.0537 - precision: 1.0000 - recall: 0.9695
+[1m13/83[0m [32m===[0m[37m=================[0m [1m47s[0m 674ms/step - binary_accuracy: 0.9856 - loss: 0.0512 - precision: 1.0000 - recall: 0.9717
+[1m14/83[0m [32m===[0m[37m=================[0m [1m46s[0m 681ms/step - binary_accuracy: 0.9821 - loss: 0.0540 - precision: 0.9912 - recall: 0.9741
+[1m15/83[0m [32m===[0m[37m=================[0m [1m46s[0m 682ms/step - binary_accuracy: 0.9833 - loss: 0.0511 - precision: 0.9919 - recall: 0.9760
+[1m16/83[0m [32m===[0m[37m=================[0m [1m45s[0m 683ms/step - binary_accuracy: 0.9824 - loss: 0.0545 - precision: 0.9922 - recall: 0.9732
+[1m17/83[0m [32m====[0m[37m================[0m [1m45s[0m 687ms/step - binary_accuracy: 0.9816 - loss: 0.0534 - precision: 0.9889 - recall: 0.9745
+[1m18/83[0m [32m====[0m[37m================[0m [1m45s[0m 693ms/step - binary_accuracy: 0.9792 - loss: 0.0623 - precision: 0.9893 - recall: 0.9686
+[1m19/83[0m [32m====[0m[37m================[0m [1m44s[0m 694ms/step - binary_accuracy: 0.9786 - loss: 0.0659 - precision: 0.9899 - recall: 0.9670
+[1m20/83[0m [32m====[0m[37m================[0m [1m43s[0m 694ms/step - binary_accuracy: 0.9781 - loss: 0.0686 - precision: 0.9903 - recall: 0.9654
+[1m21/83[0m [32m=====[0m[37m===============[0m [1m43s[0m 695ms/step - binary_accuracy: 0.9792 - loss: 0.0660 - precision: 0.9909 - recall: 0.9675
+[1m22/83[0m [32m=====[0m[37m===============[0m [1m42s[0m 701ms/step - binary_accuracy: 0.9801 - loss: 0.0637 - precision: 0.9914 - recall: 0.9691
+[1m23/83[0m [32m=====[0m[37m===============[0m [1m42s[0m 701ms/step - binary_accuracy: 0.9796 - loss: 0.0660 - precision: 0.9918 - recall: 0.9681
+[1m24/83[0m [32m=====[0m[37m===============[0m [1m41s[0m 699ms/step - binary_accuracy: 0.9779 - loss: 0.0683 - precision: 0.9922 - recall: 0.9645
+[1m25/83[0m [32m======[0m[37m==============[0m [1m40s[0m 697ms/step - binary_accuracy: 0.9787 - loss: 0.0664 - precision: 0.9925 - recall: 0.9660
+[1m26/83[0m [32m======[0m[37m==============[0m [1m39s[0m 694ms/step - binary_accuracy: 0.9796 - loss: 0.0656 - precision: 0.9928 - recall: 0.9674
+[1m27/83[0m [32m======[0m[37m==============[0m [1m38s[0m 691ms/step - binary_accuracy: 0.9803 - loss: 0.0655 - precision: 0.9930 - recall: 0.9683
+[1m28/83[0m [32m======[0m[37m==============[0m [1m37s[0m 689ms/step - binary_accuracy: 0.9810 - loss: 0.0648 - precision: 0.9933 - recall: 0.9694
+[1m29/83[0m [32m======[0m[37m==============[0m [1m37s[0m 686ms/step - binary_accuracy: 0.9806 - loss: 0.0649 - precision: 0.9914 - recall: 0.9706
+[1m30/83[0m [32m=======[0m[37m=============[0m [1m36s[0m 684ms/step - binary_accuracy: 0.9792 - loss: 0.0680 - precision: 0.9896 - recall: 0.9693
+[1m31/83[0m [32m=======[0m[37m=============[0m [1m35s[0m 682ms/step - binary_accuracy: 0.9788 - loss: 0.0679 - precision: 0.9899 - recall: 0.9683
+[1m32/83[0m [32m=======[0m[37m=============[0m [1m34s[0m 679ms/step - binary_accuracy: 0.9795 - loss: 0.0660 - precision: 0.9902 - recall: 0.9693
+[1m33/83[0m [32m=======[0m[37m=============[0m [1m33s[0m 679ms/step - binary_accuracy: 0.9801 - loss: 0.0648 - precision: 0.9905 - recall: 0.9701
+[1m34/83[0m [32m========[0m[37m============[0m [1m33s[0m 678ms/step - binary_accuracy: 0.9807 - loss: 0.0640 - precision: 0.9907 - recall: 0.9708
+[1m35/83[0m [32m========[0m[37m============[0m [1m32s[0m 677ms/step - binary_accuracy: 0.9804 - loss: 0.0648 - precision: 0.9892 - recall: 0.9716
+[1m36/83[0m [32m========[0m[37m============[0m [1m31s[0m 676ms/step - binary_accuracy: 0.9774 - loss: 0.0691 - precision: 0.9894 - recall: 0.9654
+[1m37/83[0m [32m========[0m[37m============[0m [1m31s[0m 677ms/step - binary_accuracy: 0.9780 - loss: 0.0687 - precision: 0.9897 - recall: 0.9664
+[1m38/83[0m [32m=========[0m[37m===========[0m [1m30s[0m 681ms/step - binary_accuracy: 0.9786 - loss: 0.0676 - precision: 0.9901 - recall: 0.9676
+[1m39/83[0m [32m=========[0m[37m===========[0m [1m29s[0m 679ms/step - binary_accuracy: 0.9792 - loss: 0.0667 - precision: 0.9904 - recall: 0.9687
+[1m40/83[0m [32m=========[0m[37m===========[0m [1m29s[0m 680ms/step - binary_accuracy: 0.9789 - loss: 0.0666 - precision: 0.9891 - recall: 0.9696
+[1m41/83[0m [32m=========[0m[37m===========[0m [1m28s[0m 681ms/step - binary_accuracy: 0.9794 - loss: 0.0652 - precision: 0.9894 - recall: 0.9703
+[1m42/83[0m [32m==========[0m[37m==========[0m [1m27s[0m 681ms/step - binary_accuracy: 0.9784 - loss: 0.0663 - precision: 0.9896 - recall: 0.9681
+[1m43/83[0m [32m==========[0m[37m==========[0m [1m27s[0m 679ms/step - binary_accuracy: 0.9782 - loss: 0.0680 - precision: 0.9899 - recall: 0.9676
+[1m44/83[0m [32m==========[0m[37m==========[0m [1m26s[0m 678ms/step - binary_accuracy: 0.9780 - loss: 0.0676 - precision: 0.9888 - recall: 0.9685
+[1m45/83[0m [32m==========[0m[37m==========[0m [1m25s[0m 676ms/step - binary_accuracy: 0.9778 - loss: 0.0672 - precision: 0.9876 - recall: 0.9688
+[1m46/83[0m [32m===========[0m[37m=========[0m [1m24s[0m 675ms/step - binary_accuracy: 0.9783 - loss: 0.0664 - precision: 0.9878 - recall: 0.9694
+[1m47/83[0m [32m===========[0m[37m=========[0m [1m24s[0m 674ms/step - binary_accuracy: 0.9774 - loss: 0.0670 - precision: 0.9880 - recall: 0.9675
+[1m48/83[0m [32m===========[0m[37m=========[0m [1m23s[0m 672ms/step - binary_accuracy: 0.9772 - loss: 0.0673 - precision: 0.9883 - recall: 0.9670
+[1m49/83[0m [32m===========[0m[37m=========[0m [1m22s[0m 671ms/step - binary_accuracy: 0.9770 - loss: 0.0671 - precision: 0.9886 - recall: 0.9667
+[1m50/83[0m [32m============[0m[37m========[0m [1m22s[0m 669ms/step - binary_accuracy: 0.9775 - loss: 0.0660 - precision: 0.9889 - recall: 0.9674
+[1m51/83[0m [32m============[0m[37m========[0m [1m21s[0m 667ms/step - binary_accuracy: 0.9767 - loss: 0.0667 - precision: 0.9891 - recall: 0.9658
+[1m52/83[0m [32m============[0m[37m========[0m [1m20s[0m 666ms/step - binary_accuracy: 0.9766 - loss: 0.0664 - precision: 0.9893 - recall: 0.9652
+[1m53/83[0m [32m============[0m[37m========[0m [1m19s[0m 666ms/step - binary_accuracy: 0.9770 - loss: 0.0655 - precision: 0.9895 - recall: 0.9658
+[1m54/83[0m [32m=============[0m[37m=======[0m [1m19s[0m 666ms/step - binary_accuracy: 0.9774 - loss: 0.0648 - precision: 0.9897 - recall: 0.9664
+[1m55/83[0m [32m=============[0m[37m=======[0m [1m18s[0m 668ms/step - binary_accuracy: 0.9778 - loss: 0.0642 - precision: 0.9899 - recall: 0.9671
+[1m56/83[0m [32m=============[0m[37m=======[0m [1m18s[0m 669ms/step - binary_accuracy: 0.9782 - loss: 0.0633 - precision: 0.9901 - recall: 0.9677
+[1m57/83[0m [32m=============[0m[37m=======[0m [1m17s[0m 669ms/step - binary_accuracy: 0.9786 - loss: 0.0630 - precision: 0.9903 - recall: 0.9683
+[1m58/83[0m [32m=============[0m[37m=======[0m [1m16s[0m 668ms/step - binary_accuracy: 0.9790 - loss: 0.0628 - precision: 0.9904 - recall: 0.9687
+[1m59/83[0m [32m==============[0m[37m======[0m [1m15s[0m 666ms/step - binary_accuracy: 0.9793 - loss: 0.0630 - precision: 0.9906 - recall: 0.9692
+[1m60/83[0m [32m==============[0m[37m======[0m [1m15s[0m 665ms/step - binary_accuracy: 0.9797 - loss: 0.0622 - precision: 0.9907 - recall: 0.9697
+[1m61/83[0m [32m==============[0m[37m======[0m [1m14s[0m 664ms/step - binary_accuracy: 0.9795 - loss: 0.0625 - precision: 0.9898 - recall: 0.9701
+[1m62/83[0m [32m==============[0m[37m======[0m [1m13s[0m 663ms/step - binary_accuracy: 0.9793 - loss: 0.0625 - precision: 0.9900 - recall: 0.9696
+[1m63/83[0m [32m===============[0m[37m=====[0m [1m13s[0m 662ms/step - binary_accuracy: 0.9792 - loss: 0.0628 - precision: 0.9902 - recall: 0.9692
+[1m64/83[0m [32m===============[0m[37m=====[0m [1m12s[0m 661ms/step - binary_accuracy: 0.9795 - loss: 0.0628 - precision: 0.9904 - recall: 0.9698
+[1m65/83[0m [32m===============[0m[37m=====[0m [1m11s[0m 660ms/step - binary_accuracy: 0.9793 - loss: 0.0627 - precision: 0.9905 - recall: 0.9694
+[1m66/83[0m [32m===============[0m[37m=====[0m [1m11s[0m 660ms/step - binary_accuracy: 0.9796 - loss: 0.0623 - precision: 0.9907 - recall: 0.9699
+[1m67/83[0m [32m================[0m[37m====[0m [1m10s[0m 660ms/step - binary_accuracy: 0.9799 - loss: 0.0616 - precision: 0.9908 - recall: 0.9703
+[1m68/83[0m [32m================[0m[37m====[0m [1m9s[0m 660ms/step - binary_accuracy: 0.9789 - loss: 0.0635 - precision: 0.9910 - recall: 0.9682 
+[1m69/83[0m [32m================[0m[37m====[0m [1m9s[0m 659ms/step - binary_accuracy: 0.9783 - loss: 0.0647 - precision: 0.9893 - recall: 0.9686
+[1m70/83[0m [32m================[0m[37m====[0m [1m8s[0m 658ms/step - binary_accuracy: 0.9786 - loss: 0.0641 - precision: 0.9894 - recall: 0.9688
+[1m71/83[0m [32m=================[0m[37m===[0m [1m7s[0m 657ms/step - binary_accuracy: 0.9780 - loss: 0.0650 - precision: 0.9886 - recall: 0.9683
+[1m72/83[0m [32m=================[0m[37m===[0m [1m7s[0m 656ms/step - binary_accuracy: 0.9783 - loss: 0.0646 - precision: 0.9888 - recall: 0.9687
+[1m73/83[0m [32m=================[0m[37m===[0m [1m6s[0m 656ms/step - binary_accuracy: 0.9782 - loss: 0.0649 - precision: 0.9889 - recall: 0.9682
+[1m74/83[0m [32m=================[0m[37m===[0m [1m5s[0m 655ms/step - binary_accuracy: 0.9785 - loss: 0.0642 - precision: 0.9891 - recall: 0.9687
+[1m75/83[0m [32m==================[0m[37m==[0m [1m5s[0m 654ms/step - binary_accuracy: 0.9787 - loss: 0.0636 - precision: 0.9892 - recall: 0.9691
+[1m76/83[0m [32m==================[0m[37m==[0m [1m4s[0m 653ms/step - binary_accuracy: 0.9786 - loss: 0.0650 - precision: 0.9893 - recall: 0.9687
+[1m77/83[0m [32m==================[0m[37m==[0m [1m3s[0m 653ms/step - binary_accuracy: 0.9789 - loss: 0.0642 - precision: 0.9895 - recall: 0.9692
+[1m78/83[0m [32m==================[0m[37m==[0m [1m3s[0m 652ms/step - binary_accuracy: 0.9788 - loss: 0.0640 - precision: 0.9896 - recall: 0.9688
+[1m79/83[0m [32m===================[0m[37m=[0m [1m2s[0m 651ms/step - binary_accuracy: 0.9786 - loss: 0.0645 - precision: 0.9898 - recall: 0.9685
+[1m80/83[0m [32m===================[0m[37m=[0m [1m1s[0m 653ms/step - binary_accuracy: 0.9785 - loss: 0.0657 - precision: 0.9899 - recall: 0.9681
+[1m81/83[0m [32m===================[0m[37m=[0m [1m1s[0m 652ms/step - binary_accuracy: 0.9784 - loss: 0.0653 - precision: 0.9900 - recall: 0.9677
+[1m82/83[0m [32m===================[0m[37m=[0m [1m0s[0m 652ms/step - binary_accuracy: 0.9775 - loss: 0.0664 - precision: 0.9879 - recall: 0.9682
+[1m83/83[0m [32m====================[0m[37m[0m [1m0s[0m 647ms/step - binary_accuracy: 0.9776 - loss: 0.0661 - precision: 0.9880 - recall: 0.9683
+[1m83/83[0m [32m====================[0m[37m[0m [1m62s[0m 750ms/step - binary_accuracy: 0.9776 - loss: 0.0661 - precision: 0.9880 - recall: 0.9683 - val_binary_accuracy: 0.9697 - val_loss: 0.0965 - val_precision: 0.9878 - val_recall: 0.9529
+Epoch 5: early stopping
+Second-pass fine-tuning complete.
+{
+  "baseline_old_on_val": {
+    "val_non_ai_accuracy": 0.96875,
+    "val_non_ai_genuine_fpr": 0.0125,
+    "val_overall_fraud_recall": 0.9294117647058824
+  },
+  "best_epoch_row": {
+    "epoch": 3.0,
+    "all_constraints_ok": 0.0,
+    "hard_all_ok": 0.0,
+    "hard_ok_count": 4.0,
+    "hard_max_prob": 0.4878164529800415,
+    "val_fraud_recall": 0.9882352941176471,
+    "val_non_ai_accuracy": 0.98125,
+    "val_non_ai_genuine_fpr": 0.025,
+    "val_loss": 0.08488927781581879
+  },
+  "all_constraints_ever_satisfied": false,
+  "threshold": 0.16,
+  "min_fraud_recall": 0.98,
+  "final_model_path": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4_secondpass\\mobilenetv2_secondpass_from_old.keras"
+}

@@ -1,0 +1,98 @@
+{
+  "threshold": 0.16,
+  "candidate_model": "c:/Users/YUKI/Documents/Vivy/artifacts/subset_sweep/ai_10/best.keras",
+  "old_non_ai_reference": {
+    "accuracy": 0.99375,
+    "precision_fraudulent": 1.0,
+    "recall_fraudulent": 0.9875,
+    "f1_fraudulent": 0.9937106918238994,
+    "genuine_fpr": 0.0,
+    "confusion_matrix": [
+      [
+        80,
+        0
+      ],
+      [
+        1,
+        79
+      ]
+    ]
+  },
+  "candidate_non_ai": {
+    "accuracy": 0.9875,
+    "precision_fraudulent": 0.975609756097561,
+    "recall_fraudulent": 1.0,
+    "f1_fraudulent": 0.9876543209876543,
+    "genuine_fpr": 0.025,
+    "confusion_matrix": [
+      [
+        78,
+        2
+      ],
+      [
+        0,
+        80
+      ]
+    ]
+  },
+  "candidate_full": {
+    "accuracy": 0.9878787878787879,
+    "precision_fraudulent": 0.9770114942528736,
+    "recall_fraudulent": 1.0,
+    "f1_fraudulent": 0.9883720930232558,
+    "genuine_fpr": 0.025,
+    "confusion_matrix": [
+      [
+        78,
+        2
+      ],
+      [
+        0,
+        85
+      ]
+    ]
+  },
+  "hard7": [
+    {
+      "source_path": "dataset/AndroidGenuine/gA_192.jpg",
+      "score": 0.12972456216812134,
+      "pred": 0
+    },
+    {
+      "source_path": "dataset/AndroidGenuine/gA_272.jfif",
+      "score": 0.5051161050796509,
+      "pred": 1
+    },
+    {
+      "source_path": "dataset/iOSGenuine/gI_014.PNG",
+      "score": 0.13527214527130127,
+      "pred": 0
+    },
+    {
+      "source_path": "dataset/iOSGenuine/gI_059.jpg",
+      "score": 0.29990896582603455,
+      "pred": 1
+    },
+    {
+      "source_path": "dataset/iOSGenuine/gI_388.jpg",
+      "score": 0.015179172158241272,
+      "pred": 0
+    },
+    {
+      "source_path": "dataset/iOSGenuine/gI_390.jpg",
+      "score": 0.03906295448541641,
+      "pred": 0
+    },
+    {
+      "source_path": "dataset/iOSGenuine/gI_391.jpg",
+      "score": 0.05639753118157387,
+      "pred": 0
+    }
+  ],
+  "gates": {
+    "hard7_all_genuine_at_0_16": false,
+    "non_ai_match_or_beat_old": false,
+    "fraud_recall_ge_0_98": true,
+    "all_gates_pass": false
+  }
+}

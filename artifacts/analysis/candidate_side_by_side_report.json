@@ -1,0 +1,108 @@
+{
+  "old_pre_ai": {
+    "threshold": 0.16,
+    "full_test": {
+      "accuracy": 0.9939393939393939,
+      "precision_fraudulent": 1.0,
+      "recall_fraudulent": 0.9882352941176471,
+      "f1_fraudulent": 0.9940828402366864,
+      "confusion_matrix": [
+        [
+          80,
+          0
+        ],
+        [
+          1,
+          84
+        ]
+      ]
+    },
+    "non_ai_subset": {
+      "accuracy": 0.99375,
+      "precision_fraudulent": 1.0,
+      "recall_fraudulent": 0.9875,
+      "f1_fraudulent": 0.9937106918238994,
+      "confusion_matrix": [
+        [
+          80,
+          0
+        ],
+        [
+          1,
+          79
+        ]
+      ]
+    }
+  },
+  "new_ai_expansion": {
+    "threshold": 0.05,
+    "full_test": {
+      "accuracy": 0.9575757575757575,
+      "precision_fraudulent": 0.9239130434782609,
+      "recall_fraudulent": 1.0,
+      "f1_fraudulent": 0.96045197740113,
+      "confusion_matrix": [
+        [
+          73,
+          7
+        ],
+        [
+          0,
+          85
+        ]
+      ]
+    },
+    "non_ai_subset": {
+      "accuracy": 0.95625,
+      "precision_fraudulent": 0.9195402298850575,
+      "recall_fraudulent": 1.0,
+      "f1_fraudulent": 0.9580838323353293,
+      "confusion_matrix": [
+        [
+          73,
+          7
+        ],
+        [
+          0,
+          80
+        ]
+      ]
+    }
+  },
+  "targeted_candidate": {
+    "threshold": 0.2149999999999999,
+    "full_test": {
+      "accuracy": 0.8666666666666667,
+      "precision_fraudulent": 0.8118811881188119,
+      "recall_fraudulent": 0.9647058823529412,
+      "f1_fraudulent": 0.881720430107527,
+      "confusion_matrix": [
+        [
+          61,
+          19
+        ],
+        [
+          3,
+          82
+        ]
+      ]
+    },
+    "non_ai_subset": {
+      "accuracy": 0.86875,
+      "precision_fraudulent": 0.8041237113402062,
+      "recall_fraudulent": 0.975,
+      "f1_fraudulent": 0.8813559322033899,
+      "confusion_matrix": [
+        [
+          61,
+          19
+        ],
+        [
+          2,
+          78
+        ]
+      ]
+    }
+  },
+  "hard7_csv": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\analysis\\hard7_old_new_targeted_scores.csv"
+}

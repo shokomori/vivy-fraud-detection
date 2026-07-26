@@ -11,14 +11,12 @@ class HomeScreen extends StatefulWidget {
     required this.onUploadVerify,
     required this.onOpenHistory,
     required this.onOpenLearnMore,
-    required this.onOpenMessengerQr,
   });
 
   final List<HistoryEntry> entries;
   final VoidCallback onUploadVerify;
   final VoidCallback onOpenHistory;
   final VoidCallback onOpenLearnMore;
-  final VoidCallback onOpenMessengerQr;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -31,10 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
+      useSafeArea: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(110),
       constraints: const BoxConstraints(maxWidth: 390),
-      builder: (_) => const _HowToUseSheet(),
+      builder: (sheetContext) => _HowToUseSheet(bottomInset: MediaQuery.of(sheetContext).padding.bottom),
     );
   }
 
@@ -181,31 +180,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 10),
                         _SummaryCard(stats: stats),
                         const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _MiniActionCard(
-                                title: 'History',
-                                subtitle: '${stats.total} results saved',
-                                iconAsset: 'assets/vivy_assets/history.svg',
-                                iconBackground: const Color(0xFFCCFBF1),
-                                onTap: widget.onOpenHistory,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _MiniActionCard(
-                                title: 'Learn More',
-                                subtitle: 'About fraud',
-                                iconAsset: 'assets/vivy_assets/learn.svg',
-                                iconBackground: const Color(0xFFFFF1D6),
-                                onTap: widget.onOpenLearnMore,
-                              ),
-                            ),
-                          ],
+                        _MiniActionCard(
+                          title: 'History',
+                          subtitle: '${stats.total} results saved',
+                          iconAsset: 'assets/vivy_assets/history.svg',
+                          iconBackground: const Color(0xFFE0F8F2),
+                          onTap: widget.onOpenHistory,
                         ),
                         const SizedBox(height: 10),
-                        _QrCard(onTap: widget.onOpenMessengerQr),
+                        _MiniActionCard(
+                          title: 'Learn More',
+                          subtitle: 'About GCash e-receipt fraud',
+                          iconAsset: 'assets/vivy_assets/learn.svg',
+                          iconBackground: const Color(0xFFFEEECF),
+                          onTap: widget.onOpenLearnMore,
+                        ),
                         const SizedBox(height: 10),
                         _TipsCard(
                           expanded: _tipsExpanded,
@@ -275,7 +264,9 @@ class _TapScaleState extends State<_TapScale> {
 /// Sized to exactly 390x490 and anchored to the bottom of the screen so it
 /// sits just below the Upload & Verify card on the Home screen behind it.
 class _HowToUseSheet extends StatefulWidget {
-  const _HowToUseSheet();
+  const _HowToUseSheet({required this.bottomInset});
+
+  final double bottomInset;
 
   @override
   State<_HowToUseSheet> createState() => _HowToUseSheetState();
@@ -328,10 +319,12 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 390,
-      height: 490,
-      child: Container(
+    return Padding(
+      padding: EdgeInsets.only(bottom: widget.bottomInset),
+      child: SizedBox(
+        width: 390,
+        height: 490 + widget.bottomInset,
+        child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -417,7 +410,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 16 + widget.bottomInset),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -428,7 +421,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
                       return AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: active ? 30 : 8,
+                        width: active ? 24 : 8,
                         height: 8,
                         decoration: BoxDecoration(
                           color: active
@@ -439,23 +432,23 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
                       );
                     }),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
+                    height: 50,
                     child: FilledButton(
                       onPressed: _next,
                       style: FilledButton.styleFrom(
                         backgroundColor: const Color(0xFF174AA5),
-                        minimumSize: const Size.fromHeight(54),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                       child: Text(
                         _steps[_index].cta,
                         style: const TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                           color: Colors.white,
                           fontFamily: 'Plus Jakarta Sans',
                         ),
@@ -466,6 +459,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
               ),
             ),
           ],
+        ),
         ),
       ),
     );
@@ -809,7 +803,14 @@ class _SummaryPill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (label == 'Genuine')
+              if (label == 'Scans')
+                SvgPicture.asset(
+                  'assets/vivy_assets/scan.svg',
+                  width: 15,
+                  height: 15,
+                  fit: BoxFit.contain,
+                )
+              else if (label == 'Genuine')
                 SvgPicture.asset(
                   'assets/vivy_assets/genuine_shield.svg',
                   width: 15,
@@ -823,7 +824,8 @@ class _SummaryPill extends StatelessWidget {
                   height: 15,
                   fit: BoxFit.contain,
                 ),
-              if (label == 'Genuine' || label == 'Flagged') const SizedBox(width: 4),
+              if (label != 'Scans') const SizedBox(width: 4),
+              if (label == 'Scans') const SizedBox(width: 4),
               Text(
                 value,
                 style: TextStyle(
@@ -870,146 +872,84 @@ class _MiniActionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return _TapScale(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFE4EAF6), width: 1),
           boxShadow: [
             BoxShadow(
               color: const Color(0xFF0A3D8F).withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              width: 30,
-              height: 30,
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconBackground,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              alignment: Alignment.center,
               child: SvgPicture.asset(
                 iconAsset,
+                width: 24,
+                height: 24,
                 fit: BoxFit.contain,
-                width: 30,
-                height: 30,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     title,
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 17,
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0E1726),
                       fontFamily: 'Plus Jakarta Sans',
                     ),
                   ),
-                  const SizedBox(height: 1),
+                  const SizedBox(height: 4),
                   Text(
                     subtitle,
                     style: const TextStyle(
-                      fontSize: 11.2,
-                      color: Color(0xFF6B7A99),
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Plus Jakarta Sans',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QrCard extends StatelessWidget {
-  const _QrCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _TapScale(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE4EAF6), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF0A3D8F).withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            SizedBox(
-              width: 34,
-              height: 34,
-              child: SvgPicture.asset(
-                'assets/vivy_assets/qr.svg',
-                fit: BoxFit.contain,
-                width: 34,
-                height: 34,
-              ),
-            ),
-            const SizedBox(width: 8),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'My Facebook Receipt QR',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0E1726),
-                      fontFamily: 'Plus Jakarta Sans',
-                    ),
-                  ),
-                  SizedBox(height: 1),
-                  Text(
-                    'Let customers send you receipts to scan',
-                    style: TextStyle(
                       fontSize: 12,
                       color: Color(0xFF6B7A99),
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Plus Jakarta Sans',
+                      height: 1.3,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 12),
             Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: const Color(0xFF0A3D8F).withOpacity(0.1),
+                color: Color(0xFFF1F5FF),
               ),
               alignment: Alignment.center,
               child: SvgPicture.asset(
-                'assets/vivy_assets/back_transparent.svg',
-                fit: BoxFit.contain,
+                'assets/vivy_assets/back.svg',
                 width: 16,
                 height: 16,
+                fit: BoxFit.contain,
                 colorFilter: const ColorFilter.mode(
-                  Color(0xFF0A3D8F),
+                  Color(0xFF174AA5),
                   BlendMode.srcIn,
                 ),
               ),

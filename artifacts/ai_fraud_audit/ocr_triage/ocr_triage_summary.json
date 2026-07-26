@@ -1,0 +1,18 @@
+{
+  "total": 79,
+  "pass": 28,
+  "fail": 30,
+  "ambiguous": 21,
+  "pass_android": 17,
+  "pass_ios": 11,
+  "fail_android": 12,
+  "fail_ios": 18,
+  "ambiguous_android": 11,
+  "ambiguous_ios": 10,
+  "rules": {
+    "structural_pass": "no structural feature outside 5-95 percentile",
+    "ocr_pass": "ocr_text_len >= 25th percentile, ocr_mean_conf >= 25th percentile, and receipt keyword or >=4 lines",
+    "fail": ">=3 structural outliers or OCR strongly low",
+    "ambiguous": "everything else"
+  }
+}

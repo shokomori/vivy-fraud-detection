@@ -10,11 +10,19 @@ import tensorflow as tf
 from report_before_after_preprocess_alignment import preprocess_android_opencv_semantics
 
 
-THRESHOLD = 0.16
+def load_threshold(root: Path) -> float:
+    report_path = root / "artifacts/stage5/evaluation_report.json"
+    if report_path.exists():
+        with report_path.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+        return float(data["threshold_tuning"]["selected_threshold"])
+    # Fallback for older runs where Stage 5 artifacts are unavailable.
+    return 0.16
 
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
+    threshold = load_threshold(root)
     pred = pd.read_csv(root / "artifacts/stage5/test_predictions.csv")
     test_npz = np.load(root / "artifacts/stage3/arrays/test.npz", allow_pickle=True)
     source_paths = [str(x) for x in test_npz["source_paths"]]
@@ -39,7 +47,7 @@ def main() -> None:
         interpreter.set_tensor(inp, arr[np.newaxis, ...])
         interpreter.invoke()
         score = float(interpreter.get_tensor(out).reshape(-1)[0])
-        y_pred = 1 if score >= THRESHOLD else 0
+        y_pred = 1 if score >= threshold else 0
         rows.append(
             {
                 "index": int(i),
@@ -62,7 +70,7 @@ def main() -> None:
     acc = float((df["y_true"] == df["y_pred_native_like"]).mean())
 
     report = {
-        "threshold": THRESHOLD,
+        "threshold": threshold,
         "sample_size": int(total),
         "class_balance": {"genuine": int(len(genuine)), "fraudulent": int(len(fraud))},
         "metrics_native_like": {

@@ -64,6 +64,7 @@ def search_threshold(
     y_val: np.ndarray,
     p_val: np.ndarray,
     min_fraud_recall: float,
+    max_genuine_fpr: float,
     start: float,
     end: float,
     step: float,
@@ -75,31 +76,52 @@ def search_threshold(
         y_pred = (p_val >= t).astype(np.int32)
         metrics = compute_metrics(y_val, y_pred)
         f2 = f2_score(metrics["precision_fraudulent"], metrics["recall_fraudulent"])
+        tn = int(((y_val == 0) & (y_pred == 0)).sum())
+        fp = int(((y_val == 0) & (y_pred == 1)).sum())
+        genuine_fpr = float(fp / max(1, fp + tn))
         rows.append(
             {
                 "threshold": float(t),
                 **metrics,
                 "f2_fraudulent": float(f2),
+                "genuine_fpr": genuine_fpr,
                 "meets_min_recall": int(metrics["recall_fraudulent"] >= min_fraud_recall),
+                "meets_max_genuine_fpr": int(genuine_fpr <= max_genuine_fpr),
             }
         )
 
     df = pd.DataFrame(rows)
 
-    eligible = df[df["meets_min_recall"] == 1].copy()
+    eligible = df[(df["meets_min_recall"] == 1) & (df["meets_max_genuine_fpr"] == 1)].copy()
     if not eligible.empty:
-        # Recall-biased selection: constrain by minimum recall first, then optimize F2 (recall-weighted).
+        # Recall-biased selection under explicit genuine-FPR safety constraint.
         best_row = eligible.sort_values(
-            by=["f2_fraudulent", "precision_fraudulent", "accuracy", "threshold"],
-            ascending=[False, False, False, False],
+            by=["f2_fraudulent", "precision_fraudulent", "accuracy", "genuine_fpr", "threshold"],
+            ascending=[False, False, False, True, False],
         ).iloc[0]
-        rationale = "Selected from thresholds meeting minimum fraudulent recall; best F2 (recall-weighted)."
+        rationale = (
+            "Selected from thresholds meeting minimum fraudulent recall and maximum genuine-FPR ceiling; "
+            "best F2 (recall-weighted)."
+        )
     else:
-        best_row = df.sort_values(
-            by=["recall_fraudulent", "f2_fraudulent", "precision_fraudulent", "accuracy"],
-            ascending=[False, False, False, False],
-        ).iloc[0]
-        rationale = "No threshold met minimum fraudulent recall; selected highest recall fallback."
+        recall_only = df[df["meets_min_recall"] == 1].copy()
+        if not recall_only.empty:
+            best_row = recall_only.sort_values(
+                by=["genuine_fpr", "f2_fraudulent", "precision_fraudulent", "accuracy", "threshold"],
+                ascending=[True, False, False, False, False],
+            ).iloc[0]
+            rationale = (
+                "No threshold met both constraints; selected lowest genuine-FPR among recall-eligible thresholds, "
+                "then best F2."
+            )
+        else:
+            best_row = df.sort_values(
+                by=["recall_fraudulent", "genuine_fpr", "f2_fraudulent", "precision_fraudulent", "accuracy"],
+                ascending=[False, True, False, False, False],
+            ).iloc[0]
+            rationale = (
+                "No threshold met minimum fraudulent recall; selected highest recall fallback with lower genuine-FPR preference."
+            )
 
     return float(best_row["threshold"]), df, rationale
 
@@ -133,6 +155,7 @@ def main() -> None:
     parser.add_argument("--output-dir", default="artifacts/stage5", help="Directory for evaluation outputs")
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--min-fraud-recall", type=float, default=0.90, help="Minimum recall target for fraudulent class")
+    parser.add_argument("--max-genuine-fpr", type=float, default=1.0, help="Maximum allowed false-positive rate on genuine class")
     parser.add_argument("--threshold-start", type=float, default=0.05)
     parser.add_argument("--threshold-end", type=float, default=0.95)
     parser.add_argument("--threshold-step", type=float, default=0.005)
@@ -161,6 +184,7 @@ def main() -> None:
         y_val=y_val,
         p_val=p_val,
         min_fraud_recall=args.min_fraud_recall,
+        max_genuine_fpr=args.max_genuine_fpr,
         start=args.threshold_start,
         end=args.threshold_end,
         step=args.threshold_step,
@@ -199,6 +223,7 @@ def main() -> None:
         "threshold_tuning": {
             "selected_threshold": best_threshold,
             "min_fraud_recall_target": args.min_fraud_recall,
+            "max_genuine_fpr_ceiling": args.max_genuine_fpr,
             "selection_rationale": rationale,
             "search_range": [args.threshold_start, args.threshold_end, args.threshold_step],
         },

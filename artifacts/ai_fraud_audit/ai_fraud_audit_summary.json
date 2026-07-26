@@ -1,0 +1,37 @@
+{
+  "incoming_total": 80,
+  "accepted_total": 0,
+  "borderline_total": 79,
+  "rejected_total": 1,
+  "accepted_android": 0,
+  "accepted_ios": 0,
+  "borderline_android": 40,
+  "borderline_ios": 39,
+  "rejected_reasons": {
+    "exact_duplicate_incoming:dataset/NEW DATASET/iOS Fraud/fI_434.png": 1
+  },
+  "accepted_stats": {
+    "count": 0,
+    "min_w": 0,
+    "max_w": 0,
+    "median_w": 0,
+    "min_h": 0,
+    "max_h": 0,
+    "median_h": 0,
+    "min_aspect": 0,
+    "max_aspect": 0,
+    "median_aspect": 0
+  },
+  "borderline_stats": {
+    "count": 79,
+    "min_w": 336,
+    "max_w": 430,
+    "median_w": 362.0,
+    "min_h": 646,
+    "max_h": 974,
+    "median_h": 813.0,
+    "min_aspect": 0.3675564681724846,
+    "max_aspect": 0.5528781793842035,
+    "median_aspect": 0.4634146341463415
+  }
+}

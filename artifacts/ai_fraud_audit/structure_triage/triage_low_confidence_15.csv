@@ -1,0 +1,16 @@
+relative_path,platform,width,height,aspect,edge_density,text_pixel_ratio,line_band_count,component_count,entropy,confidence,triage,reason
+dataset/iOSAIFraudulent/ai_ios_046_fi_406.png,ios,422,825,0.511515,0.198242,0.470033,18,249,4.989655,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_043_fi_403.png,ios,403,848,0.475236,0.199556,0.465448,20,218,5.128571,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_059_fi_419.png,ios,372,847,0.439197,0.197998,0.461658,20,224,4.927237,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_072_fi_432.png,ios,356,829,0.429433,0.193736,0.469050,21,202,5.100691,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_058_fi_418.png,ios,372,847,0.439197,0.197544,0.461445,21,226,4.924977,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_052_fi_412.png,ios,371,841,0.441141,0.197862,0.455401,22,213,4.931940,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_042_fi_402.png,ios,401,846,0.473995,0.198307,0.451858,23,227,5.054568,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_057_fi_417.png,ios,373,847,0.440378,0.197496,0.461550,23,234,4.943868,0.800,pass,text_pixel_ratio_outlier
+dataset/AndroidAIFraudulent/ai_android_034_fa_434.png,android,346,801,0.431960,0.199804,0.474057,24,147,5.842043,0.800,pass,text_pixel_ratio_outlier
+dataset/iOSAIFraudulent/ai_ios_060_fi_420.png,ios,369,847,0.435655,0.199157,0.464013,25,233,4.939688,0.800,pass,text_pixel_ratio_outlier
+dataset/AndroidAIFraudulent/ai_android_029_fa_429.png,android,343,804,0.426617,0.199679,0.211737,12,198,4.944111,1.000,pass,strong_receipt_structure
+dataset/iOSAIFraudulent/ai_ios_079_fi_439.png,ios,361,779,0.463415,0.199386,0.271874,13,170,4.398438,1.000,pass,strong_receipt_structure
+dataset/iOSAIFraudulent/ai_ios_069_fi_429.png,ios,385,812,0.474138,0.188292,0.250985,13,181,4.710367,1.000,pass,strong_receipt_structure
+dataset/AndroidAIFraudulent/ai_android_020_fa_420.png,android,337,714,0.471989,0.196772,0.151718,14,185,4.522112,1.000,pass,strong_receipt_structure
+dataset/iOSAIFraudulent/ai_ios_065_fi_425.png,ios,382,808,0.472772,0.193986,0.242328,14,198,4.726247,1.000,pass,strong_receipt_structure

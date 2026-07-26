@@ -1,0 +1,8 @@
+row_idx,source_path,label_text,y_true,new_model_score,new_pred_at_0_05,new_pred_at_0_16,old_model_score,old_pred_at_0_16,old_pred_at_0_05
+48,dataset/iOSGenuine/gI_391.jpg,ios_genuine,0,0.9833683371543884,1,1,0.03836873918771744,0,0
+125,dataset/iOSGenuine/gI_390.jpg,ios_genuine,0,0.9562393426895142,1,1,0.020850541070103645,0,0
+41,dataset/iOSGenuine/gI_388.jpg,ios_genuine,0,0.9133595824241638,1,1,0.009605404920876026,0,0
+93,dataset/AndroidGenuine/gA_272.jfif,android_genuine,0,0.46774187684059143,1,1,0.03407007083296776,0,0
+108,dataset/iOSGenuine/gI_014.PNG,ios_genuine,0,0.3653288781642914,1,1,0.02443261630833149,0,0
+69,dataset/AndroidGenuine/gA_192.jpg,android_genuine,0,0.32519325613975525,1,1,0.009297762997448444,0,0
+137,dataset/iOSGenuine/gI_059.jpg,ios_genuine,0,0.1186869665980339,1,0,0.013026513159275055,0,0

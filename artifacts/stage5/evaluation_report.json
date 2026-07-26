@@ -4,9 +4,9 @@
     "1": "Fraudulent",
     "positive_class_for_metrics_and_threshold": 1
   },
-  "model_path": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4\\checkpoints\\best_finetune.keras",
+  "model_path": "C:\\Users\\YUKI\\Documents\\Vivy\\artifacts\\stage4\\mobilenetv2_fraud_detector.keras",
   "threshold_tuning": {
-    "selected_threshold": 0.15999999999999995,
+    "selected_threshold": 0.05,
     "min_fraud_recall_target": 0.9,
     "selection_rationale": "Selected from thresholds meeting minimum fraudulent recall; best F2 (recall-weighted).",
     "search_range": [
@@ -16,10 +16,10 @@
     ]
   },
   "test_metrics": {
-    "accuracy": 0.98125,
-    "precision_fraudulent": 0.9753086419753086,
-    "recall_fraudulent": 0.9875,
-    "f1_fraudulent": 0.9813664596273292
+    "accuracy": 0.9575757575757575,
+    "precision_fraudulent": 0.9239130434782609,
+    "recall_fraudulent": 1.0,
+    "f1_fraudulent": 0.96045197740113
   },
   "confusion_matrix_test": {
     "labels_order": [
@@ -28,12 +28,12 @@
     ],
     "matrix": [
       [
-        78,
-        2
+        73,
+        7
       ],
       [
-        1,
-        79
+        0,
+        85
       ]
     ]
   },

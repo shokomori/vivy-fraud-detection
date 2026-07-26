@@ -1,0 +1,24 @@
+{
+  "total": 79,
+  "pass": 79,
+  "fail": 0,
+  "ambiguous": 0,
+  "pass_android": 40,
+  "pass_ios": 39,
+  "fail_android": 0,
+  "fail_ios": 0,
+  "ambiguous_android": 0,
+  "ambiguous_ios": 0,
+  "method": "structure_features_no_ocr",
+  "features": [
+    "edge_density",
+    "text_pixel_ratio",
+    "line_band_count",
+    "component_count",
+    "entropy"
+  ],
+  "thresholds": {
+    "pass": "score>=0.75 and bands>=10 and components>=80",
+    "fail": "score<=0.35 or bands<=3 or components<=20"
+  }
+}

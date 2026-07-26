@@ -1,0 +1,90 @@
+{
+  "low_resolution_rule": {
+    "width_lt": 540,
+    "height_lt": 960
+  },
+  "incoming_android": {
+    "count": 40,
+    "width_min": 336,
+    "width_median": 358.0,
+    "width_max": 430,
+    "height_min": 646,
+    "height_median": 814.0,
+    "height_max": 974,
+    "aspect_min": 0.3675564681724846,
+    "aspect_median": 0.4432907610480005,
+    "aspect_max": 0.5464396284829721,
+    "low_resolution_count": 40,
+    "low_resolution_pct": 100.0
+  },
+  "incoming_ios": {
+    "count": 39,
+    "width_min": 336,
+    "width_median": 372.0,
+    "width_max": 425,
+    "height_min": 747,
+    "height_median": 813.0,
+    "height_max": 848,
+    "aspect_min": 0.41025641025641024,
+    "aspect_median": 0.46461949265687585,
+    "aspect_max": 0.5528781793842035,
+    "low_resolution_count": 39,
+    "low_resolution_pct": 100.0
+  },
+  "old_android_fraud": {
+    "count": 400,
+    "width_min": 171,
+    "width_median": 456.0,
+    "width_max": 1026,
+    "height_min": 398,
+    "height_median": 858.0,
+    "height_max": 2001,
+    "aspect_min": 0.11597938144329897,
+    "aspect_median": 0.522439585730725,
+    "aspect_max": 0.6692759295499021,
+    "low_resolution_count": 288,
+    "low_resolution_pct": 72.0
+  },
+  "old_android_genuine": {
+    "count": 400,
+    "width_min": 620,
+    "width_median": 720.0,
+    "width_max": 1440,
+    "height_min": 1341,
+    "height_median": 1649.0,
+    "height_max": 4520,
+    "aspect_min": 0.3185840707964602,
+    "aspect_median": 0.46768431308866515,
+    "aspect_max": 0.5541303232426885,
+    "low_resolution_count": 0,
+    "low_resolution_pct": 0.0
+  },
+  "old_ios_fraud": {
+    "count": 400,
+    "width_min": 286,
+    "width_median": 411.0,
+    "width_max": 1024,
+    "height_min": 510,
+    "height_median": 776.0,
+    "height_max": 1846,
+    "aspect_min": 0.35468564650059314,
+    "aspect_median": 0.5773418883550139,
+    "aspect_max": 0.7592920353982301,
+    "low_resolution_count": 296,
+    "low_resolution_pct": 74.0
+  },
+  "old_ios_genuine": {
+    "count": 400,
+    "width_min": 530,
+    "width_median": 843.0,
+    "width_max": 1290,
+    "height_min": 1024,
+    "height_median": 1792.0,
+    "height_max": 2796,
+    "aspect_min": 0.4366282595512432,
+    "aspect_median": 0.46205357142857145,
+    "aspect_max": 0.5435329642677403,
+    "low_resolution_count": 3,
+    "low_resolution_pct": 0.75
+  }
+}

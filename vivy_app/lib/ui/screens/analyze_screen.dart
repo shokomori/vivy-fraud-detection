@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../domain/analysis_models.dart';
 import '../widgets/result_card.dart';
@@ -643,46 +642,6 @@ class _AnimatedLoadingBarsState extends State<_AnimatedLoadingBars>
   }
 }
 
-class _PulseBars extends StatelessWidget {
-  const _PulseBars();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: const [
-        _MiniBar(active: true),
-        SizedBox(width: 7),
-        _MiniBar(active: true),
-        SizedBox(width: 7),
-        _MiniBar(active: true),
-        SizedBox(width: 7),
-        _MiniBar(active: true),
-        SizedBox(width: 7),
-        _MiniBar(active: false),
-      ],
-    );
-  }
-}
-
-class _MiniBar extends StatelessWidget {
-  const _MiniBar({required this.active});
-
-  final bool active;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 28,
-      height: 6,
-      decoration: BoxDecoration(
-        color: active ? const Color(0xFF17489D) : const Color(0xFFC9D5EA),
-        borderRadius: BorderRadius.circular(99),
-      ),
-    );
-  }
-}
-
 class _FormatChip extends StatelessWidget {
   const _FormatChip({required this.label});
 
@@ -754,14 +713,10 @@ class _DashedBorderPainter extends CustomPainter {
   const _DashedBorderPainter({
     required this.color,
     required this.width,
-    this.dashLength = 6,
-    this.gapLength = 4,
   });
 
   final Color color;
   final double width;
-  final double dashLength;
-  final double gapLength;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -779,10 +734,9 @@ class _DashedBorderPainter extends CustomPainter {
     for (var metric in metrics) {
       var distance = 0.0;
       while (distance < metric.length) {
-        final extractedPath =
-            metric.extractPath(distance, distance + dashLength);
+        final extractedPath = metric.extractPath(distance, distance + 6);
         canvas.drawPath(extractedPath, paint);
-        distance += dashLength + gapLength;
+        distance += 6 + 4;
       }
     }
   }
@@ -795,12 +749,10 @@ class _TapScale extends StatefulWidget {
   const _TapScale({
     required this.onTap,
     required this.child,
-    this.borderRadius = BorderRadius.zero,
   });
 
   final VoidCallback? onTap;
   final Widget child;
-  final BorderRadius borderRadius;
 
   @override
   State<_TapScale> createState() => _TapScaleState();
@@ -818,14 +770,12 @@ class _TapScaleState extends State<_TapScale> {
       child: Material(
         color: Colors.transparent,
         borderRadius:
-            widget.borderRadius == BorderRadius.zero ? null : widget.borderRadius,
-        shape: widget.borderRadius == BorderRadius.zero
-            ? const CircleBorder()
-            : null,
+            null,
+        shape: null,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: widget.onTap,
-          borderRadius: widget.borderRadius,
+          borderRadius: null,
           onHighlightChanged: (value) {
             if (mounted) setState(() => _pressed = value);
           },
