@@ -100,60 +100,31 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, HistoryEntry item) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Record?'),
-        content: const Text(
+  /// Shows the delete confirmation dialog and resolves to `true` only if
+  /// the user confirms. Used both by the swipe-to-delete gesture (via
+  /// [Dismissible.confirmDismiss]) so the card doesn't disappear until the
+  /// user actually confirms.
+  Future<bool> _confirmDelete(BuildContext context) {
+    return _showVivyConfirmDialog(
+      context,
+      title: 'Delete Record?',
+      message:
           'Are you sure you want to delete this verification record? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleDeleteEntry(item);
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+      confirmLabel: 'Delete',
     );
   }
 
-  void _showClearAllConfirmation(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear History?'),
-        content: const Text(
+  Future<void> _showClearAllConfirmation(BuildContext context) async {
+    final confirmed = await _showVivyConfirmDialog(
+      context,
+      title: 'Clear History?',
+      message:
           'Are you sure you want to clear your entire verification history? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleClearAll();
-            },
-            child: const Text(
-              'Clear All',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+      confirmLabel: 'Clear All',
     );
+    if (confirmed) {
+      await _handleClearAll();
+    }
   }
 
   @override
@@ -217,7 +188,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   ),
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.all(VivySpacing.pagePadding),
+                  padding: EdgeInsets.fromLTRB(
+                    VivySpacing.pagePadding,
+                    VivySpacing.pagePadding,
+                    VivySpacing.pagePadding,
+                    VivySpacing.pagePadding +
+                        MediaQuery.of(context).padding.bottom +
+                        22,
+                  ),
                   itemCount: displayEntries.length,
                   separatorBuilder: (_, index) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
@@ -242,11 +220,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ? 'N/A'
                         : '${(item.confidence! * 100).toStringAsFixed(1)}%';
 
-                    return _TapScale(
+                    final card = _TapScale(
                       borderRadius: BorderRadius.circular(VivySpacing.radiusMedium),
                       onTap: () => _openDetail(context, item),
                       child: Container(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
                         decoration: BoxDecoration(
                           color: VivyColors.surface,
                           borderRadius:
@@ -318,49 +297,70 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    confidenceText,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      fontSize: 12,
-                                      color: VivyColors.textSecondary,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
                             const SizedBox(width: 8),
-                            if (item.amount != null)
-                              Text(
-                                '₱${item.amount!.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: VivyColors.textPrimary,
-                                ),
-                              ),
-                            if (widget.onDeleteEntry != null) ...[
-                              const SizedBox(width: 8),
-                              _TapScale(
-                                onTap: () => _showDeleteConfirmation(context, item),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8),
-                                  child: Icon(
-                                    Icons.close,
-                                    size: 20,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  confidenceText,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontSize: 12,
                                     color: VivyColors.textSecondary,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
-                            ],
+                                if (item.amount != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '₱${item.amount!.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                      color: VivyColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
                           ],
                         ),
                       ),
+                    );
+
+                    // Swipe-to-delete: only enabled when a delete handler is
+                    // actually wired up (mirrors the old X-button condition).
+                    if (widget.onDeleteEntry == null) {
+                      return card;
+                    }
+
+                    return Dismissible(
+                      key: ObjectKey(item),
+                      direction: DismissDirection.endToStart,
+                      confirmDismiss: (_) => _confirmDelete(context),
+                      onDismissed: (_) => _handleDeleteEntry(item),
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFDC2626),
+                          borderRadius:
+                              BorderRadius.circular(VivySpacing.radiusMedium),
+                        ),
+                        child: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.white,
+                          size: 22,
+                        ),
+                      ),
+                      child: card,
                     );
                   },
                 ),
@@ -443,6 +443,142 @@ class _BackButton extends StatelessWidget {
           Icons.arrow_back,
           size: 19,
           color: VivyColors.textPrimary,
+        ),
+      ),
+    );
+  }
+}
+
+/// A destructive-confirmation dialog styled to match the rest of the app:
+/// rounded surface card, tinted icon badge, ExtraBold title, and SemiBold
+/// body/button copy — all in Plus Jakarta Sans. Resolves to `true` only
+/// when the destructive action is confirmed.
+Future<bool> _showVivyConfirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  required String confirmLabel,
+}) async {
+  const destructive = Color(0xFFDC2626);
+  const destructiveTint = Color(0xFFF8D9D9);
+
+  final result = await showDialog<bool>(
+    context: context,
+    barrierColor: Colors.black.withOpacity(0.35),
+    builder: (context) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        decoration: BoxDecoration(
+          color: VivyColors.surface,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: VivyColors.cardBorder),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: const BoxDecoration(
+                color: destructiveTint,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_outline,
+                color: destructive,
+                size: 26,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                fontWeight: FontWeight.w800, // ExtraBold
+                fontSize: 18,
+                color: VivyColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Plus Jakarta Sans',
+                fontWeight: FontWeight.w600, // SemiBold
+                fontSize: 13.5,
+                height: 1.45,
+                color: VivyColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 22),
+            Row(
+              children: [
+                Expanded(
+                  child: _DialogButton(
+                    label: 'Cancel',
+                    onTap: () => Navigator.of(context).pop(false),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _DialogButton(
+                    label: confirmLabel,
+                    filled: true,
+                    color: destructive,
+                    onTap: () => Navigator.of(context).pop(true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+  return result ?? false;
+}
+
+/// Pill-shaped dialog action button, reusing the same tap-scale interaction
+/// as the rest of the app's tappable surfaces so the dialog feels native
+/// to the screen rather than a stock system alert.
+class _DialogButton extends StatelessWidget {
+  const _DialogButton({
+    required this.label,
+    required this.onTap,
+    this.filled = false,
+    this.color,
+  });
+
+  final String label;
+  final VoidCallback onTap;
+  final bool filled;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = color ?? VivyColors.textPrimary;
+    return _TapScale(
+      borderRadius: BorderRadius.circular(14),
+      onTap: onTap,
+      child: Container(
+        height: 46,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: filled ? accent : const Color(0xFFF3F5FB),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Plus Jakarta Sans',
+            fontWeight: FontWeight.w600, // SemiBold
+            fontSize: 14.5,
+            color: filled ? Colors.white : VivyColors.textPrimary,
+          ),
         ),
       ),
     );

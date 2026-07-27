@@ -20,36 +20,6 @@ class VerificationDetailScreen extends StatelessWidget {
   bool get _isNotReceipt => entry.label.toLowerCase().contains('not') && entry.label.toLowerCase().contains('receipt');
   bool get _isUnclear => entry.label.toLowerCase() == 'unclear' || (entry.label.toLowerCase().contains('unclear'));
 
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Record?'),
-        content: const Text(
-          'Are you sure you want to delete this verification record? This action cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              onDelete?.call().then((_) {
-                Navigator.of(context).pop();
-              });
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     late Color accent, tintBg, badgeBg;
@@ -93,16 +63,6 @@ class VerificationDetailScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         foregroundColor: VivyColors.textPrimary,
         elevation: 0,
-        actions: onDelete != null
-            ? [
-                Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: _DeleteButton(
-                    onTap: () => _showDeleteConfirmation(context),
-                  ),
-                ),
-              ]
-            : null,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(VivySpacing.pagePadding),
@@ -424,33 +384,6 @@ class _BackButton extends StatelessWidget {
         alignment: Alignment.center,
         child: const Icon(
           Icons.arrow_back,
-          size: 19,
-          color: VivyColors.textPrimary,
-        ),
-      ),
-    );
-  }
-}
-
-class _DeleteButton extends StatelessWidget {
-  const _DeleteButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _TapScale(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F5FB),
-          shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: const Icon(
-          Icons.delete_outline,
           size: 19,
           color: VivyColors.textPrimary,
         ),

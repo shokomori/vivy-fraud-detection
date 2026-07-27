@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      useSafeArea: true,
+      useSafeArea: false,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(110),
       constraints: const BoxConstraints(maxWidth: 390),
@@ -184,7 +186,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: 'History',
                           subtitle: '${stats.total} results saved',
                           iconAsset: 'assets/vivy_assets/history.svg',
-                          iconBackground: const Color(0xFFE0F8F2),
                           onTap: widget.onOpenHistory,
                         ),
                         const SizedBox(height: 10),
@@ -192,7 +193,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           title: 'Learn More',
                           subtitle: 'About GCash e-receipt fraud',
                           iconAsset: 'assets/vivy_assets/learn.svg',
-                          iconBackground: const Color(0xFFFEEECF),
                           onTap: widget.onOpenLearnMore,
                         ),
                         const SizedBox(height: 10),
@@ -319,12 +319,10 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: widget.bottomInset),
-      child: SizedBox(
-        width: 390,
-        height: 490 + widget.bottomInset,
-        child: Container(
+    return SizedBox(
+      width: 390,
+      height: 490 + widget.bottomInset,
+      child: Container(
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -410,7 +408,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 16 + widget.bottomInset),
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 26 + math.min(widget.bottomInset, 24)),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -459,7 +457,6 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
               ),
             ),
           ],
-        ),
         ),
       ),
     );
@@ -858,14 +855,12 @@ class _MiniActionCard extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.iconAsset,
-    required this.iconBackground,
     this.onTap,
   });
 
   final String title;
   final String subtitle;
   final String iconAsset;
-  final Color iconBackground;
   final VoidCallback? onTap;
 
   @override
@@ -874,6 +869,8 @@ class _MiniActionCard extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
+        width: 350,
+        height: 70,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
@@ -886,22 +883,17 @@ class _MiniActionCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: iconBackground,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              alignment: Alignment.center,
+            SizedBox(
+              width: 36,
+              height: 36,
               child: SvgPicture.asset(
                 iconAsset,
-                width: 24,
-                height: 24,
+                width: 36,
+                height: 36,
                 fit: BoxFit.contain,
               ),
             ),
@@ -944,14 +936,10 @@ class _MiniActionCard extends StatelessWidget {
               ),
               alignment: Alignment.center,
               child: SvgPicture.asset(
-                'assets/vivy_assets/back.svg',
-                width: 16,
-                height: 16,
+                'assets/vivy_assets/blue_transparent_back.svg',
+                width: 12,
+                height: 12,
                 fit: BoxFit.contain,
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFF174AA5),
-                  BlendMode.srcIn,
-                ),
               ),
             ),
           ],
