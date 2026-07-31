@@ -211,22 +211,13 @@ class _ResultTheme {
         badgeLabel: 'Fraudulent',
         badgeIcon: '!',
       ),
-      ResultType.notReceipt => const _ResultTheme(
-        accent: Color(0xFFD97706),
-        headerBackground: Color(0xFFFFF2D9),
-        badgeBackground: Color(0xFFFFE6C2),
+      ResultType.invalid => const _ResultTheme(
+        accent: Color(0xFF6B7280),
+        headerBackground: Color(0xFFF3F4F6),
+        badgeBackground: Color(0xFFE5E7EB),
         headerAsset: 'assets/vivy_assets/warning.svg',
         titleAsset: 'assets/vivy_assets/warning.svg',
-        badgeLabel: 'Unclear',
-        badgeIcon: '?',
-      ),
-      ResultType.unclear => const _ResultTheme(
-        accent: Color(0xFFD97706),
-        headerBackground: Color(0xFFFFF2D9),
-        badgeBackground: Color(0xFFFFE6C2),
-        headerAsset: 'assets/vivy_assets/warning.svg',
-        titleAsset: 'assets/vivy_assets/warning.svg',
-        badgeLabel: 'Unclear',
+        badgeLabel: 'Invalid',
         badgeIcon: '?',
       ),
       ResultType.error => const _ResultTheme(

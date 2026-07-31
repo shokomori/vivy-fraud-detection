@@ -17,8 +17,7 @@ class VerificationDetailScreen extends StatelessWidget {
 
   bool get _isFraud => entry.label.toLowerCase() == 'fraudulent';
   bool get _isGenuine => entry.label.toLowerCase() == 'genuine';
-  bool get _isNotReceipt => entry.label.toLowerCase().contains('not') && entry.label.toLowerCase().contains('receipt');
-  bool get _isUnclear => entry.label.toLowerCase() == 'unclear' || (entry.label.toLowerCase().contains('unclear'));
+  bool get _isInvalid => entry.label.toLowerCase() == 'invalid';
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +30,11 @@ class VerificationDetailScreen extends StatelessWidget {
       accent = const Color(0xFF059669);
       tintBg = const Color(0xFFDFF1E7);
       badgeBg = const Color(0xFFCFF2DE);
+    } else if (_isInvalid) {
+      accent = const Color(0xFF6B7280);
+      tintBg = const Color(0xFFF3F4F6);
+      badgeBg = const Color(0xFFE5E7EB);
     } else {
-      // unclear, not receipt, error, and any other warning states
       accent = const Color(0xFFD97706);
       tintBg = const Color(0xFFFFF2D9);
       badgeBg = const Color(0xFFFFF2D9);
@@ -40,7 +42,8 @@ class VerificationDetailScreen extends StatelessWidget {
     final confidenceText = entry.confidence == null
         ? 'N/A'
         : '${(entry.confidence! * 100).toStringAsFixed(1)}%';
-    final explanation = entry.explanation ?? _fallbackExplanation(_isFraud);
+    final explanation = entry.explanation ??
+        _fallbackExplanation(isFraud: _isFraud, isInvalid: _isInvalid);
 
     return Scaffold(
       backgroundColor: VivyColors.appBackground,
@@ -475,7 +478,10 @@ String _formatDateTime(DateTime dt) {
   return '${months[dt.month - 1]} ${dt.day}, ${dt.year} · $hour:$minute $suffix';
 }
 
-String _fallbackExplanation(bool isFraud) {
+String _fallbackExplanation({required bool isFraud, required bool isInvalid}) {
+  if (isInvalid) {
+    return 'This image was marked Invalid because it did not clearly match a valid GCash receipt. Please upload a clearer or genuine e-receipt photo.';
+  }
   return isFraud
       ? 'This receipt shows signs of digital manipulation. Inconsistencies '
         'were found in font rendering, metadata timestamps, and compression '

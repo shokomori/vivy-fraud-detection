@@ -1,9 +1,0 @@
-Existing fraud images: 800
-Incoming candidate images: 79
-{
-  "total": 79,
-  "pass": 28,
-  "fail": 30,
-  "ambiguous": 21
-}
-Results written to: C:\Users\YUKI\Documents\Vivy\artifacts\ai_fraud_audit\ocr_triage

@@ -9,6 +9,27 @@
 				"-c",
 				"print('task-ok')"
 			]
+		},
+		{
+			"label": "flutter-verify",
+			"type": "shell",
+			"command": "cd /d c:\\Users\\YUKI\\Documents\\Vivy\\vivy_app && C:/flutter-sdk/flutter/bin/flutter.bat pub get && C:/flutter-sdk/flutter/bin/flutter.bat analyze",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter-build-check",
+			"type": "shell",
+			"command": "cd /d c:\\Users\\YUKI\\Documents\\Vivy\\vivy_app && C:/flutter-sdk/flutter/bin/flutter.bat build apk --debug",
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "flutter-build-apk-with-logo",
+			"type": "shell",
+			"command": "cd /d c:\\Users\\YUKI\\Documents\\Vivy\\vivy_app && C:/flutter-sdk/flutter/bin/flutter.bat build apk --debug",
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

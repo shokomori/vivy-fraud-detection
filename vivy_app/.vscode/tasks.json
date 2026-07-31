@@ -13,6 +13,35 @@
 			"isBackground": false,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "flutter-build-apk",
+			"type": "shell",
+			"command": "C:/flutter-sdk/flutter/bin/flutter.bat",
+			"args": [
+				"build",
+				"apk",
+				"--debug"
+			],
+			"isBackground": false,
+			"problemMatcher": []
+		},
+		{
+			"label": "install-phone-apk",
+			"type": "shell",
+			"command": "C:/platform-tools/adb.exe",
+			"args": [
+				"devices",
+				"&&",
+				"C:/platform-tools/adb.exe",
+				"-s",
+				"R5CX34A2XEH",
+				"install",
+				"-r",
+				"build/app/outputs/flutter-apk/app-debug.apk"
+			],
+			"isBackground": false,
+			"problemMatcher": []
 		}
 	]
 }

@@ -2,14 +2,13 @@ import 'dart:convert';
 
 import 'package:image/image.dart' as img;
 
-enum ResultType { genuine, fraudulent, notReceipt, unclear, error }
+enum ResultType { genuine, fraudulent, invalid, error }
 
 extension ResultTypeLabel on ResultType {
   String get displayLabel => switch (this) {
     ResultType.fraudulent => 'Fraudulent',
     ResultType.genuine => 'Genuine',
-    ResultType.notReceipt => 'Unclear',
-    ResultType.unclear => 'Unclear',
+    ResultType.invalid => 'Invalid',
     ResultType.error => 'Error',
   };
 }
@@ -54,27 +53,18 @@ class AnalysisResult {
     );
   }
 
-  factory AnalysisResult.notReceipt({
+  factory AnalysisResult.invalid({
     required String message,
-    required double areaRatio,
-    required double aspectRatio,
+    double? score,
+    double? confidence,
+    String? explanation,
   }) {
     return AnalysisResult(
-      type: ResultType.notReceipt,
-      message: message,
-      areaRatio: areaRatio,
-      aspectRatio: aspectRatio,
-    );
-  }
-
-  factory AnalysisResult.unclear({
-    required String message,
-    required double score,
-  }) {
-    return AnalysisResult(
-      type: ResultType.unclear,
+      type: ResultType.invalid,
       message: message,
       score: score,
+      confidence: confidence,
+      explanation: explanation,
     );
   }
 

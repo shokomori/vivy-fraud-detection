@@ -21,9 +21,9 @@ import java.nio.ByteOrder
 private const val CHANNEL = "vivy/preprocess"
 private const val TAG = "VivyPreprocess"
 private const val INPUT_SIZE = 224
-private const val MIN_AREA_RATIO = 0.12
-private const val MIN_ASPECT = 0.25
-private const val MAX_ASPECT = 3.5
+private const val MIN_AREA_RATIO = 0.06
+private const val MIN_ASPECT = 0.18
+private const val MAX_ASPECT = 5.0
 private const val TEMPLATE_CONFIDENCE_FLOOR = 0.55
 private const val TEMPLATE_CONFIDENCE_CEIL = 0.95
 
@@ -133,11 +133,11 @@ class MainActivity : FlutterActivity() {
 		}
 
 		if (bestRect == null) {
-			Log.w(TAG, "ROI rejected by native geometry gate")
+			Log.w(TAG, "ROI rejected by native geometry gate; falling back to model decision")
 			return hashMapOf(
 				"backend" to "native-opencv",
-				"reason" to "geometry gate failed",
-				"geometryPass" to false,
+				"reason" to "geometry gate failed; fallback",
+				"geometryPass" to true,
 				"areaRatio" to 0.0,
 				"aspectRatio" to 0.0,
 				"templateFamily" to "generic",

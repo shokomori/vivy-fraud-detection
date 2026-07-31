@@ -212,7 +212,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       accent = const Color(0xFF059669);
                       tintBg = const Color(0xFFCFF2DE);
                     } else {
-                      // unclear, not receipt, error, and any other warning states
+                      // fallback state for any non-genuine result
                       accent = const Color(0xFFD97706);
                       tintBg = const Color(0xFFFFF2D9);
                     }

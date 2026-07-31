@@ -31,7 +31,7 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       asset: 'assets/vivy_assets/checkmark.svg',
       title: 'Instant, Clear Results',
       subtitle:
-          'Get an immediate Genuine or Fraudulent verdict with a detailed explanation — and save it to your history.',
+          'Get an immediate Genuine, Fraudulent, or Invalid verdict with a detailed explanation — and save it to your history.',
     ),
   ];
 

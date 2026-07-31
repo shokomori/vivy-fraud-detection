@@ -294,7 +294,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
     (
       title: 'Step 3: Review Results',
       description:
-          'Get an instant Genuine or Fraudulent verdict with a clear explanation. Results are saved automatically to History.',
+          'Get an instant Genuine, Fraudulent, or Invalid verdict with a clear explanation. Results are saved automatically to History.',
       art: _HowToArtType.result,
       cta: "Let's Go!",
     ),
@@ -675,6 +675,15 @@ class _SummaryCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _SummaryPill(
+                    value: '${stats.invalid}',
+                    label: 'Invalid',
+                    valueColor: const Color(0xFF6B7280),
+                    background: const Color(0xFFE5E7EB),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _SummaryPill(
                     value: '${stats.flagged}',
                     label: 'Flagged',
                     valueColor: const Color(0xFFDC2626),
@@ -810,6 +819,13 @@ class _SummaryPill extends StatelessWidget {
               else if (label == 'Genuine')
                 SvgPicture.asset(
                   'assets/vivy_assets/genuine_shield.svg',
+                  width: 15,
+                  height: 15,
+                  fit: BoxFit.contain,
+                )
+              else if (label == 'Invalid')
+                SvgPicture.asset(
+                  'assets/vivy_assets/warning.svg',
                   width: 15,
                   height: 15,
                   fit: BoxFit.contain,
@@ -1054,6 +1070,7 @@ class _SummaryStats {
     required this.total,
     required this.genuine,
     required this.flagged,
+    required this.invalid,
     required this.safeRate,
     required this.lastScanText,
     required this.lastScanColor,
@@ -1062,6 +1079,7 @@ class _SummaryStats {
   final int total;
   final int genuine;
   final int flagged;
+  final int invalid;
   final double safeRate;
   final String lastScanText;
   final Color lastScanColor;
@@ -1069,6 +1087,7 @@ class _SummaryStats {
   static _SummaryStats fromEntries(List<HistoryEntry> entries) {
     var genuine = 0;
     var flagged = 0;
+    var invalid = 0;
 
     for (final entry in entries) {
       final label = entry.label.toLowerCase();
@@ -1076,10 +1095,14 @@ class _SummaryStats {
         genuine++;
       } else if (label == 'fraudulent') {
         flagged++;
+      } else if (label == 'invalid') {
+        invalid++;
+      } else {
+        flagged++;
       }
     }
 
-    // Total includes all records: Genuine, Fraudulent, Unclear, and Not a GCash Receipt
+    // Total includes all records: Genuine, Flagged, and Invalid.
     final total = entries.length;
     final safeRate = total == 0 ? 0.0 : (genuine / total) * 100;
 
@@ -1094,6 +1117,7 @@ class _SummaryStats {
       total: total,
       genuine: genuine,
       flagged: flagged,
+      invalid: invalid,
       safeRate: safeRate,
       lastScanText: last,
       lastScanColor: lastScanColor,
@@ -1112,7 +1136,7 @@ class _SummaryStats {
     if (normalized == 'genuine') {
       return const Color(0xFF059669);
     }
-    if (normalized == 'unclear' || normalized == 'fraudulent') {
+    if (normalized == 'fraudulent') {
       return const Color(0xFFDC2626);
     }
     return const Color(0xFF6B7A99);

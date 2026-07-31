@@ -826,20 +826,15 @@ List<String> _recommendations(ResultType type) {
       'Report to your payment provider immediately.',
       'Request a fresh payment confirmation from sender.',
     ],
-    ResultType.notReceipt => const [
-      'The image does not appear to be a GCash receipt.',
-      'Upload a full, unedited GCash e-receipt screenshot.',
-      'Ensure all transaction details are fully visible.',
-    ],
-    ResultType.unclear => const [
-      'The system could not confidently verify this receipt.',
-      'Retake a clear, well-lit, and complete screenshot.',
-      'Try uploading the original GCash e-receipt without edits.',
-    ],
     ResultType.error => const [
       'Retry the analysis with a clear image.',
       'Restart the app if issue persists.',
       'Use another receipt screenshot for verification.',
+    ],
+    ResultType.invalid => const [
+      'This image could not be verified as a valid GCash receipt.',
+      'Try uploading a clearer photo of the receipt.',
+      'Make sure the receipt is fully visible and not cropped.',
     ],
   };
 }
