@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:crypto/crypto.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -23,10 +24,35 @@ import 'ui/screens/splash_screen.dart';
 import 'ui/theme/vivy_colors.dart';
 
 const double kFraudThreshold = 0.16;
-const double kUnclearBand = 0.05;
-const double kMinAreaRatio = 0.12;
-const double kMinAspectRatio = 0.25;
-const double kMaxAspectRatio = 3.5;
+const double kInvalidBandWidth = 0.05;
+const double kInvalidBandLow = kFraudThreshold - (kInvalidBandWidth / 2);
+const double kInvalidBandHigh = kFraudThreshold + (kInvalidBandWidth / 2);
+const double kMinAreaRatio = 0.22;
+const double kMinAspectRatio = 0.45;
+const double kMaxAspectRatio = 2.5;
+const double kMinComponentFillRatio = 0.72;
+const int kReceiptFieldValidationThreshold = 4;
+final RegExp kPesoPattern = RegExp(r'₱', caseSensitive: false);
+final RegExp kReferencePattern = RegExp(
+  r'\bref(?:erence)?\.?\s*no\.?\s*[:\-]?\s*[0-9][0-9.\-\s]{4,}[0-9]\b',
+  caseSensitive: false,
+);
+final RegExp kPhonePattern = RegExp(
+  r'(?:(?:\+63|0)\s*9[0-9.\s\-]{8,14}[0-9])',
+  caseSensitive: false,
+);
+final RegExp kDatePattern = RegExp(
+  r'\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+\d{1,2}(?:,\s*\d{4})?\b|\b\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4}\b|\b\d{1,2}:\d{2}(?:\s*[AP]M)?\b',
+  caseSensitive: false,
+);
+final RegExp kAmountPattern = RegExp(
+  r'\b(?:₱\s*)?\d{1,3}(?:[.,]\d{3})*(?:\.\d{2})?\b',
+  caseSensitive: false,
+);
+final RegExp kGcashMarkerPattern = RegExp(
+  r'\b(?:sent via gcash|gcash payment|gcash transfer|gcash)\b',
+  caseSensitive: false,
+);
 const int kInputSize = 224;
 const String kZoneBaselineAsset = 'assets/config/zone_baselines.json';
 const Map<String, Map<String, List<double>>> kZoneLayouts = {
@@ -50,6 +76,160 @@ const Map<String, String> kZoneDisplayNames = {
   'timestamp': 'timestamp',
   'name_block': 'name block',
 };
+
+class ReceiptScoreDecision {
+  const ReceiptScoreDecision({
+    required this.score,
+    required this.isFraudulent,
+    required this.confidence,
+  });
+
+  final double score;
+  final bool isFraudulent;
+  final double confidence;
+}
+
+ReceiptScoreDecision classifyReceiptScore(double score) {
+  final isInvalid = score >= kInvalidBandLow && score <= kInvalidBandHigh;
+  if (isInvalid) {
+    return ReceiptScoreDecision(
+      score: score,
+      isFraudulent: true,
+      confidence: 1.0 - (kInvalidBandHigh - kFraudThreshold).abs(),
+    );
+  }
+  final isFraudulent = score > kInvalidBandHigh;
+  final confidence = isFraudulent ? score : (1.0 - score);
+  return ReceiptScoreDecision(
+    score: score,
+    isFraudulent: isFraudulent,
+    confidence: confidence,
+  );
+}
+
+AnalysisResult _buildAnalysisResultFromScore({
+  required double score,
+  required String family,
+  required double templateConfidence,
+  required Map<String, _ZoneFeatureVector> zoneMetrics,
+  required _ZoneBaselineProfile? zoneBaselineProfile,
+}) {
+  if (score >= kInvalidBandLow && score <= kInvalidBandHigh) {
+    return AnalysisResult.invalid(
+      message: 'We couldn\'t verify this receipt with enough confidence.',
+      score: score,
+      confidence: 1.0 - (kInvalidBandHigh - kFraudThreshold).abs(),
+      explanation: 'The score fell inside the uncertainty band around the decision threshold, so the result is Invalid until a clearer receipt image is provided.',
+    );
+  }
+
+  final isFraudulent = score > kInvalidBandHigh;
+  final confidence = isFraudulent ? score : (1.0 - score);
+  final zoneExplanation = _buildZoneExplanationFromProfile(
+    isFraudulent: isFraudulent,
+    confidence: confidence,
+    family: family,
+    templateConfidence: templateConfidence,
+    zoneMetrics: zoneMetrics,
+    zoneBaselineProfile: zoneBaselineProfile,
+  );
+  return AnalysisResult.classified(
+    score: score,
+    confidence: confidence,
+    isFraudulent: isFraudulent,
+    explanation: zoneExplanation,
+  );
+}
+
+class _ReceiptFieldValidationResult {
+  const _ReceiptFieldValidationResult({
+    required this.isValid,
+    required this.foundFields,
+  });
+
+  final bool isValid;
+  final int foundFields;
+}
+
+String _buildZoneExplanationFromProfile({
+  required bool isFraudulent,
+  required double confidence,
+  required String family,
+  required double templateConfidence,
+  required Map<String, _ZoneFeatureVector> zoneMetrics,
+  required _ZoneBaselineProfile? zoneBaselineProfile,
+}) {
+  final confidenceText = (confidence * 100).toStringAsFixed(1);
+  final profile = zoneBaselineProfile;
+  if (profile == null || zoneMetrics.isEmpty) {
+    return isFraudulent
+        ? 'Receipt is classified as fraudulent ($confidenceText% confidence). The image shows suspicious formatting signals, but zone-level evidence is unavailable on this device.'
+        : 'Receipt is classified as genuine ($confidenceText% confidence). No strong anomalies were detected in available checks.';
+  }
+
+  final tuned = profile.precisionBias;
+  final lowTemplateConfidence =
+      family == 'generic' || templateConfidence < tuned.templateConfidenceMin;
+  final baselineFamily = lowTemplateConfidence
+      ? 'generic'
+      : (profile.stats.containsKey(family) ? family : 'generic');
+
+  final anomalies = <_ZoneAnomalySummary>[];
+  for (final entry in zoneMetrics.entries) {
+    final zone = entry.key;
+    final vector = entry.value;
+    final zoneStats = profile.stats[baselineFamily]?[zone];
+    if (zoneStats == null) {
+      continue;
+    }
+
+    final failures = <String>[];
+    var severeCount = 0;
+    final metricValues = vector.toMap();
+    for (final metricEntry in metricValues.entries) {
+      final metric = metricEntry.key;
+      final value = metricEntry.value;
+      final ref = zoneStats[metric];
+      if (ref == null) {
+        continue;
+      }
+      final z = (value - ref.median).abs() / math.max(ref.mad * 1.4826, 1e-6);
+      final outsideBand = value < ref.p05 || value > ref.p95;
+      if (z >= tuned.metricZThreshold && outsideBand) {
+        failures.add(metric);
+        if (tuned.severeMetrics.contains(metric)) {
+          severeCount++;
+        }
+      }
+    }
+
+    final failsZone = failures.length >= tuned.zoneFailMetricsMin ||
+        (failures.length >= tuned.zoneFailMetricsMinWithSevere && severeCount >= 1);
+    if (failsZone) {
+      anomalies.add(
+        _ZoneAnomalySummary(
+          zoneName: zone,
+          failedMetrics: failures,
+        ),
+      );
+    }
+  }
+
+  if (isFraudulent) {
+    if (lowTemplateConfidence) {
+      return 'Receipt is classified as fraudulent ($confidenceText% confidence). Template family confidence is low, so zone-level claims are intentionally withheld to avoid overconfident localization.';
+    }
+    if (anomalies.isEmpty) {
+      return 'Receipt is classified as fraudulent ($confidenceText% confidence). No zone passed strict anomaly criteria; classification relies on global model evidence.';
+    }
+    final zoneList = anomalies
+        .map((a) => kZoneDisplayNames[a.zoneName] ?? a.zoneName)
+        .join(', ');
+    return 'Receipt is classified as fraudulent ($confidenceText% confidence). Conservative zone anomalies were found in: $zoneList.';
+  }
+
+  return 'Receipt is classified as genuine ($confidenceText% confidence). No zone exceeded strict anomaly thresholds against train-genuine baselines.';
+}
 
 void main() {
   runApp(const VivyApp());
@@ -147,6 +327,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   static const MethodChannel _preprocessChannel = MethodChannel(
     'vivy/preprocess',
   );
+  late final TextRecognizer _textRecognizer;
   static const String _historyStorageKey = 'analysis_history_v1';
   static const String _rawScoreStorageKey = 'analysis_raw_score_log_v2';
   static const String _debugBatchRootName = 'vivy_debug_batch';
@@ -175,6 +356,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
     _loadZoneBaselines();
     _loadModel();
     _loadHistory();
@@ -184,6 +366,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _textRecognizer.close();
     _analyzeUiState.dispose();
     _historyEntriesNotifier.dispose();
     _interpreter?.close();
@@ -426,10 +609,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           backendUsed: 'native-opencv',
           backendNote: native.reason,
         );
-        final result = AnalysisResult.notReceipt(
-          message: 'This does not look like a GCash receipt.',
-          areaRatio: native.areaRatio,
-          aspectRatio: native.aspectRatio,
+        final result = AnalysisResult.invalid(
+          message: 'This image does not appear to be a valid GCash receipt.',
+          score: 1.0,
+          confidence: 1.0,
+          explanation: 'The geometry gate rejected this image, so it was marked Invalid because it does not appear to be a valid GCash receipt.',
         );
         return _PipelineOutcome(
           result: result,
@@ -439,6 +623,32 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           decodedHeight: decodedHeight,
           backendUsed: 'native-opencv',
           backendNote: native.reason,
+        );
+      }
+
+      final decoded = img.decodeImage(bytes);
+      final roiImage = decoded == null ? null : _extractReceiptRoi(decoded).roi;
+      final receiptFields = await _validateReceiptTextFields(roiImage, decoded);
+      if (!receiptFields.isValid) {
+        _reportBackendUsage(
+          imagePath: sourcePathForNative,
+          backendUsed: 'native-opencv',
+          backendNote: 'ocr_field_validation_failed',
+        );
+        final result = AnalysisResult.invalid(
+          message: 'This image does not appear to be a valid GCash receipt.',
+          score: 1.0,
+          confidence: 1.0,
+          explanation: 'OCR field validation found only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt fields.',
+        );
+        return _PipelineOutcome(
+          result: result,
+          fileSha256: fileSha256,
+          fileSizeBytes: fileSizeBytes,
+          decodedWidth: decodedWidth,
+          decodedHeight: decodedHeight,
+          backendUsed: 'native-opencv',
+          backendNote: 'ocr_field_validation_failed',
         );
       }
 
@@ -449,36 +659,12 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         backendNote: native.reason,
       );
 
-      if ((score - kFraudThreshold).abs() < kUnclearBand) {
-        final result = AnalysisResult.unclear(
-          score: score,
-          message: 'Result unclear - try a clearer or better-lit photo.',
-        );
-        return _PipelineOutcome(
-          result: result,
-          fileSha256: fileSha256,
-          fileSizeBytes: fileSizeBytes,
-          decodedWidth: decodedWidth,
-          decodedHeight: decodedHeight,
-          backendUsed: 'native-opencv',
-          backendNote: native.reason,
-        );
-      }
-
-      final isFraudulent = score >= kFraudThreshold;
-      final confidence = isFraudulent ? score : (1.0 - score);
-      final zoneExplanation = _buildZoneExplanation(
-        isFraudulent: isFraudulent,
-        confidence: confidence,
+      final result = _buildAnalysisResultFromScore(
+        score: score,
         family: native.templateFamily,
         templateConfidence: native.templateConfidence,
         zoneMetrics: native.zoneMetrics,
-      );
-      final result = AnalysisResult.classified(
-        score: score,
-        confidence: confidence,
-        isFraudulent: isFraudulent,
-        explanation: zoneExplanation,
+        zoneBaselineProfile: _zoneBaselineProfile,
       );
       return _PipelineOutcome(
         result: result,
@@ -514,10 +700,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     }
     final roiResult = _extractReceiptRoi(decoded);
     if (!roiResult.geometryPass) {
-      final result = AnalysisResult.notReceipt(
-        message: 'This does not look like a GCash receipt.',
-        areaRatio: roiResult.areaRatio,
-        aspectRatio: roiResult.aspectRatio,
+      final result = AnalysisResult.invalid(
+        message: 'This image does not appear to be a valid GCash receipt.',
+        score: 1.0,
+        confidence: 1.0,
+        explanation: 'The geometry gate rejected this image, so it was marked Invalid because it does not appear to be a valid GCash receipt.',
       );
       return _PipelineOutcome(
         result: result,
@@ -530,13 +717,13 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       );
     }
 
-    final normalized = _preprocessForModel(roiResult.roi!);
-    final score = _runModel(normalized);
-
-    if ((score - kFraudThreshold).abs() < kUnclearBand) {
-      final result = AnalysisResult.unclear(
-        score: score,
-        message: 'Result unclear - try a clearer or better-lit photo.',
+    final receiptFields = await _validateReceiptTextFields(roiResult.roi, decoded);
+    if (!receiptFields.isValid) {
+      final result = AnalysisResult.invalid(
+        message: 'This image does not appear to be a valid GCash receipt.',
+        score: 1.0,
+        confidence: 1.0,
+        explanation: 'OCR field validation found only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt fields.',
       );
       return _PipelineOutcome(
         result: result,
@@ -545,29 +732,24 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         decodedWidth: decodedWidth,
         decodedHeight: decodedHeight,
         backendUsed: 'dart-image-fallback',
-        backendNote: 'ok',
+        backendNote: 'ocr_field_validation_failed',
       );
     }
 
-    final isFraudulent = score >= kFraudThreshold;
-    final confidence = isFraudulent ? score : (1.0 - score);
     final fallbackZoneFeatures = _extractZoneFeaturesFromRoi(roiResult.roi!);
     final fallbackTemplate = _inferTemplateFamily(
       roiWidth: roiResult.roi!.width,
       roiHeight: roiResult.roi!.height,
     );
-    final zoneExplanation = _buildZoneExplanation(
-      isFraudulent: isFraudulent,
-      confidence: confidence,
+    final normalized = _preprocessForModel(roiResult.roi!);
+    final score = _runModel(normalized);
+
+    final result = _buildAnalysisResultFromScore(
+      score: score,
       family: fallbackTemplate.family,
       templateConfidence: fallbackTemplate.confidence,
       zoneMetrics: fallbackZoneFeatures,
-    );
-    final result = AnalysisResult.classified(
-      score: score,
-      confidence: confidence,
-      isFraudulent: isFraudulent,
-      explanation: zoneExplanation,
+      zoneBaselineProfile: _zoneBaselineProfile,
     );
     return _PipelineOutcome(
       result: result,
@@ -662,6 +844,86 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       debugPrint(msg);
       return true;
     }());
+  }
+
+  Future<_ReceiptFieldValidationResult> _validateReceiptTextFields(
+    img.Image? roi,
+    img.Image? fullImage,
+  ) async {
+    try {
+      final inputImage = await _buildInputImageForTextRecognition(
+        roi: roi,
+        fullImage: fullImage,
+      );
+      if (inputImage == null) {
+        return const _ReceiptFieldValidationResult(
+          isValid: false,
+          foundFields: 0,
+        );
+      }
+
+      final recognizedText = await _textRecognizer.processImage(inputImage);
+      final text = recognizedText.text.toLowerCase();
+      final hasText = text.trim().isNotEmpty;
+      if (!hasText) {
+        debugPrint('[VIVY][OCR] no text detected');
+        return const _ReceiptFieldValidationResult(
+          isValid: false,
+          foundFields: 0,
+        );
+      }
+
+      final foundFields = <String, bool>{
+        'peso': kPesoPattern.hasMatch(text),
+        'reference': kReferencePattern.hasMatch(text),
+        'phone': kPhonePattern.hasMatch(text),
+        'date': kDatePattern.hasMatch(text),
+        'amount': _containsAmountField(text),
+        'gcash': kGcashMarkerPattern.hasMatch(text),
+      };
+
+      final matchedCount = foundFields.values.where((v) => v).length;
+      debugPrint('[VIVY][OCR] fields=$matchedCount text=${text.length}');
+      debugPrint('[VIVY][OCR] detail=${foundFields.entries.where((e) => e.value).map((e) => e.key).join(', ')}');
+
+      return _ReceiptFieldValidationResult(
+        isValid: matchedCount >= kReceiptFieldValidationThreshold,
+        foundFields: matchedCount,
+      );
+    } catch (e) {
+      debugPrint('[VIVY][OCR] validation failed: $e');
+      return const _ReceiptFieldValidationResult(
+        isValid: false,
+        foundFields: 0,
+      );
+    }
+  }
+
+  bool _containsAmountField(String text) {
+    if (kAmountPattern.hasMatch(text)) {
+      return true;
+    }
+
+    return RegExp(r'\b(total|amount|paid|balance)\b.*\d', caseSensitive: false)
+        .hasMatch(text);
+  }
+
+  Future<InputImage?> _buildInputImageForTextRecognition({
+    img.Image? roi,
+    img.Image? fullImage,
+  }) async {
+    final image = roi ?? fullImage;
+    if (image == null) {
+      return null;
+    }
+
+    final bytes = img.encodePng(image);
+    final tempDir = await getTemporaryDirectory();
+    final tempFile = File(
+      '${tempDir.path}${Platform.pathSeparator}vivy_ocr_roi_${DateTime.now().microsecondsSinceEpoch}.png',
+    );
+    await tempFile.writeAsBytes(bytes);
+    return InputImage.fromFilePath(tempFile.path);
   }
 
   Future<void> _simulateClassifiedResult({required bool isFraudulent}) async {
@@ -967,6 +1229,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     return const _TemplateFamilyGuess(family: 'generic', confidence: 0.55);
   }
 
+
   img.Image _cropNormalized(img.Image gray, List<double> bounds) {
     final x0 = _denormX(bounds[0], gray.width);
     final y0 = _denormY(bounds[1], gray.height);
@@ -1207,84 +1470,6 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     return out;
   }
 
-  String _buildZoneExplanation({
-    required bool isFraudulent,
-    required double confidence,
-    required String family,
-    required double templateConfidence,
-    required Map<String, _ZoneFeatureVector> zoneMetrics,
-  }) {
-    final confidenceText = (confidence * 100).toStringAsFixed(1);
-    final profile = _zoneBaselineProfile;
-    if (profile == null || zoneMetrics.isEmpty) {
-      return isFraudulent
-          ? 'Receipt is classified as fraudulent ($confidenceText% confidence). The image shows suspicious formatting signals, but zone-level evidence is unavailable on this device.'
-          : 'Receipt is classified as genuine ($confidenceText% confidence). No strong anomalies were detected in available checks.';
-    }
-
-    final tuned = profile.precisionBias;
-    final lowTemplateConfidence =
-        family == 'generic' || templateConfidence < tuned.templateConfidenceMin;
-    final baselineFamily = lowTemplateConfidence
-        ? 'generic'
-        : (profile.stats.containsKey(family) ? family : 'generic');
-
-    final anomalies = <_ZoneAnomalySummary>[];
-    for (final entry in zoneMetrics.entries) {
-      final zone = entry.key;
-      final vector = entry.value;
-      final zoneStats = profile.stats[baselineFamily]?[zone];
-      if (zoneStats == null) {
-        continue;
-      }
-
-      final failures = <String>[];
-      var severeCount = 0;
-      final metricValues = vector.toMap();
-      for (final metricEntry in metricValues.entries) {
-        final metric = metricEntry.key;
-        final value = metricEntry.value;
-        final ref = zoneStats[metric];
-        if (ref == null) {
-          continue;
-        }
-        final z = (value - ref.median).abs() / math.max(ref.mad * 1.4826, 1e-6);
-        final outsideBand = value < ref.p05 || value > ref.p95;
-        if (z >= tuned.metricZThreshold && outsideBand) {
-          failures.add(metric);
-          if (tuned.severeMetrics.contains(metric)) {
-            severeCount++;
-          }
-        }
-      }
-
-      final failsZone = failures.length >= tuned.zoneFailMetricsMin ||
-          (failures.length >= tuned.zoneFailMetricsMinWithSevere && severeCount >= 1);
-      if (failsZone) {
-        anomalies.add(
-          _ZoneAnomalySummary(
-            zoneName: zone,
-            failedMetrics: failures,
-          ),
-        );
-      }
-    }
-
-    if (isFraudulent) {
-      if (lowTemplateConfidence) {
-        return 'Receipt is classified as fraudulent ($confidenceText% confidence). Template family confidence is low, so zone-level claims are intentionally withheld to avoid overconfident localization.';
-      }
-      if (anomalies.isEmpty) {
-        return 'Receipt is classified as fraudulent ($confidenceText% confidence). No zone passed strict anomaly criteria; classification relies on global model evidence.';
-      }
-      final zoneList = anomalies
-          .map((a) => kZoneDisplayNames[a.zoneName] ?? a.zoneName)
-          .join(', ');
-      return 'Receipt is classified as fraudulent ($confidenceText% confidence). Conservative zone anomalies were found in: $zoneList.';
-    }
-
-    return 'Receipt is classified as genuine ($confidenceText% confidence). No zone exceeded strict anomaly thresholds against train-genuine baselines.';
-  }
 
   double _runModel(Float32List inputBuffer) {
     final input = List.generate(
@@ -1576,9 +1761,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
         final aspect = w / h;
         final areaRatio = area / (width * height);
+        final fillRatio = area / math.max(1, w * h);
         if (areaRatio < kMinAreaRatio ||
             aspect < kMinAspectRatio ||
-            aspect > kMaxAspectRatio) {
+            aspect > kMaxAspectRatio ||
+            fillRatio < kMinComponentFillRatio) {
           continue;
         }
 
