@@ -122,7 +122,9 @@ class VerificationDetailScreen extends StatelessWidget {
                                     Icon(
                                       _isGenuine
                                           ? Icons.check_circle_outline
-                                          : Icons.error_outline,
+                                          : _isInvalid
+                                              ? Icons.help_outline
+                                              : Icons.error_outline,
                                       size: 18,
                                       color: accent,
                                     ),

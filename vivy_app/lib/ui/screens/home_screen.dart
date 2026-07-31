@@ -811,7 +811,7 @@ class _SummaryPill extends StatelessWidget {
             children: [
               if (label == 'Scans')
                 SvgPicture.asset(
-                  'assets/vivy_assets/scan.svg',
+                  'assets/vivy_assets/blue_scan.svg',
                   width: 15,
                   height: 15,
                   fit: BoxFit.contain,
@@ -825,7 +825,7 @@ class _SummaryPill extends StatelessWidget {
                 )
               else if (label == 'Invalid')
                 SvgPicture.asset(
-                  'assets/vivy_assets/warning.svg',
+                  'assets/vivy_assets/grey_question.svg',
                   width: 15,
                   height: 15,
                   fit: BoxFit.contain,

@@ -213,8 +213,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       tintBg = const Color(0xFFCFF2DE);
                     } else {
                       // fallback state for any non-genuine result
-                      accent = const Color(0xFFD97706);
-                      tintBg = const Color(0xFFFFF2D9);
+                      accent = const Color(0xFF6B7280);
+                      tintBg = const Color.fromARGB(213, 235, 234, 234);
                     }
                     final confidenceText = item.confidence == null
                         ? 'N/A'

@@ -305,7 +305,7 @@ class _ScanningStateView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Verifying metadata & fonts...',
+            'Verifying GCash E-Receipt...',
             style: TextStyle(
               fontSize: 19,
               fontWeight: FontWeight.w600,
