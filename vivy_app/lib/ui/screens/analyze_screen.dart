@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../domain/analysis_models.dart';
 import '../widgets/result_card.dart';
+import 'learn_more_screen.dart';
 
 class AnalyzeUiState {
   const AnalyzeUiState({
@@ -26,6 +27,7 @@ class AnalyzeScreen extends StatelessWidget {
     required this.onOpenHistory,
     required this.onExportRawScores,
     this.onDone,
+    this.onOpenHelpDesk,
     this.onDebugGenuine,
     this.onDebugFraudulent,
   });
@@ -36,6 +38,7 @@ class AnalyzeScreen extends StatelessWidget {
   final VoidCallback onOpenHistory;
   final VoidCallback onExportRawScores;
   final VoidCallback? onDone;
+  final VoidCallback? onOpenHelpDesk;
   final VoidCallback? onDebugGenuine;
   final VoidCallback? onDebugFraudulent;
 
@@ -66,6 +69,7 @@ class AnalyzeScreen extends StatelessWidget {
                 onPickPhoto: onPickPhoto,
                 onExportRawScores: onExportRawScores,
                 onDone: onDone,
+                onOpenHelpDesk: onOpenHelpDesk,
               ),
             },
           ),
@@ -95,7 +99,11 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
     };
 
     if (mode == _AnalyzeViewMode.scanning) {
-      return AppBar(backgroundColor: Colors.transparent, elevation: 0);
+      return AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      );
     }
 
     return AppBar(
@@ -330,6 +338,7 @@ class _ResultStateView extends StatelessWidget {
     required this.onPickPhoto,
     required this.onExportRawScores,
     this.onDone,
+    this.onOpenHelpDesk,
   });
 
   final AnalysisResult result;
@@ -337,6 +346,7 @@ class _ResultStateView extends StatelessWidget {
   final VoidCallback onPickPhoto;
   final VoidCallback onExportRawScores;
   final VoidCallback? onDone;
+  final VoidCallback? onOpenHelpDesk;
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +370,12 @@ class _ResultStateView extends StatelessWidget {
                 const SizedBox(height: 8),
                 ResultCard(result: result, threshold: threshold),
                 const SizedBox(height: 12),
-                _RecommendationCard(result: result),
+                _RecommendationCard(
+                  result: result,
+                  onOpenHelpDesk: onOpenHelpDesk,
+                ),
+                const SizedBox(height: 12),
+                _DisclaimerNote(result: result),
               ],
             ),
           ),
@@ -425,9 +440,13 @@ class _ResultStateView extends StatelessWidget {
 }
 
 class _RecommendationCard extends StatelessWidget {
-  const _RecommendationCard({required this.result});
+  const _RecommendationCard({
+    required this.result,
+    this.onOpenHelpDesk,
+  });
 
   final AnalysisResult result;
+  final VoidCallback? onOpenHelpDesk;
 
   @override
   Widget build(BuildContext context) {
@@ -492,8 +511,103 @@ class _RecommendationCard extends StatelessWidget {
             ),
             if (i != recommendations.length - 1) const SizedBox(height: 10),
           ],
+          const SizedBox(height: 14),
+          const Divider(height: 1, color: Color(0xFFE1EAF7)),
+          const SizedBox(height: 12),
+          _TapScale(
+            onTap: onOpenHelpDesk ??
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LearnMoreScreen(initialIndex: 3),
+                    ),
+                  );
+                },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 12,
+              ),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE1EAF7),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Icon(
+                    Icons.support_agent_rounded,
+                    size: 18,
+                    color: Color(0xFF15489D),
+                  ),
+                  SizedBox(width: 8),
+                  Text(
+                    'Contact Help Desk',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF15489D),
+                      fontFamily: 'Plus Jakarta Sans',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// Disclaimer shown below the Recommendations card on every result type.
+/// Adds an extra fraud-specific warning when the result is fraudulent.
+class _DisclaimerNote extends StatelessWidget {
+  const _DisclaimerNote({required this.result});
+
+  final AnalysisResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // General AI disclaimer — shown for all result types
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF1F4FA),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFDCE3F0)),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 18,
+                color: Color(0xFF677892),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'ViVy can make mistakes. Please confirm the results.',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: Color(0xFF677892),
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Plus Jakarta Sans',
+                    height: 1.35,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

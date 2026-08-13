@@ -4,17 +4,28 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LearnMoreScreen extends StatefulWidget {
-  const LearnMoreScreen({super.key});
+  const LearnMoreScreen({super.key, this.initialIndex = 0});
+
+  /// Which page to open on. 0 = What is Receipt Fraud, 1 = Common Red
+  /// Flags, 2 = Stay Protected, 3 = Help Desks & Contacts.
+  final int initialIndex;
 
   @override
   State<LearnMoreScreen> createState() => _LearnMoreScreenState();
 }
 
 class _LearnMoreScreenState extends State<LearnMoreScreen> {
-  final PageController _controller = PageController();
-  int _index = 0;
+  late final PageController _controller;
+  late int _index;
 
   static const int _count = 4;
+
+  @override
+  void initState() {
+    super.initState();
+    _index = widget.initialIndex.clamp(0, _count - 1);
+    _controller = PageController(initialPage: _index);
+  }
 
   @override
   void dispose() {

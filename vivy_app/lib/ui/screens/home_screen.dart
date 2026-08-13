@@ -685,7 +685,7 @@ class _SummaryCard extends StatelessWidget {
                 Expanded(
                   child: _SummaryPill(
                     value: '${stats.flagged}',
-                    label: 'Flagged',
+                    label: 'Fraudulent',
                     valueColor: const Color(0xFFDC2626),
                     background: const Color(0xFFFEE2E2),
                   ),
@@ -830,7 +830,7 @@ class _SummaryPill extends StatelessWidget {
                   height: 15,
                   fit: BoxFit.contain,
                 )
-              else if (label == 'Flagged')
+              else if (label == 'Fraudulent')
                 SvgPicture.asset(
                   'assets/vivy_assets/fraudulent_warning.svg',
                   width: 15,
