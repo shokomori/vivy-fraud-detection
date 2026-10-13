@@ -42,7 +42,8 @@ class VerificationDetailScreen extends StatelessWidget {
     final confidenceText = entry.confidence == null
         ? 'N/A'
         : '${(entry.confidence! * 100).toStringAsFixed(1)}%';
-    final explanation = entry.explanation ??
+    final explanation =
+        entry.explanation ??
         _fallbackExplanation(isFraud: _isFraud, isInvalid: _isInvalid);
 
     return Scaffold(
@@ -111,7 +112,9 @@ class VerificationDetailScreen extends StatelessWidget {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 8),
+                                  horizontal: 14,
+                                  vertical: 8,
+                                ),
                                 decoration: BoxDecoration(
                                   color: badgeBg,
                                   borderRadius: BorderRadius.circular(99),
@@ -123,8 +126,8 @@ class VerificationDetailScreen extends StatelessWidget {
                                       _isGenuine
                                           ? Icons.check_circle_outline
                                           : _isInvalid
-                                              ? Icons.help_outline
-                                              : Icons.error_outline,
+                                          ? Icons.help_outline
+                                          : Icons.error_outline,
                                       size: 18,
                                       color: accent,
                                     ),
@@ -190,10 +193,14 @@ class VerificationDetailScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _DetailRow(
-                        label: 'Date & Time',
-                        value: _formatDateTime(entry.timestamp)),
+                      label: 'Date & Time',
+                      value: _formatDateTime(entry.timestamp),
+                    ),
                     const Divider(height: 1, color: VivyColors.cardBorder),
-                    _DetailRow(label: 'Confidence Score', value: confidenceText),
+                    _DetailRow(
+                      label: 'Confidence Score',
+                      value: confidenceText,
+                    ),
                   ],
                 ),
               ),
@@ -250,15 +257,19 @@ class VerificationDetailScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF3C7),
-                    borderRadius:
-                        BorderRadius.circular(VivySpacing.radiusMedium),
+                    borderRadius: BorderRadius.circular(
+                      VivySpacing.radiusMedium,
+                    ),
                     border: Border.all(color: const Color(0xFFFDE68A)),
                   ),
                   child: const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.warning_amber_rounded,
-                          color: Color(0xFFB45309), size: 20),
+                      Icon(
+                        Icons.warning_amber_rounded,
+                        color: Color(0xFFB45309),
+                        size: 20,
+                      ),
                       SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -422,8 +433,11 @@ class _ReceiptPreview extends StatelessWidget {
         child: hasImage
             ? Image.file(file, fit: BoxFit.cover)
             : Center(
-                child: Icon(Icons.receipt_long_outlined,
-                    size: 48, color: accent),
+                child: Icon(
+                  Icons.receipt_long_outlined,
+                  size: 48,
+                  color: accent,
+                ),
               ),
       ),
     );
@@ -469,8 +483,18 @@ class _DetailRow extends StatelessWidget {
 
 String _formatDateTime(DateTime dt) {
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   var hour = dt.hour;
   final minute = dt.minute.toString().padLeft(2, '0');
@@ -482,14 +506,14 @@ String _formatDateTime(DateTime dt) {
 
 String _fallbackExplanation({required bool isFraud, required bool isInvalid}) {
   if (isInvalid) {
-    return 'This image was marked Invalid because it did not clearly match a valid GCash receipt. Please upload a clearer or genuine e-receipt photo.';
+    return 'The app could not verify this image because it did not clearly look like a complete GCash receipt. Please upload a clearer photo of the whole receipt, or check that the receipt is genuine.';
   }
   return isFraud
-      ? 'This receipt shows signs of digital manipulation. Inconsistencies '
-        'were found in font rendering, metadata timestamps, and compression '
-        'artifacts — common indicators of a forged or edited GCash receipt.'
-      : 'This receipt passed all verification checks. The document structure, '
-        'metadata, and visual patterns are consistent with an authentic '
-        'GCash electronic receipt. No signs of editing or tampering were '
-        'detected.';
+      ? 'This receipt contains details that do not match the appearance of a '
+            'genuine GCash receipt. Differences in the text style, receipt '
+            'details, and image quality may indicate that it was edited or '
+            'created from an unreliable source.'
+      : 'This receipt passed the available checks. Its layout, visible '
+            'details, and overall appearance match a genuine GCash electronic '
+            'receipt, and no clear signs of editing or tampering were found.';
 }

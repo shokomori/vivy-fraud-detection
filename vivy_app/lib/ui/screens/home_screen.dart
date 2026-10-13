@@ -35,7 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withAlpha(110),
       constraints: const BoxConstraints(maxWidth: 390),
-      builder: (sheetContext) => _HowToUseSheet(bottomInset: MediaQuery.of(sheetContext).padding.bottom),
+      builder: (sheetContext) => _HowToUseSheet(
+        bottomInset: MediaQuery.of(sheetContext).padding.bottom,
+      ),
     );
   }
 
@@ -166,7 +168,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     color: Color(0xFFF1F4FB),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
                   ),
                   child: SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
@@ -298,6 +302,13 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
       art: _HowToArtType.result,
       cta: "Let's Go!",
     ),
+    (
+      title: 'Check Compatibility',
+      description:
+          'Vivy was designed and tested to read GCash electronic receipt formats from app versions 5 and 6. For the most reliable result, upload a clear image of the complete receipt.',
+      art: _HowToArtType.compatibility,
+      cta: "Let's Go!",
+    ),
   ];
 
   @override
@@ -373,9 +384,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
                       children: [
                         SizedBox(
                           height: 150,
-                          child: Center(
-                            child: _HowToArt(type: step.art),
-                          ),
+                          child: Center(child: _HowToArt(type: step.art)),
                         ),
                         const SizedBox(height: 18),
                         Text(
@@ -408,7 +417,12 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(24, 0, 24, 26 + math.min(widget.bottomInset, 24)),
+              padding: EdgeInsets.fromLTRB(
+                24,
+                0,
+                24,
+                26 + math.min(widget.bottomInset, 24),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -463,7 +477,7 @@ class _HowToUseSheetState extends State<_HowToUseSheet> {
   }
 }
 
-enum _HowToArtType { upload, analysis, result }
+enum _HowToArtType { upload, analysis, result, compatibility }
 
 class _HowToArt extends StatelessWidget {
   const _HowToArt({required this.type});
@@ -476,6 +490,7 @@ class _HowToArt extends StatelessWidget {
       _HowToArtType.upload => 'assets/vivy_assets/scan.svg',
       _HowToArtType.analysis => 'assets/vivy_assets/security_check.svg',
       _HowToArtType.result => 'assets/vivy_assets/green_check.svg',
+      _HowToArtType.compatibility => 'assets/vivy_assets/scan.svg',
     };
 
     return SvgPicture.asset(
@@ -729,7 +744,9 @@ class _SummaryCard extends StatelessWidget {
                 value: (stats.safeRate / 100).clamp(0, 1),
                 minHeight: 5,
                 backgroundColor: const Color(0xFFF1F5F9),
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF0D9488)),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color(0xFF0D9488),
+                ),
               ),
             ),
           ),
@@ -767,7 +784,10 @@ class _SummaryCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             fontFamily: 'Plus Jakarta Sans',
                           ),
-                          children: _buildLastScanTextSpans(stats.lastScanText, stats.lastScanColor),
+                          children: _buildLastScanTextSpans(
+                            stats.lastScanText,
+                            stats.lastScanColor,
+                          ),
                         ),
                       ),
                     ),
@@ -993,10 +1013,7 @@ class _TipsCard extends StatelessWidget {
                     width: 20,
                     height: 20,
                     alignment: Alignment.center,
-                    child: const Text(
-                      '💡',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    child: const Text('💡', style: TextStyle(fontSize: 18)),
                   ),
                   const SizedBox(width: 8),
                   const Expanded(
@@ -1038,8 +1055,9 @@ class _TipsCard extends StatelessWidget {
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 200),
             sizeCurve: Curves.easeInOut,
-            crossFadeState:
-                expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: expanded
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox(width: double.infinity),
             secondChild: Container(
               width: double.infinity,
@@ -1107,7 +1125,7 @@ class _SummaryStats {
     final safeRate = total == 0 ? 0.0 : (genuine / total) * 100;
 
     final last = entries.isEmpty
-      ? 'Last scan: No scans yet'
+        ? 'Last scan: No scans yet'
         : _formatLastScan(entries.first);
     final lastScanColor = entries.isEmpty
         ? const Color(0xFF6B7A99)
@@ -1160,6 +1178,9 @@ List<TextSpan> _buildLastScanTextSpans(String text, Color resultColor) {
 
   return [
     TextSpan(text: prefixText),
-    TextSpan(text: resultText, style: TextStyle(color: resultColor)),
+    TextSpan(
+      text: resultText,
+      style: TextStyle(color: resultColor),
+    ),
   ];
 }

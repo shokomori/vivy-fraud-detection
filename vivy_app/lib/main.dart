@@ -119,7 +119,8 @@ AnalysisResult _buildAnalysisResultFromScore({
       message: 'We couldn\'t verify this receipt with enough confidence.',
       score: score,
       confidence: 1.0 - (kInvalidBandHigh - kFraudThreshold).abs(),
-      explanation: 'The score fell inside the uncertainty band around the decision threshold, so the result is Invalid until a clearer receipt image is provided.',
+      explanation:
+          'The app could not make a reliable decision because the image contains some signs of a genuine receipt and some signs that do not match one. The result is marked Invalid until a clearer receipt image is provided.',
     );
   }
 
@@ -163,8 +164,8 @@ String _buildZoneExplanationFromProfile({
   final profile = zoneBaselineProfile;
   if (profile == null || zoneMetrics.isEmpty) {
     return isFraudulent
-        ? 'Receipt is classified as fraudulent ($confidenceText% confidence). The image shows suspicious formatting signals, but zone-level evidence is unavailable on this device.'
-        : 'Receipt is classified as genuine ($confidenceText% confidence). No strong anomalies were detected in available checks.';
+        ? 'The app classified this receipt as Fraudulent ($confidenceText%). Its appearance contains details that do not match the patterns of a genuine GCash receipt. The app could not identify one specific area as the main cause.'
+        : 'The app classified this receipt as Genuine ($confidenceText%). Its overall appearance matches the patterns found in genuine GCash receipts, and no strong signs of editing were detected.';
   }
 
   final tuned = profile.precisionBias;
@@ -203,32 +204,31 @@ String _buildZoneExplanationFromProfile({
       }
     }
 
-    final failsZone = failures.length >= tuned.zoneFailMetricsMin ||
-        (failures.length >= tuned.zoneFailMetricsMinWithSevere && severeCount >= 1);
+    final failsZone =
+        failures.length >= tuned.zoneFailMetricsMin ||
+        (failures.length >= tuned.zoneFailMetricsMinWithSevere &&
+            severeCount >= 1);
     if (failsZone) {
       anomalies.add(
-        _ZoneAnomalySummary(
-          zoneName: zone,
-          failedMetrics: failures,
-        ),
+        _ZoneAnomalySummary(zoneName: zone, failedMetrics: failures),
       );
     }
   }
 
   if (isFraudulent) {
     if (lowTemplateConfidence) {
-      return 'Receipt is classified as fraudulent ($confidenceText% confidence). Template family confidence is low, so zone-level claims are intentionally withheld to avoid overconfident localization.';
+      return 'The app classified this receipt as Fraudulent ($confidenceText%). Its overall appearance contains signs that do not match a genuine receipt, but the app could not confidently identify one specific area as the cause.';
     }
     if (anomalies.isEmpty) {
-      return 'Receipt is classified as fraudulent ($confidenceText% confidence). No zone passed strict anomaly criteria; classification relies on global model evidence.';
+      return 'The app classified this receipt as Fraudulent ($confidenceText%). Several details across the receipt look unusual when compared with genuine receipts, although no single area stood out as the main cause.';
     }
     final zoneList = anomalies
         .map((a) => kZoneDisplayNames[a.zoneName] ?? a.zoneName)
         .join(', ');
-    return 'Receipt is classified as fraudulent ($confidenceText% confidence). Conservative zone anomalies were found in: $zoneList.';
+    return 'The app classified this receipt as Fraudulent ($confidenceText%). Unusual details were found in these areas: $zoneList. These differences may indicate that the receipt was edited or is not an authentic GCash receipt.';
   }
 
-  return 'Receipt is classified as genuine ($confidenceText% confidence). No zone exceeded strict anomaly thresholds against train-genuine baselines.';
+  return 'The app classified this receipt as Genuine ($confidenceText%). It compared the visible details with examples of genuine receipts and found no strong differences that would suggest editing or tampering.';
 }
 
 void main() {
@@ -337,8 +337,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   static const String _debugBatchStatusName = 'last_batch_status.json';
 
   final ImagePicker _picker = ImagePicker();
-  final ValueNotifier<AnalyzeUiState> _analyzeUiState =
-      ValueNotifier(const AnalyzeUiState());
+  final ValueNotifier<AnalyzeUiState> _analyzeUiState = ValueNotifier(
+    const AnalyzeUiState(),
+  );
 
   Interpreter? _interpreter;
   XFile? _selectedFile;
@@ -613,7 +614,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           message: 'This image does not appear to be a valid GCash receipt.',
           score: 1.0,
           confidence: 1.0,
-          explanation: 'The geometry gate rejected this image, so it was marked Invalid because it does not appear to be a valid GCash receipt.',
+          explanation:
+              'The image could not be verified because it does not look like a complete, properly framed GCash receipt. Please make sure the whole receipt is visible and try again.',
         );
         return _PipelineOutcome(
           result: result,
@@ -639,7 +641,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
           message: 'This image does not appear to be a valid GCash receipt.',
           score: 1.0,
           confidence: 1.0,
-          explanation: 'OCR field validation found only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt fields.',
+          explanation:
+              'The app could read only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt details. Please upload a clearer image where the date, amount, reference number, and other receipt information are easy to read.',
         );
         return _PipelineOutcome(
           result: result,
@@ -704,7 +707,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         message: 'This image does not appear to be a valid GCash receipt.',
         score: 1.0,
         confidence: 1.0,
-        explanation: 'The geometry gate rejected this image, so it was marked Invalid because it does not appear to be a valid GCash receipt.',
+        explanation:
+            'The image could not be verified because it does not look like a complete, properly framed GCash receipt. Please make sure the whole receipt is visible and try again.',
       );
       return _PipelineOutcome(
         result: result,
@@ -717,13 +721,17 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       );
     }
 
-    final receiptFields = await _validateReceiptTextFields(roiResult.roi, decoded);
+    final receiptFields = await _validateReceiptTextFields(
+      roiResult.roi,
+      decoded,
+    );
     if (!receiptFields.isValid) {
       final result = AnalysisResult.invalid(
         message: 'This image does not appear to be a valid GCash receipt.',
         score: 1.0,
         confidence: 1.0,
-        explanation: 'OCR field validation found only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt fields.',
+        explanation:
+            'The app could read only ${receiptFields.foundFields} of $kReceiptFieldValidationThreshold required receipt details. Please upload a clearer image where the date, amount, reference number, and other receipt information are easy to read.',
       );
       return _PipelineOutcome(
         result: result,
@@ -778,7 +786,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final aspectRatio = (map['aspectRatio'] as num?)?.toDouble() ?? 0.0;
     final templateFamily = (map['templateFamily'] as String?) ?? 'generic';
     final templateConfidence =
-      (map['templateConfidence'] as num?)?.toDouble() ?? 0.0;
+        (map['templateConfidence'] as num?)?.toDouble() ?? 0.0;
     final zoneMetrics = _parseNativeZoneMetrics(map['zoneMetrics']);
 
     if (!geometryPass) {
@@ -798,9 +806,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     if (tensorBytesAny is Uint8List) {
       tensorBytes = tensorBytesAny;
     } else if (tensorBytesAny is List) {
-      tensorBytes = Uint8List.fromList(
-        tensorBytesAny.cast<int>(),
-      );
+      tensorBytes = Uint8List.fromList(tensorBytesAny.cast<int>());
     }
 
     if (tensorBytes == null) {
@@ -884,7 +890,9 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
       final matchedCount = foundFields.values.where((v) => v).length;
       debugPrint('[VIVY][OCR] fields=$matchedCount text=${text.length}');
-      debugPrint('[VIVY][OCR] detail=${foundFields.entries.where((e) => e.value).map((e) => e.key).join(', ')}');
+      debugPrint(
+        '[VIVY][OCR] detail=${foundFields.entries.where((e) => e.value).map((e) => e.key).join(', ')}',
+      );
 
       return _ReceiptFieldValidationResult(
         isValid: matchedCount >= kReceiptFieldValidationThreshold,
@@ -904,8 +912,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       return true;
     }
 
-    return RegExp(r'\b(total|amount|paid|balance)\b.*\d', caseSensitive: false)
-        .hasMatch(text);
+    return RegExp(
+      r'\b(total|amount|paid|balance)\b.*\d',
+      caseSensitive: false,
+    ).hasMatch(text);
   }
 
   Future<InputImage?> _buildInputImageForTextRecognition({
@@ -974,7 +984,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         backendUsed: backendUsed,
         backendNote: backendNote,
       );
-      await prefs.setStringList(_rawScoreStorageKey, <String>[...existing, row]);
+      await prefs.setStringList(_rawScoreStorageKey, <String>[
+        ...existing,
+        row,
+      ]);
     } catch (_) {
       // Keep analysis flow responsive even if score logging fails.
     }
@@ -1006,17 +1019,14 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         '${rootDir.path}${Platform.pathSeparator}$_debugBatchExportName',
       )..createSync(recursive: true);
 
-      final images = inbox
-          .listSync()
-          .whereType<File>()
-          .where(_isBatchImageFile)
-          .toList()
-        ..sort((a, b) => a.path.compareTo(b.path));
+      final images =
+          inbox.listSync().whereType<File>().where(_isBatchImageFile).toList()
+            ..sort((a, b) => a.path.compareTo(b.path));
 
-      final timestamp = DateTime.now()
-          .toUtc()
-          .toIso8601String()
-          .replaceAll(':', '-');
+      final timestamp = DateTime.now().toUtc().toIso8601String().replaceAll(
+        ':',
+        '-',
+      );
       final csvPath =
           '${exportDir.path}${Platform.pathSeparator}batch_results_$timestamp.csv';
       final csvFile = File(csvPath);
@@ -1083,9 +1093,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Debug batch processed ${rows.length} image(s).',
-            ),
+            content: Text('Debug batch processed ${rows.length} image(s).'),
           ),
         );
       }
@@ -1138,7 +1146,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final prefs = await SharedPreferences.getInstance();
     final rows = prefs.getStringList(_rawScoreStorageKey) ?? <String>[];
     const header =
-      'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height,backend_used,backend_note';
+        'timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height,backend_used,backend_note';
     final csv = rows.isEmpty ? header : '$header\n${rows.join('\n')}';
 
     await Clipboard.setData(ClipboardData(text: csv));
@@ -1203,7 +1211,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   }
 
   Map<String, _ZoneFeatureVector> _extractZoneFeaturesFromRoi(img.Image roi) {
-    final family = _inferTemplateFamily(roiWidth: roi.width, roiHeight: roi.height);
+    final family = _inferTemplateFamily(
+      roiWidth: roi.width,
+      roiHeight: roi.height,
+    );
     final layout = kZoneLayouts[family.family] ?? kZoneLayouts['android-like']!;
     final gray = img.grayscale(roi);
     final out = <String, _ZoneFeatureVector>{};
@@ -1221,14 +1232,16 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
   }) {
     final aspect = roiWidth / math.max(roiHeight.toDouble(), 1.0);
     if (aspect >= 0.80) {
-      return const _TemplateFamilyGuess(family: 'android-like', confidence: 0.86);
+      return const _TemplateFamilyGuess(
+        family: 'android-like',
+        confidence: 0.86,
+      );
     }
     if (aspect <= 0.68) {
       return const _TemplateFamilyGuess(family: 'ios-like', confidence: 0.86);
     }
     return const _TemplateFamilyGuess(family: 'generic', confidence: 0.55);
   }
-
 
   img.Image _cropNormalized(img.Image gray, List<double> bounds) {
     final x0 = _denormX(bounds[0], gray.width);
@@ -1254,7 +1267,11 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     final lapVar = _laplacianVariance(grayZone);
     final edgeDensity = _edgeDensity(grayZone);
     final bin = _binaryMask(grayZone, _otsuThreshold(grayZone));
-    final stats = _connectedComponentStats(bin, grayZone.width, grayZone.height);
+    final stats = _connectedComponentStats(
+      bin,
+      grayZone.width,
+      grayZone.height,
+    );
     final strokeFill = bin.where((v) => v).length / math.max(1, bin.length);
 
     if (stats.isEmpty) {
@@ -1282,7 +1299,8 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
 
     final centerYs = stats.map((s) => s.centerY).toList();
     final heights = stats.map((s) => s.height).toList();
-    final alignmentStd = _stddev(centerYs) / math.max(grayZone.height.toDouble(), 1.0);
+    final alignmentStd =
+        _stddev(centerYs) / math.max(grayZone.height.toDouble(), 1.0);
     final fontHeightCv = _stddev(heights) / math.max(_mean(heights), 1e-6);
 
     return _ZoneFeatureVector(
@@ -1331,8 +1349,10 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
     var total = 0;
     for (var y = 1; y < gray.height - 1; y++) {
       for (var x = 1; x < gray.width - 1; x++) {
-        final gx = (gray.getPixel(x + 1, y).r - gray.getPixel(x - 1, y).r).toDouble();
-        final gy = (gray.getPixel(x, y + 1).r - gray.getPixel(x, y - 1).r).toDouble();
+        final gx = (gray.getPixel(x + 1, y).r - gray.getPixel(x - 1, y).r)
+            .toDouble();
+        final gy = (gray.getPixel(x, y + 1).r - gray.getPixel(x, y - 1).r)
+            .toDouble();
         final mag = math.sqrt(gx * gx + gy * gy);
         if (mag >= 48.0) {
           count++;
@@ -1464,12 +1484,12 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
         spacingCv: (value['spacing_cv'] as num?)?.toDouble() ?? 0.0,
         alignmentStd: (value['alignment_std'] as num?)?.toDouble() ?? 0.0,
         fontHeightCv: (value['font_height_cv'] as num?)?.toDouble() ?? 0.0,
-        strokeFillRatio: (value['stroke_fill_ratio'] as num?)?.toDouble() ?? 0.0,
+        strokeFillRatio:
+            (value['stroke_fill_ratio'] as num?)?.toDouble() ?? 0.0,
       );
     }
     return out;
   }
-
 
   double _runModel(Float32List inputBuffer) {
     final input = List.generate(
@@ -1831,9 +1851,7 @@ class _ReceiptCheckPageState extends State<ReceiptCheckPage>
       },
       onOpenLearnMore: () {
         Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => const LearnMoreScreen(),
-          ),
+          MaterialPageRoute<void>(builder: (_) => const LearnMoreScreen()),
         );
       },
     );
@@ -1940,10 +1958,7 @@ class _ZoneFeatureVector {
 }
 
 class _TemplateFamilyGuess {
-  const _TemplateFamilyGuess({
-    required this.family,
-    required this.confidence,
-  });
+  const _TemplateFamilyGuess({required this.family, required this.confidence});
 
   final String family;
   final double confidence;

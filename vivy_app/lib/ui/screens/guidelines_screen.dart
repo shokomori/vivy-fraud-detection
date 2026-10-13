@@ -33,6 +33,12 @@ class _GuidelinesScreenState extends State<GuidelinesScreen> {
       subtitle:
           'Get an immediate Genuine, Fraudulent, or Invalid verdict with a detailed explanation — and save it to your history.',
     ),
+    (
+      asset: 'assets/vivy_assets/scan.svg',
+      title: 'Check Compatibility',
+      subtitle:
+          'Vivy was designed and tested to read GCash electronic receipt formats from app versions 5 and 6. For the most reliable result, upload a clear image of the complete receipt.',
+    ),
   ];
 
   final PageController _controller = PageController();
