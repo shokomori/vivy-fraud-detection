@@ -30,8 +30,8 @@ Evaluate on the held-out test set using accuracy, precision, recall, F1-score, a
 
 Use this mapping consistently across Stage 4 training, Stage 5 threshold tuning, and the Flutter app inference logic:
 
-- 0 = Genuine
-- 1 = Fraudulent
+- `0` = Genuine
+- `1` = Fraudulent
 
 Treat `Fraudulent` (1) as the positive class when computing precision, recall, F1-score, confusion matrix, and threshold selection.
 
@@ -62,7 +62,7 @@ Build the final installable app and install it on demo devices ahead of time.
 ## Summary Table
 
 | Stage | Main focus | Main tools |
-| --- | --- | --- |
+|---|---|---|
 | 1 | Set up Python and Flutter environments | TensorFlow, OpenCV, Flutter SDK |
 | 2 | Collect and organize genuine and fraudulent images | Phone camera, Canva |
 | 3 | Clean, standardize, and augment images | OpenCV, NumPy |
@@ -135,7 +135,7 @@ Push real-world screenshots to this app-specific folder on device/emulator:
 
 ### Single ADB command to trigger a full batch run
 
-Use one host command (from repo root) after images are in `batch_inbox`:
+Use one host command from the repository root after images are in `batch_inbox`:
 
 ```bash
 adb shell "touch /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/trigger.run" && adb shell monkey -p com.example.vivy_app -c android.intent.category.LAUNCHER 1
@@ -159,12 +159,12 @@ adb shell "touch /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batc
 
 ### Output files
 
-After processing, app writes:
+After processing, the app writes:
 
 - CSV: `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports/batch_results_<UTC>.csv`
 - Status JSON: `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/last_batch_status.json`
 
-Pull outputs to local workspace:
+Pull outputs to the local workspace:
 
 ```bash
 adb pull /sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_exports artifacts/debug_compare/
@@ -194,9 +194,17 @@ What it does:
 
 ## Vivy App APK Builder
 
-This section explains how to obtain the Vivy release APK from the published Docker Hub image and save it to your Windows computer.
+This section explains how to download the Vivy Android application directly or export the APK using the published Docker Hub image.
 
-The Docker container does not run the Android application. To test the app, install the exported APK on a compatible Android device or emulator.
+The Docker container does not run the Android application. To test the app, install the APK on a compatible Android device or emulator.
+
+### Download the APK Directly
+
+You can download the Vivy Android application APK from the Google Drive folder below.
+
+**[Download Vivy APK from Google Drive](https://drive.google.com/drive/u/0/folders/16ssh5cuBrZEjMhRffrygMuWikJEzelP3?usp=sharing)**
+
+Alternatively, follow the Docker instructions below to export the APK to your Windows computer.
 
 ### Requirements
 
@@ -206,7 +214,7 @@ The Docker container does not run the Android application. To test the app, inst
 - A compatible Android device or emulator for testing.
 - Android Debug Bridge (ADB) installed and available in your PATH if you want to install or launch the app using PowerShell.
 
-### Download and Export the APK
+### Download and Export the APK Using Docker
 
 Open Windows PowerShell in the directory where you want the `docker_output` folder created.
 
