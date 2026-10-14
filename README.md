@@ -87,23 +87,23 @@ Build the final installable app and install it on demo devices ahead of time.
 
 Use this workflow before proposing any retraining changes.
 
-1. Export app raw scores on-device
+### 1. Export app raw scores on-device
 
 - In the result screen, tap `Copy Raw Score CSV`.
 - The app copies CSV text with columns:
-	- `timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height`
+  - `timestamp_iso,filename,result_type,raw_score,threshold,file_path,file_sha256,file_size_bytes,decoded_width,decoded_height`
 - Paste this into a local file, for example:
-	- `artifacts/debug_compare/app_raw_scores.csv`
+  - `artifacts/debug_compare/app_raw_scores.csv`
 
-2. Compare app raw score vs Python Stage 3 + TFLite score
+### 2. Compare app raw score vs Python Stage 3 + TFLite score
 
 Run from repo root:
 
 ```bash
 python tools/compare_realworld_app_vs_stage3.py \
-	--app-csv artifacts/debug_compare/app_raw_scores.csv \
-	--images-dir <folder_with_realworld_images> \
-	--model artifacts/stage6/mobilenetv2_fraud_detector_float16.tflite
+    --app-csv artifacts/debug_compare/app_raw_scores.csv \
+    --images-dir <folder_with_realworld_images> \
+    --model artifacts/stage6/mobilenetv2_fraud_detector_float16.tflite
 ```
 
 Outputs:
@@ -133,7 +133,7 @@ Push real-world screenshots to this app-specific folder on device/emulator:
 
 - `/sdcard/Android/data/com.example.vivy_app/files/vivy_debug_batch/batch_inbox/`
 
-### Single adb command to trigger a full batch run
+### Single ADB command to trigger a full batch run
 
 Use one host command (from repo root) after images are in `batch_inbox`:
 
@@ -177,17 +177,157 @@ For repeatable app-side regression checks, use:
 
 ```bash
 python tools/run_app_batch_validation.py \
-	--manifest artifacts/debug_compare/full204/selected_files.txt \
-	--output-dir artifacts/debug_compare/full204_postfix \
-	--chunk-size 51 \
-	--compare-images-dir real_world_samples \
-	--compare-out-name full204_compare_postfix.json
+    --manifest artifacts/debug_compare/full204/selected_files.txt \
+    --output-dir artifacts/debug_compare/full204_postfix \
+    --chunk-size 51 \
+    --compare-images-dir real_world_samples \
+    --compare-out-name full204_compare_postfix.json
 ```
 
 What it does:
 
 - Pushes images to the app debug-batch inbox in fixed-size chunks.
-- Triggers the app through adb and waits for each exported CSV.
+- Triggers the app through ADB and waits for each exported CSV.
 - Fails fast if any row uses a backend other than the expected `backend_used` value.
 - Merges batch CSVs into one combined export.
 - Optionally runs `tools/compare_realworld_app_vs_stage3.py` on the merged CSV.
+
+## Vivy App APK Builder
+
+This section explains how to obtain the Vivy release APK from the published Docker Hub image and save it to your Windows computer.
+
+The Docker container does not run the Android application. To test the app, install the exported APK on a compatible Android device or emulator.
+
+### Requirements
+
+- Docker Desktop installed and running.
+- Windows PowerShell.
+- An internet connection to download the Docker image.
+- A compatible Android device or emulator for testing.
+- Android Debug Bridge (ADB) installed and available in your PATH if you want to install or launch the app using PowerShell.
+
+### Download and Export the APK
+
+Open Windows PowerShell in the directory where you want the `docker_output` folder created.
+
+Run these commands:
+
+```powershell
+docker pull naviii123/vivy-app-apk-package:latest
+
+New-Item -ItemType Directory -Force .\docker_output | Out-Null
+
+docker run --rm `
+  --mount "type=bind,source=$((Resolve-Path .\docker_output).Path),target=/output" `
+  naviii123/vivy-app-apk-package:latest
+
+Get-Item .\docker_output\app-release.apk | Format-List FullName,Length,LastWriteTime
+```
+
+### APK Output
+
+After the command completes, the release APK should be saved at:
+
+`.\docker_output\app-release.apk`
+
+The path is relative to the PowerShell directory where you ran the commands.
+
+You can install this APK on a compatible Android device or use it with an Android emulator.
+
+### How the Docker Bind Mount Works
+
+The `--mount` option connects the Windows folder:
+
+`.\docker_output`
+
+to the folder inside the temporary container:
+
+`/output`
+
+The image copies the APK to:
+
+`/output/app-release.apk`
+
+Because `/output` is connected to the Windows folder, the APK appears on your computer at:
+
+`.\docker_output\app-release.apk`
+
+The `--rm` option removes the temporary container after the command finishes. The APK remains on your computer because it was written through the bind mount.
+
+### Install or Update the App Using ADB
+
+Connect your Android device with USB debugging enabled, or start an Android emulator through Android Studio.
+
+Run this in Windows PowerShell from the same directory where `docker_output` is located:
+
+```powershell
+$apk = ".\docker_output\app-release.apk"
+$package = "com.example.vivy_app"
+
+if (-not (Test-Path $apk)) {
+    throw "APK not found at $apk. Run the Docker export commands first."
+}
+
+if (-not (Get-Command adb -ErrorAction SilentlyContinue)) {
+    throw "adb was not found. Start an emulator in Android Studio, or add Android SDK platform-tools to your PATH."
+}
+
+adb get-state
+if ($LASTEXITCODE -ne 0) {
+    throw "No Android device or emulator is connected. Start one in Android Studio Device Manager, then try again."
+}
+
+adb install -r $apk
+if ($LASTEXITCODE -ne 0) {
+    throw "APK installation failed."
+}
+
+adb shell monkey -p $package 1
+if ($LASTEXITCODE -ne 0) {
+    throw "APK installed, but Android could not launch the app."
+}
+```
+
+The `adb install -r` command installs the APK or updates an existing installation while normally preserving its app data.
+
+### Perform a Fresh Installation
+
+Use this when you want to uninstall the existing app before installing the exported APK again.
+
+**Warning:** Uninstalling the app can delete locally stored data, including saved history and preferences.
+
+Run these commands in Windows PowerShell:
+
+```powershell
+adb uninstall com.example.vivy_app
+if ($LASTEXITCODE -ne 0) {
+    throw "Uninstall failed. Check that the app is installed and the device is connected."
+}
+
+adb install .\docker_output\app-release.apk
+if ($LASTEXITCODE -ne 0) {
+    throw "Install failed."
+}
+
+adb shell monkey -p com.example.vivy_app 1
+if ($LASTEXITCODE -ne 0) {
+    throw "APK installed, but Android could not launch the app."
+}
+```
+
+### Docker Hub Image
+
+- **Image:** `naviii123/vivy-app-apk-package:latest`
+- **Repository:** https://hub.docker.com/r/naviii123/vivy-app-apk-package
+
+### Important Notes
+
+- Run the Docker commands in Windows PowerShell.
+- Keep Docker Desktop installed and running while the commands execute.
+- Run the commands from the directory where you want `docker_output` created.
+- Do not run the commands from inside the `docker_output` folder.
+- The image exports the release APK contained in the image.
+- The container does not run the Flutter Android application.
+- The exported file is `docker_output\app-release.apk`.
+- ADB is optional if you only need to export the APK.
+- Do not publish API keys, passwords, private signing keys, or other sensitive credentials in the repository or inside the APK.
